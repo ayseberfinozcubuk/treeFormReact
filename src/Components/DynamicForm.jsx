@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../Style/Style.css'; // CSS dosyasını import et
 
-const DynamicForm = ({ data, formValues, setFormValues, path = '' }) => {
+const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel = 0 }) => {
     const [subForms, setSubForms] = useState({}); // Her form alanının altındaki form öğelerini saklamak için
 
     const handleChange = (propertyName, value, index = null) => {
@@ -59,10 +59,14 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '' }) => {
 
     const renderInput = (property) => {
         const { Name, Label, Type, IsMandatory, MinMax, ListType } = property;
+
+        const indentStyle = {
+            marginLeft: `${indentLevel * 20}px`, // Her seviye için 20px girinti
+        };
     
         if (Type === "List") {
             return (
-                <div key={Name} className="list-container">
+                <div key={Name} className="list-container" style={indentStyle}>
                     <label>{Label}</label>
                     <button type="button" onClick={() => handleListClick(ListType, Name)}>
                         {Label} Ekle
@@ -75,6 +79,7 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '' }) => {
                                 formValues={formValues}
                                 setFormValues={setFormValues}
                                 path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`}
+                                indentLevel={indentLevel + 1} // Alt form için girinti artırılıyor
                             />
                         </div>
                     ))}
@@ -83,7 +88,7 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '' }) => {
         }
     
         return (
-            <div key={Name} className="form-element">
+            <div key={Name} className="form-element" style={indentStyle}>
                 <label>{Label} {IsMandatory === "yes" && <span>*</span>}</label>
                 <input
                     type={Type === "Double" ? "number" : "text"}

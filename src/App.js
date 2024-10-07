@@ -4,8 +4,9 @@ import './Style/Style.css'; // CSS dosyasını import et
 
 const App = () => {
     const [sampleData, setSampleData] = useState(null);
-    const [formValues, setFormValues] = useState(0); // Formu yeniden oluşturmak için key kullanıyoruz
-    const [subForms, setSubForms] = useState({}); // SubForms için de state ekliyoruz
+    const [formValues, setFormValues] = useState(0); 
+    const [subForms, setSubForms] = useState({}); 
+    const [formKey, setFormKey] = useState(0);
 
     useEffect(() => {
         fetch('/SampleData/Emiter.json') // JSON dosyasının bulunduğu yolu belirtin
@@ -16,11 +17,12 @@ const App = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Form Gönderildi.');
-
+        console.log('Form Verileri:', formValues);
+        
         // Formu yeniden oluşturmak için key'i değiştiriyoruz
         setFormValues({});
         setSubForms({});
+        setFormKey(prevKey => prevKey + 1); // Key değerini artırarak formu sıfırlıyoruz
     };
 
     if (!sampleData) {
@@ -28,18 +30,24 @@ const App = () => {
     }
 
     return (
-        <div className="form-container">
-            <h1>Dinamik Form</h1>
-            <form onSubmit={handleSubmit}>
-                <DynamicForm
-                    data={sampleData}
-                    formValues={formValues}
-                    setFormValues={setFormValues} 
-                    subForms={subForms}
-                    setSubForms={setSubForms}
-                />
-                <button type="submit" className="submit-button">Gönder</button>
-            </form>
+        <div className="app-container">
+            <header className="app-header">
+                <h1>Dinamik Form Sistemi</h1>
+                <p>Bu formu doldurarak verilerinizi bize iletin.</p>
+            </header>
+            <div className="form-container">
+                <h1>Dinamik Form</h1>
+                <form onSubmit={handleSubmit} key={formKey}>
+                    <DynamicForm
+                        data={sampleData}
+                        formValues={formValues}
+                        setFormValues={setFormValues} 
+                        subForms={subForms}
+                        setSubForms={setSubForms}
+                    />
+                    <button type="submit" className="submit-button">Gönder</button>
+                </form>
+            </div>
         </div>
     );
 };

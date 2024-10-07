@@ -1,3 +1,13 @@
+/* Uygulamanın genel stilini oluşturuyoruz */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* İçerikleri ortalamak için */
+    justify-content: center; /* İçerikleri dikey olarak ortalamak için */
+    min-height: 100vh; /* Sayfanın tamamını kaplamak için */
+    background-color: #f0f4f8; /* Arka plan rengi */
+}
+
 /* Genel form container */
 .form-container {
     margin: 20px;
@@ -7,6 +17,24 @@
     border-radius: 8px;
     display: inline-block; /* Formun genişliğini içerdiği elementlere göre ayarlar */
     font-family: Arial, sans-serif;
+}
+
+/* Header kısmı */
+.app-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.app-header h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.app-header p {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
 }
 
 /* Form başlıkları ve alt başlıklar */
