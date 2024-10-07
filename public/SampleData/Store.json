@@ -1,0 +1,16 @@
+{
+    "Name": "Store",
+    "Properties": [
+        {
+            "Name": "StoreName",
+            "Label": "Store Name",
+            "Type": "String"
+        },
+        {
+            "Name": "Items",
+            "Label": "Items List",
+            "Type": "List",
+            "ListType": "Item"
+        }
+    ]
+}

@@ -1,0 +1,114 @@
+/* Genel form container */
+.form-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    display: inline-block; /* Formun genişliğini içerdiği elementlere göre ayarlar */
+    font-family: Arial, sans-serif;
+}
+
+/* Form başlıkları ve alt başlıklar */
+.form-container h1,
+.form-container h3 {
+    color: #333;
+    font-size: 1.5em;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-container h3 {
+    margin-left: 20px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+/* Her form elementi (label ve input yan yana) */
+.form-element {
+    display: flex;
+    align-items: center; /* Label ve input aynı hizada */
+    margin-bottom: 15px;
+}
+
+.form-element label {
+    font-weight: 500;
+    margin-right: 10px; /* Label ile input arasında boşluk */
+    color: #444;
+    font-size: 0.9em;
+    white-space: nowrap; /* Label'in yanına input sığmadığında taşmasını engeller */
+}
+
+/* Text ve number input alanları */
+.form-element input {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #333;
+    width: 200px; /* Sabit genişlik */
+}
+
+.form-element input:focus {
+    border-color: #4CAF50;
+    outline: none;
+}
+
+/* Liste öğeleri */
+.list-container {
+    margin-left: 15px;
+}
+
+.list-container button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.8em;
+    margin-left: 10px; /* Label ile buton arasında boşluk */
+    margin-bottom: 10px;
+}
+
+.list-container button:hover {
+    background-color: #45a049;
+}
+
+/* Gönder butonu */
+.submit-button {
+    background-color: #008CBA;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.submit-button:hover {
+    background-color: #007bb5;
+}
+
+/* Min ve Max küçük açıklamaları */
+small {
+    color: #888;
+    font-size: 0.75em;
+    margin-top: 5px;
+    margin-left: 10px; /* Min ve Max değerlerinden önce boşluk */
+}
+
+/* İç içe form yapısı için kenar çizgisi */
+.form-border {
+    margin-left: 15px;
+    padding-left: 10px;
+    border-left: 2px solid #ddd;
+    margin-bottom: 15px;
+}
+
+/* Odaklanan inputlar */
+input:focus {
+    border-color: #007bb5;
+    box-shadow: 0 0 5px rgba(0, 123, 181, 0.5);
+    outline: none;
+}

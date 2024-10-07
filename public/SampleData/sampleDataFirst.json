@@ -1,0 +1,62 @@
+{
+    "entityName": "EmitterNodePri",
+    "Properties": [
+        {
+            "Name": "PriMin",
+            "Label": "PRI Min",
+            "Type": "Double",
+            "Unit": "ms",
+            "IsMandatory": "yes",
+            "MinMax": {
+                "Min": 0,
+                "Max": 10000
+            }
+        },
+        {
+            "Name": "PriMax",
+            "Label": "PRI Max",
+            "Type": "Double",
+            "Unit": "ms",
+            "MinMax": {
+                "Min": 0,
+                "Max": 10000
+            }
+        },
+        {
+            "Name": "PrfMin",
+            "Label": "PRF Min",
+            "Type": "Double",
+            "Unit": "ms",
+            "MinMax": {
+                "Min": 0,
+                "Max": 10000
+            }
+        },
+        {
+            "Name": "PrfMax",
+            "Label": "PRF Max",
+            "Type": "Double",
+            "Unit": "ms",
+            "MinMax": {
+                "Min": 0,
+                "Max": 10000
+            }
+        },
+        {
+            "Name": "Deviation",
+            "Label": "Standart Sapma",
+            "Type": "Double",
+            "Unit": "us",
+            "MinMax": {
+                "Min": 0,
+                "Max": 10000
+            }
+        },
+        {
+            "Name": "DiscreteValues",
+            "Label": "Ayrik Degerler Listesi",
+            "Type": "List",
+            "ListType": "PriDiscreteValue"
+        }
+    ]
+}
