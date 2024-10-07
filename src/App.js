@@ -4,10 +4,11 @@ import './Style/Style.css'; // CSS dosyasını import et
 
 const App = () => {
     const [sampleData, setSampleData] = useState(null);
-    const [formValues, setFormValues] = useState({});
+    const [formValues, setFormValues] = useState(0); // Formu yeniden oluşturmak için key kullanıyoruz
+    const [subForms, setSubForms] = useState({}); // SubForms için de state ekliyoruz
 
     useEffect(() => {
-        fetch('/SampleData/Emiter.json')
+        fetch('/SampleData/Emiter.json') // JSON dosyasının bulunduğu yolu belirtin
             .then((response) => response.json())
             .then((data) => setSampleData(data))
             .catch((error) => console.error('Error loading JSON:', error));
@@ -15,12 +16,15 @@ const App = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Tüm Form Verileri:', formValues);
+        console.log('Form Gönderildi.');
+
+        // Formu yeniden oluşturmak için key'i değiştiriyoruz
         setFormValues({});
+        setSubForms({});
     };
 
     if (!sampleData) {
-        return <div>Form Yükleniyor...</div>;
+        return <div>Form Yükleniyor...</div>; // Veriler yüklenene kadar bekleme durumu
     }
 
     return (
@@ -30,7 +34,9 @@ const App = () => {
                 <DynamicForm
                     data={sampleData}
                     formValues={formValues}
-                    setFormValues={setFormValues}
+                    setFormValues={setFormValues} 
+                    subForms={subForms}
+                    setSubForms={setSubForms}
                 />
                 <button type="submit" className="submit-button">Gönder</button>
             </form>
