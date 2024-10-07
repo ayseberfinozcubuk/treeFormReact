@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../Style/Style.css'; // CSS dosyasını import et
+import '../Style/Style.css'; 
 
 const DynamicForm = ({ data, formValues, setFormValues, path = '' }) => {
     const [subForms, setSubForms] = useState({});
