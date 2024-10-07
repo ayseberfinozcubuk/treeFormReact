@@ -1,80 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Uygulamanın genel stilini oluşturuyoruz */
 .app-container {
     display: flex;
     flex-direction: column;
-    align-items: center; /* İçerikleri ortalamak için */
-    justify-content: center; /* İçerikleri dikey olarak ortalamak için */
-    min-height: 100vh; /* Sayfanın tamamını kaplamak için */
-    background-color: #f0f4f8; /* Arka plan rengi */
+    align-items: center; 
+    justify-content: flex-start; 
+    min-height: 100vh;
+    padding-top: 50px;
+    background-color: #f0f4f8; 
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 /* Genel form container */
 .form-container {
     margin: 20px;
-    padding: 20px;
-    background-color: #f9f9f9;
+    padding: 25px;
+    background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
-    display: inline-block; /* Formun genişliğini içerdiği elementlere göre ayarlar */
-    font-family: Arial, sans-serif;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    font-family: 'Arial', sans-serif;
+    width: 100%;
+    max-width: 500px;
 }
 
-/* Header kısmı */
-.app-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.app-header h1 {
-    font-size: 2em;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.app-header p {
-    font-size: 1.2em;
-    color: #666;
-    margin-bottom: 20px;
-}
-
-/* Form başlıkları ve alt başlıklar */
-.form-container h1,
-.form-container h3 {
-    color: #333;
-    font-size: 1.5em;
-    font-weight: 600;
-    margin-bottom: 20px;
-}
-
-.form-container h3 {
-    margin-left: 20px;
-    font-size: 1.2em;
-    color: #555;
-}
-
-/* Her form elementi (label ve input yan yana) */
+/* Form elementleri */
 .form-element {
     display: flex;
-    align-items: center; /* Label ve input aynı hizada */
+    align-items: center;
     margin-bottom: 15px;
-}
-
-.form-element label {
-    font-weight: 500;
-    margin-right: 10px; /* Label ile input arasında boşluk */
-    color: #444;
-    font-size: 0.9em;
-    white-space: nowrap; /* Label'in yanına input sığmadığında taşmasını engeller */
+    justify-content: space-between;
 }
 
 /* Text ve number input alanları */
 .form-element input {
-    padding: 6px;
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 5px;
     font-size: 0.9em;
     color: #333;
-    width: 200px; /* Sabit genişlik */
+    flex-grow: 1;
+    max-width: 250px;
 }
 
 .form-element input:focus {
@@ -91,11 +62,11 @@
     background-color: #4CAF50;
     color: white;
     border: none;
-    padding: 6px 10px;
+    padding: 8px 12px;
     cursor: pointer;
-    border-radius: 4px;
-    font-size: 0.8em;
-    margin-left: 10px; /* Label ile buton arasında boşluk */
+    border-radius: 5px;
+    font-size: 0.9em;
+    margin-left: 10px;
     margin-bottom: 10px;
 }
 
@@ -103,35 +74,44 @@
     background-color: #45a049;
 }
 
+/* TypeList labeli için ek girinti */
+.type-list-label {
+    font-weight: bold;
+    margin-left: 10px;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.form-label {
+    font-weight: bold;
+    margin-right: 10px;
+    color: #444;
+    font-size: 1em;
+    white-space: nowrap;
+}
+
 /* Gönder butonu */
 .submit-button {
-    background-color: #008CBA;
+    background-color: #007bb5;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 1.1em;
+    margin-top: 20px;
 }
 
 .submit-button:hover {
-    background-color: #007bb5;
-}
-
-/* Min ve Max küçük açıklamaları */
-small {
-    color: #888;
-    font-size: 0.75em;
-    margin-top: 5px;
-    margin-left: 10px; /* Min ve Max değerlerinden önce boşluk */
+    background-color: #005f8c;
 }
 
 /* İç içe form yapısı için kenar çizgisi */
 .form-border {
-    margin-left: 15px;
-    padding-left: 10px;
+    margin-left: 20px; /* Alt form elemanları da bir tab ileride */
+    padding-left: 15px;
     border-left: 2px solid #ddd;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 /* Odaklanan inputlar */
@@ -139,4 +119,8 @@ input:focus {
     border-color: #007bb5;
     box-shadow: 0 0 5px rgba(0, 123, 181, 0.5);
     outline: none;
+}
+
+.list-type-container {
+    margin-left: 20px; /* Butonun bulunduğu yer bir tab ileride */
 }

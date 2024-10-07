@@ -2,40 +2,40 @@ import React, { useState } from 'react';
 import '../Style/Style.css'; // CSS dosyasını import et
 
 const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel = 0 }) => {
-    const [subForms, setSubForms] = useState({}); // Her form alanının altındaki form öğelerini saklamak için
+    const [subForms, setSubForms] = useState({});
+    const [showListTypeButton, setShowListTypeButton] = useState({});
 
     const handleChange = (propertyName, value, index = null) => {
         const updatedValues = { ...formValues };
         const propertyPath = path ? `${path}.${propertyName}` : propertyName;
-    
+
         if (index !== null) {
-            // Eğer bir dizi içindeysek (alt form, liste türü)
             const paths = path ? path.split('.') : [];
             let current = updatedValues;
             paths.forEach(p => {
-                if (!current[p]) current[p] = {}; // Eğer yol boyunca obje yoksa başlat
+                if (!current[p]) current[p] = {};
                 current = current[p];
             });
             if (!Array.isArray(current[propertyName])) {
-                current[propertyName] = []; // Diziyi başlat
+                current[propertyName] = [];
             }
-            current[propertyName][index] = value; // Değeri güncelle
+            current[propertyName][index] = value;
         } else {
             if (path) {
                 const paths = path.split('.');
                 let current = updatedValues;
                 paths.forEach((p, index) => {
-                    if (!current[p]) current[p] = {}; // Eğer obje yoksa başlat
+                    if (!current[p]) current[p] = {};
                     if (index === paths.length - 1) {
-                        current[p][propertyName] = value; // Tekil elemanlar burada güncellenir
+                        current[p][propertyName] = value;
                     }
                     current = current[p];
                 });
             } else {
-                updatedValues[propertyName] = value; // Tekil elemanlar burada güncellenir
+                updatedValues[propertyName] = value;
             }
         }
-    
+
         setFormValues(updatedValues);
     };
 
@@ -45,11 +45,10 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
             .then((newForm) => {
                 const updatedSubForms = { ...subForms };
 
-                // Eğer propertyName altında zaten bir form dizi varsa, yeni bir form ekliyoruz
                 if (updatedSubForms[propertyName]) {
                     updatedSubForms[propertyName] = [...updatedSubForms[propertyName], newForm];
                 } else {
-                    updatedSubForms[propertyName] = [newForm]; // İlk formu ekliyoruz
+                    updatedSubForms[propertyName] = [newForm];
                 }
 
                 setSubForms(updatedSubForms);
@@ -61,35 +60,57 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
         const { Name, Label, Type, IsMandatory, MinMax, ListType } = property;
 
         const indentStyle = {
-            marginLeft: `${indentLevel * 20}px`, // Her seviye için 20px girinti
+            marginLeft: `${indentLevel * 20}px`, // PrimeReact tree yapısına benzer bir indentation
         };
-    
+
+        const handleLabelClick = () => {
+            setShowListTypeButton((prevState) => ({
+                ...prevState,
+                [Name]: true, 
+            }));
+        };
+
+        const handleListTypeClick = () => {
+            handleListClick(ListType, Name); 
+        };
+
         if (Type === "List") {
             return (
                 <div key={Name} className="list-container" style={indentStyle}>
-                    <label>{Label}</label>
-                    <button type="button" onClick={() => handleListClick(ListType, Name)}>
-                        {Label} Ekle
+                    <label className="form-label">{Label}</label>
+                    <button type="button" onClick={handleLabelClick}>
+                        {Label} ekle
                     </button>
-    
+
+                    {/* Label eklenince yanına {ListType} ekle butonu gösteriliyor */}
+                    {showListTypeButton[Name] && (
+                        <div className="list-type-container" style={{ marginLeft: '20px' }}>
+                            <label className="form-label">{ListType}</label>
+                            <button type="button" onClick={handleListTypeClick}>
+                                {ListType} ekle
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Alt form render edilmesi */}
                     {subForms[Name] && subForms[Name].map((form, i) => (
-                        <div key={i} className="form-border">
+                        <div key={i} className="form-border" style={{ marginLeft: '20px' }}>
                             <DynamicForm
                                 data={form}
                                 formValues={formValues}
                                 setFormValues={setFormValues}
                                 path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`}
-                                indentLevel={indentLevel + 1} // Alt form için girinti artırılıyor
+                                indentLevel={indentLevel + 1} // Her seviye için bir tab daha içeri
                             />
                         </div>
                     ))}
                 </div>
             );
         }
-    
+
         return (
             <div key={Name} className="form-element" style={indentStyle}>
-                <label>{Label} {IsMandatory === "yes" && <span>*</span>}</label>
+                <label className="form-label">{Label} {IsMandatory === "yes" && <span>*</span>}</label>
                 <input
                     type={Type === "Double" ? "number" : "text"}
                     min={MinMax?.Min}
@@ -104,17 +125,17 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
     };
 
     const getFormValue = (propertyName, index = null) => {
-        if (!path) return formValues[propertyName] || ''; // Eğer obje yoksa boş string döndür
+        if (!path) return formValues[propertyName] || '';
         const paths = path.split('.');
         let current = formValues;
         for (const p of paths) {
             current = current[p];
-            if (!current) return ''; // Eğer current boşsa, hemen döneriz
+            if (!current) return '';
         }
         if (index !== null && Array.isArray(current[propertyName])) {
-            return current[propertyName][index] || ''; // Eğer dizi içindeki eleman yoksa boş string döndür
+            return current[propertyName][index] || '';
         }
-        return current[propertyName] || ''; // Tekil elemanlar için
+        return current[propertyName] || '';
     };
 
     return (
