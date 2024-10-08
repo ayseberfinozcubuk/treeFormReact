@@ -4,7 +4,7 @@ import './Style/Style.css'; // CSS dosyasını import et
 
 const App = () => {
     const [sampleData, setSampleData] = useState(null);
-    const [formValues, setFormValues] = useState(0); 
+    const [formValues, setFormValues] = useState({}); 
     const [subForms, setSubForms] = useState({}); 
     const [formKey, setFormKey] = useState(0);
 

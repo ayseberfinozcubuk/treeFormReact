@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import '../Style/Style.css'; // CSS dosyasını import et
+import { Button } from 'primereact/button'; // PrimeReact Button
+import '../Style/Style.css'; // CSS import
+import 'primeicons/primeicons.css';
+import { PrimeIcons } from 'primereact/api';
 
 const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel = 0 }) => {
     const [subForms, setSubForms] = useState({});
@@ -60,39 +63,49 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
         const { Name, Label, Type, IsMandatory, MinMax, ListType } = property;
 
         const indentStyle = {
-            marginLeft: `${indentLevel * 20}px`, // PrimeReact tree yapısına benzer bir indentation
+            marginLeft: `${indentLevel * 20}px`, // PrimeReact tree-like indentation
         };
 
         const handleLabelClick = () => {
             setShowListTypeButton((prevState) => ({
                 ...prevState,
-                [Name]: true, 
+                [Name]: true,
             }));
         };
 
         const handleListTypeClick = () => {
-            handleListClick(ListType, Name); 
+            handleListClick(ListType, Name);
         };
 
         if (Type === "List") {
             return (
                 <div key={Name} className="list-container" style={indentStyle}>
                     <label className="form-label">{Label}</label>
-                    <button type="button" onClick={handleLabelClick}>
-                        {Label} ekle
-                    </button>
+                    <Button 
+                        label={`${Label}`} 
+                        type="button" 
+                        onClick={handleLabelClick} 
+                        className="p-button-rounded p-button-secondary"
+                        icon={PrimeIcons.PLUS}
+                        style={{ gap: '8px' }} 
+                    />
 
-                    {/* Label eklenince yanına {ListType} ekle butonu gösteriliyor */}
+                    {/* Show {ListType} add button when label is clicked */}
                     {showListTypeButton[Name] && (
                         <div className="list-type-container" style={{ marginLeft: '20px' }}>
                             <label className="form-label">{ListType}</label>
-                            <button type="button" onClick={handleListTypeClick}>
-                                {ListType} ekle
-                            </button>
+                            <Button 
+                                label={`${ListType}`} 
+                                type="button" 
+                                onClick={handleListTypeClick} 
+                                className="p-button-rounded p-button-primary" 
+                                icon={PrimeIcons.PLUS}
+                                style={{ gap: '8px' }} 
+                            />
                         </div>
                     )}
 
-                    {/* Alt form render edilmesi */}
+                    {/* Render subforms */}
                     {subForms[Name] && subForms[Name].map((form, i) => (
                         <div key={i} className="form-border" style={{ marginLeft: '20px' }}>
                             <DynamicForm
@@ -100,7 +113,7 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
                                 formValues={formValues}
                                 setFormValues={setFormValues}
                                 path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`}
-                                indentLevel={indentLevel + 1} // Her seviye için bir tab daha içeri
+                                indentLevel={indentLevel + 1} // Indent further for nested forms
                             />
                         </div>
                     ))}
@@ -140,7 +153,7 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
 
     return (
         <div>
-            {data.Properties.map((property, index) => renderInput(property, index))}
+            {data.Properties ? data.Properties.map((property, index) => renderInput(property, index)) : null}
         </div>
     );
 };
