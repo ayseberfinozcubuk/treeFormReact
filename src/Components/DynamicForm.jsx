@@ -7,6 +7,7 @@ import { PrimeIcons } from 'primereact/api';
 const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel = 0 }) => {
     const [subForms, setSubForms] = useState({});
     const [showListTypeButton, setShowListTypeButton] = useState({});
+    const [showForm, setShowForm] = useState(false); // State to toggle the form rendering
 
     const handleChange = (propertyName, value, index = null) => {
         const updatedValues = { ...formValues };
@@ -59,7 +60,7 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
             .catch((error) => console.error('Error loading JSON:', error));
     };
 
-    const renderInput = (property) => {
+    const renderInput = (property, name) => {
         const { Name, Label, Type, IsMandatory, MinMax, ListType } = property;
 
         const indentStyle = {
@@ -80,30 +81,16 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
         if (Type === "List") {
             return (
                 <div key={Name} className="list-container" style={indentStyle}>
+
                     <label className="form-label">{Label}</label>
                     <Button 
                         label={`${Label}`} 
                         type="button" 
-                        onClick={handleLabelClick} 
+                        onClick={handleListTypeClick} 
                         className="p-button-rounded p-button-secondary"
                         icon={PrimeIcons.PLUS}
                         style={{ gap: '8px' }} 
                     />
-
-                    {/* Show {ListType} add button when label is clicked */}
-                    {showListTypeButton[Name] && (
-                        <div className="list-type-container" style={{ marginLeft: '20px' }}>
-                            <label className="form-label">{ListType}</label>
-                            <Button 
-                                label={`${ListType}`} 
-                                type="button" 
-                                onClick={handleListTypeClick} 
-                                className="p-button-rounded p-button-primary" 
-                                icon={PrimeIcons.PLUS}
-                                style={{ gap: '8px' }} 
-                            />
-                        </div>
-                    )}
 
                     {/* Render subforms */}
                     {subForms[Name] && subForms[Name].map((form, i) => (
@@ -153,7 +140,21 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
 
     return (
         <div>
-            {data.Properties ? data.Properties.map((property, index) => renderInput(property, index)) : null}
+            <Button
+                label={data.Name}
+                type="button" 
+                onClick={() => setShowForm(true)}
+                className="p-button-rounded p-button-secondary"
+                icon={PrimeIcons.PLUS}
+                style={{ gap: '8px' }} 
+            />
+
+            {/* Conditionally render the form only after BenButon is clicked */}
+            {showForm && (
+                <div>
+                    {data.Properties ? data.Properties.map((property, index) => renderInput(property, index, data.Name)) : null}
+                </div>
+            )}
         </div>
     );
 };

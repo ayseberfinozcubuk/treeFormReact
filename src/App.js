@@ -9,7 +9,7 @@ const App = () => {
     const [formKey, setFormKey] = useState(0);
 
     useEffect(() => {
-        fetch('/SampleData/Emiter.json') // JSON dosyasının bulunduğu yolu belirtin
+        fetch('/SampleData/EmiterNodePri.json') // JSON dosyasının bulunduğu yolu belirtin
             .then((response) => response.json())
             .then((data) => setSampleData(data))
             .catch((error) => console.error('Error loading JSON:', error));
