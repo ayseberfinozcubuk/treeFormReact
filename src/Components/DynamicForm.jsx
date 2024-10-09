@@ -5,9 +5,9 @@ import 'primeicons/primeicons.css';
 import { PrimeIcons } from 'primereact/api';
 
 const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel = 0 }) => {
-    const [subForms, setSubForms] = useState([]); // Array to hold multiple form instances
-    const [listSubForms, setListSubForms] = useState({}); // State for List-type subforms
-    const [listClicked, setListClicked] = useState({}); // Track the click status for each ListType field
+    const [subForms, setSubForms] = useState({});
+    const [showListTypeButton, setShowListTypeButton] = useState({});
+    const [showForm, setShowForm] = useState(false); // State to toggle the form rendering
 
     const handleChange = (propertyName, value, index = null) => {
         const updatedValues = { ...formValues };
@@ -43,6 +43,23 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
         setFormValues(updatedValues);
     };
 
+    const handleListClick = (listType, propertyName) => {
+        fetch(`/SampleData/${listType}.json`)
+            .then((response) => response.json())
+            .then((newForm) => {
+                const updatedSubForms = { ...subForms };
+
+                if (updatedSubForms[propertyName]) {
+                    updatedSubForms[propertyName] = [...updatedSubForms[propertyName], newForm];
+                } else {
+                    updatedSubForms[propertyName] = [newForm];
+                }
+
+                setSubForms(updatedSubForms);
+            })
+            .catch((error) => console.error('Error loading JSON:', error));
+    };
+
     const renderInput = (property, name) => {
         const { Name, Label, Type, IsMandatory, MinMax, ListType } = property;
 
@@ -50,44 +67,33 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
             marginLeft: `${indentLevel * 20}px`, // PrimeReact tree-like indentation
         };
 
-        // Handle button for ListType elements
-        const handleListTypeClick = () => {
-            // If the form for this list type is already clicked, do nothing
-            if (listClicked[Name]) return;
-
-            fetch(`/SampleData/${ListType}.json`)
-                .then((response) => response.json())
-                .then((newForm) => {
-                    const updatedListSubForms = { ...listSubForms };
-                    if (updatedListSubForms[Name]) {
-                        updatedListSubForms[Name] = [...updatedListSubForms[Name], newForm];
-                    } else {
-                        updatedListSubForms[Name] = [newForm];
-                    }
-                    setListSubForms(updatedListSubForms); // Add the form for ListType
-
-                    // Mark this form as clicked so it doesn't add more subforms on subsequent clicks
-                    setListClicked({ ...listClicked, [Name]: true }); // Track clicks for each ListType
-                })
-                .catch((error) => console.error('Error loading JSON:', error));
+        const handleLabelClick = () => {
+            setShowListTypeButton((prevState) => ({
+                ...prevState,
+                [Name]: true,
+            }));
         };
 
-        // Check if the type is "List" and show the corresponding button
+        const handleListTypeClick = () => {
+            handleListClick(ListType, Name);
+        };
+
         if (Type === "List") {
             return (
                 <div key={Name} className="list-container" style={indentStyle}>
+
                     <label className="form-label">{Label}</label>
                     <Button 
                         label={`${Label}`} 
                         type="button" 
-                        onClick={handleListTypeClick} // Click to add subform only once
+                        onClick={handleListTypeClick} 
                         className="p-button-rounded p-button-secondary"
                         icon={PrimeIcons.PLUS}
                         style={{ gap: '8px' }} 
                     />
 
-                    {/* Render List subforms if any */}
-                    {listSubForms[Name] && listSubForms[Name].map((form, i) => (
+                    {/* Render subforms */}
+                    {subForms[Name] && subForms[Name].map((form, i) => (
                         <div key={i} className="form-border" style={{ marginLeft: '20px' }}>
                             <DynamicForm
                                 data={form}
@@ -102,7 +108,6 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
             );
         }
 
-        // Render normal input field
         return (
             <div key={Name} className="form-element" style={indentStyle}>
                 <label className="form-label">{Label} {IsMandatory === "yes" && <span>*</span>}</label>
@@ -139,22 +144,21 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
 
     return (
         <div>
-            {/* Button to add a new main form instance */}
             <Button
                 label={data.Name}
                 type="button" 
-                onClick={handleButtonClick} // Add a new form instance on each click
+                onClick={() => setShowForm(true)}
                 className="p-button-rounded p-button-secondary"
                 icon={PrimeIcons.PLUS}
                 style={{ gap: '8px' }} 
             />
 
-            {/* Render a new form instance for each click */}
-            {subForms.map((form, formIndex) => (
-                <div key={formIndex} className="form-instance">
-                    {form.Properties ? form.Properties.map((property, index) => renderInput(property, index, form.Name)) : null}
+            {/* Conditionally render the form only after BenButon is clicked */}
+            {showForm && (
+                <div>
+                    {data.Properties ? data.Properties.map((property, index) => renderInput(property, index, data.Name)) : null}
                 </div>
-            ))}
+            )}
         </div>
     );
 };
