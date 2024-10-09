@@ -133,8 +133,7 @@ const DynamicForm = ({ data, formValues, setFormValues, path = '', indentLevel =
         return current[propertyName] || '';
     };
 
-    const handleButtonClick = () => {
-        // Add a new form instance to the subForms array each time the button is clicked
+    const handleButtonClick = (name) => {
         setSubForms([...subForms, data]);
     };
 
