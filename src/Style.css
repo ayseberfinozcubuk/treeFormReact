@@ -1,0 +1,29 @@
+.app-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+input {
+    padding: 5px;
+    margin: 5px 0;
+}
+
+button {
+    margin-left: 10px;
+}
+
+.custom-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.extend-shrink-button {
+    margin-left: 5px;
+}
