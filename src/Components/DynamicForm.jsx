@@ -20,13 +20,8 @@ const DynamicForm = ({ jsonPath, path = "", parentId, indentLevel = 0 }) => {
       .finally(() => setLoading(false));
   }, [jsonPath]);
 
-  if (loading) {
-    return <p>Loading form data...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
+  if (loading) return <p>Loading form data...</p>;
+  if (error) return <p>{error}</p>;
 
   const renderInput = (property) => {
     if (property.Type === "List") {
@@ -35,7 +30,7 @@ const DynamicForm = ({ jsonPath, path = "", parentId, indentLevel = 0 }) => {
           key={property.Name}
           property={property}
           path={path}
-          parentId={parentId} // Unique parent ID for each level
+          parentId={parentId}
           indentLevel={indentLevel}
         />
       );
