@@ -19,6 +19,10 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
 
   // Handler to create an "Add Store" button when "Add Stores" is clicked
   const handleAddListClick = () => {
+    if (!isExpanded) {
+      handleToggle(); // Automatically expand the section on first click
+    }
+
     const newId = uuidv4();
     setStoreButtons((prevState) => [...prevState, newId]); // Create "Add Store" button dynamically
     setIsClicked(true); // Disable the button after clicking
