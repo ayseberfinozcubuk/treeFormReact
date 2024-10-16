@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import FormButton from "./FormButton";
-import ExtendShrinkButton from "./ExtendShrinkButton"; // Import ExtendShrinkButton
+import ExtendShrinkButton from "./ExtendShrinkButton";
 import DynamicForm from "./DynamicForm";
 import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
@@ -36,9 +36,11 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
   return (
     <div style={{ marginLeft: `${indentLevel * 20}px` }}>
       {/* Label and ExtendShrinkButton */}
-      <div className="flex items-center">
+      <div className="flex items-center mb-2">
         <label>{Label}</label>
-        <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
+        <div className="ml-2">
+          <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
+        </div>
         {/* Form Button */}
         <FormButton
           label={`Add ${Name}`} // E.g., Add Stores

@@ -1,3 +1,4 @@
+// useFormStore.js
 import { create } from "zustand";
 
 export const useFormStore = create((set) => ({
@@ -24,6 +25,20 @@ export const useFormStore = create((set) => ({
         },
       },
     })),
+
+  // Remove form section and its values
+  removeFormSection: (path) =>
+    set((state) => {
+      const updatedFormValues = { ...state.formValues };
+      const keys = Object.keys(updatedFormValues);
+      keys.forEach((key) => {
+        if (key.startsWith(path)) {
+          delete updatedFormValues[key];
+        }
+      });
+
+      return { formValues: updatedFormValues };
+    }),
 
   // Reset form values and subforms
   resetFormValues: () =>

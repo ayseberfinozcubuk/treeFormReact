@@ -31,6 +31,12 @@ const App = () => {
     setFormStarted(true); // Show the DynamicForm
   };
 
+  // Function to handle removal of the form instance
+  const handleRemoveForm = () => {
+    setFormStarted(false); // Stop rendering the form
+    setIsClicked(false); // Enable the "Add EmiterNodePri" button again
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8">
       {/* The header/title at the top */}
@@ -59,6 +65,7 @@ const App = () => {
               key={formKey}
               jsonPath={`/SampleData/${root}.json`}
               indentLevel={1} // Start one tab to the right
+              onRemove={handleRemoveForm} // Pass the remove function
             />
           </div>
         )}

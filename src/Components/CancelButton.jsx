@@ -1,17 +1,19 @@
-// CancelButton.jsx
 import React from "react";
-import { Button } from "primereact/button";
+import PropTypes from "prop-types";
 
-const CancelButton = ({ onCancel }) => {
+const CancelButton = ({ onClick }) => {
   return (
-    <Button
-      label="Cancel"
-      icon="pi pi-times"
-      onClick={onCancel}
-      className="ml-2 p-button-rounded p-button-success"
-      style={{ padding: "0.75rem 1.5rem" }}
-    />
+    <button
+      className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+      onClick={onClick}
+    >
+      Cancel
+    </button>
   );
+};
+
+CancelButton.propTypes = {
+  onClick: PropTypes.func.isRequired, // Ensure it's required and called correctly
 };
 
 export default CancelButton;

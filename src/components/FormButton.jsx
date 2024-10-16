@@ -4,11 +4,11 @@ import PropTypes from "prop-types";
 
 const FormButton = ({
   label,
-  icon,
+  icon = "", // Default parameter for icon
   onClick,
-  disabled = false,
-  className = "",
-  style = {}, // Accept custom style
+  disabled = false, // Default parameter for disabled
+  className = "", // Default parameter for className
+  style = {}, // Default parameter for style
 }) => {
   // Combine default and custom styles (use custom styles to override)
   const combinedStyles = {
@@ -39,13 +39,6 @@ FormButton.propTypes = {
   disabled: PropTypes.bool,
   className: PropTypes.string,
   style: PropTypes.object,
-};
-
-FormButton.defaultProps = {
-  icon: "",
-  disabled: false,
-  className: "",
-  style: {}, // Empty style object by default
 };
 
 export default FormButton;
