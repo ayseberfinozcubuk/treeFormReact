@@ -1,4 +1,6 @@
 /* Genel Sayfa Stili */
+@import "primeicons/primeicons.css";
+
 .App {
   font-family: Arial, sans-serif;
   padding: 20px;

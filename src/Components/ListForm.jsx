@@ -1,7 +1,7 @@
-// ListForm.jsx
 import React, { useState } from "react";
+import FormButton from "./FormButton";
+import ExtendShrinkButton from "./ExtendShrinkButton"; // Import ExtendShrinkButton
 import DynamicForm from "./DynamicForm";
-import FormButton from "./FormButton"; // Import FormButton
 import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
@@ -10,6 +10,12 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
   const { Name, Label, ListType } = property;
   const [storeButtons, setStoreButtons] = useState([]); // Track independent Store buttons
   const [isClicked, setIsClicked] = useState(false); // Track if the "Add Items" button has been clicked
+  const [isExpanded, setIsExpanded] = useState(true); // Manage the expand/shrink state
+
+  // Toggle Expand/Collapse
+  const handleToggle = () => {
+    setIsExpanded((prev) => !prev);
+  };
 
   // Handler to create an "Add Store" button when "Add Stores" is clicked
   const handleAddListClick = () => {
@@ -25,38 +31,43 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
 
   return (
     <div style={{ marginLeft: `${indentLevel * 20}px` }}>
-      {/* Add Stores Button (disable after one click) */}
-      <label>{Label}</label>
-      <FormButton
-        label={`Add ${Name}`} // E.g., Add Stores
-        icon="pi pi-plus"
-        onClick={handleAddListClick}
-        disabled={isClicked} // Disable after first click
-        className="ml-2"
-      />
+      {/* Label and ExtendShrinkButton */}
+      <div className="flex items-center">
+        <label>{Label}</label>
+        <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
+        {/* Form Button */}
+        <FormButton
+          label={`Add ${Name}`} // E.g., Add Stores
+          icon="pi pi-plus"
+          onClick={handleAddListClick}
+          disabled={isClicked} // Disable after first click
+          className="ml-2"
+        />
+      </div>
 
-      {/* Dynamically created "Add Store" buttons */}
-      {storeButtons.map((storeId) => (
-        <div key={storeId} style={{ marginTop: "10px" }}>
-          <FormButton
-            label={`Add ${ListType}`} // E.g., Add Store
-            icon="pi pi-plus"
-            onClick={() => handleAddStoreClick(storeId)} // Create independent Store form
-            className="ml-2"
-          />
-
-          {/* Render dynamically created subforms */}
-          {subForms[`${parentId}.${storeId}`]?.[Name]?.map((formPath, i) => (
-            <DynamicForm
-              key={i}
-              jsonPath={formPath}
-              path={`${path}.${Name}[${i}]`}
-              parentId={`${parentId}.${storeId}.${Name}[${i}]`} // Pass unique ID for each new form instance
-              indentLevel={indentLevel + 1}
+      {/* Only show contents if expanded */}
+      <div className={isExpanded ? "visible" : "hidden"}>
+        {storeButtons.map((storeId) => (
+          <div key={storeId} style={{ marginTop: "10px" }}>
+            <FormButton
+              label={`Add ${ListType}`} // E.g., Add Store
+              icon="pi pi-plus"
+              onClick={() => handleAddStoreClick(storeId)} // Create independent Store form
+              className="ml-4"
             />
-          ))}
-        </div>
-      ))}
+            {/* Render dynamically created subforms */}
+            {subForms[`${parentId}.${storeId}`]?.[Name]?.map((formPath, i) => (
+              <DynamicForm
+                key={i}
+                jsonPath={formPath}
+                path={`${path}.${Name}[${i}]`}
+                parentId={`${parentId}.${storeId}.${Name}[${i}]`} // Pass unique ID for each new form instance
+                indentLevel={indentLevel + 1}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
