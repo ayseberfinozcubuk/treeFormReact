@@ -1,7 +1,7 @@
 // ListForm.jsx
 import React, { useState } from "react";
-import { Button } from "primereact/button";
 import DynamicForm from "./DynamicForm";
+import FormButton from "./FormButton"; // Import FormButton
 import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
@@ -27,24 +27,22 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
     <div style={{ marginLeft: `${indentLevel * 20}px` }}>
       {/* Add Stores Button (disable after one click) */}
       <label>{Label}</label>
-      <Button
-        type="button"
+      <FormButton
         label={`Add ${Name}`} // E.g., Add Stores
         icon="pi pi-plus"
         onClick={handleAddListClick}
         disabled={isClicked} // Disable after first click
-        style={{ marginLeft: "10px" }}
+        className="ml-2"
       />
 
       {/* Dynamically created "Add Store" buttons */}
       {storeButtons.map((storeId) => (
         <div key={storeId} style={{ marginTop: "10px" }}>
-          <Button
-            type="button"
+          <FormButton
             label={`Add ${ListType}`} // E.g., Add Store
             icon="pi pi-plus"
             onClick={() => handleAddStoreClick(storeId)} // Create independent Store form
-            style={{ marginLeft: "20px" }}
+            className="ml-2"
           />
 
           {/* Render dynamically created subforms */}

@@ -1,7 +1,7 @@
 // App.js
 import React, { useState } from "react";
 import DynamicForm from "./components/DynamicForm";
-import { Button } from "primereact/button";
+import FormButton from "./components/FormButton"; // Import FormButton
 import { useFormStore } from "./store/useFormStore";
 
 const App = () => {
@@ -32,44 +32,45 @@ const App = () => {
   };
 
   return (
-    <div className="app-container">
-      <h1>Dynamic Form Example</h1>
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8">
+      {/* The header/title at the top */}
+      <h1 className="text-xl font-semibold text-gray-800 mb-8">
+        Dynamic Form Example
+      </h1>
 
-      {/* Show the "Add Root" button aligned with the form's indentation */}
-      <div>
-        <label className="form-label">{root}</label>
-        <Button
-          label={`Add ${root}`}
-          icon="pi pi-plus"
-          onClick={handleStartForm}
-          disabled={isClicked} // Disable the button after the first click
-          style={{ marginLeft: "10px" }}
-        />
-      </div>
-
-      {/* Once the button is clicked, render the form indented at the same level */}
-      {formStarted && (
-        <div>
-          <DynamicForm
-            key={formKey}
-            jsonPath={`/SampleData/${root}.json`}
-            indentLevel={1} // Start one tab to the right
+      {/* The form container */}
+      <div className="w-full max-w-3xl p-6 bg-white shadow-md rounded-md border border-gray-300">
+        {/* Show the "Add Root" button aligned with the form's indentation */}
+        <div className="mb-4 flex items-center">
+          <label className="form-label">{root}</label>
+          <FormButton
+            label={`Add ${root}`}
+            icon="pi pi-plus"
+            onClick={handleStartForm}
+            disabled={isClicked} // Disable the button after the first click
+            className="ml-2"
           />
         </div>
-      )}
 
-      {/* Submit Button */}
-      <Button
-        label="Submit"
-        icon="pi pi-check"
-        onClick={handleSubmit}
-        style={{
-          marginTop: "20px",
-          backgroundColor: "#007bb5",
-          color: "white",
-          marginLeft: "20px", // Ensure the submit button is aligned with the form
-        }}
-      />
+        {/* Once the button is clicked, render the form indented at the same level */}
+        {formStarted && (
+          <div>
+            <DynamicForm
+              key={formKey}
+              jsonPath={`/SampleData/${root}.json`}
+              indentLevel={1} // Start one tab to the right
+            />
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <FormButton
+          label="Submit"
+          icon="pi pi-check"
+          onClick={handleSubmit}
+          className="mt-6 bg-blue-500 text-white"
+        />
+      </div>
     </div>
   );
 };

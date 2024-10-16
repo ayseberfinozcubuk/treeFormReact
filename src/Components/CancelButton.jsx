@@ -7,9 +7,9 @@ const CancelButton = ({ onCancel }) => {
     <Button
       label="Cancel"
       icon="pi pi-times"
-      className="p-button-danger"
       onClick={onCancel}
-      style={{ marginLeft: "10px" }}
+      className="ml-2 p-button-rounded p-button-success"
+      style={{ padding: "0.75rem 1.5rem" }}
     />
   );
 };
