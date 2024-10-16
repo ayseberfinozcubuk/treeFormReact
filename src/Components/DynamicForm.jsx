@@ -60,8 +60,14 @@ const DynamicForm = ({ jsonPath, path = "", parentId, indentLevel = 0 }) => {
   };
 
   return (
-    <div className={`p-4 border border-gray-200 rounded-md bg-white shadow-md`}>
-      <CancelButton onClick={handleCancel} /> {/* Use onClick here */}
+    <div
+      className={`relative p-6 pt-12 border border-gray-200 rounded-md bg-white shadow-md`}
+    >
+      {/* Cancel button positioned absolutely in the top-right corner */}
+      <CancelButton
+        onClick={handleCancel}
+        className="absolute top-2 right-2" // Positioned in top-right corner
+      />
       {/* Render the form inputs */}
       {data?.Properties.map(renderInput)}
     </div>
