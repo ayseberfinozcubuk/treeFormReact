@@ -43,8 +43,8 @@ const App = () => {
   };
 
   const resetForm = () => {
-    resetFormValues();
-    setFormKey((prevKey) => prevKey + 1);
+    resetFormValues(); // Reset all form values, subforms, and validation fields
+    setFormKey((prevKey) => prevKey + 1); // Ensure new form key to reset form
     setFormStarted(false);
     setIsClicked(false);
   };
@@ -55,8 +55,9 @@ const App = () => {
   };
 
   const handleRemoveForm = () => {
+    resetFormValues(); // Reset Zustand store values when the form is removed
     setFormStarted(false);
-    setIsClicked(false);
+    setIsClicked(false); // Make the Add button clickable again after form is cancelled
   };
 
   return (
@@ -72,10 +73,10 @@ const App = () => {
             {rootEntity}
           </label>
           <FormButton
-            label={`${rootEntity} Ekle`}
+            label={`${rootEntity} Ekle`} // Add Button
             icon="pi pi-plus"
-            onClick={handleStartForm}
-            disabled={isClicked}
+            onClick={handleStartForm} // Start form on click
+            disabled={isClicked} // Disable button when form is started
             className="ml-2"
           />
         </div>
@@ -85,7 +86,7 @@ const App = () => {
             <DynamicForm
               key={formKey}
               entityName={rootEntity}
-              onRemove={handleRemoveForm}
+              onRemove={handleRemoveForm} // Reset form when cancel is clicked
             />
           </div>
         )}

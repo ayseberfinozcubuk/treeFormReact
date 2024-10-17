@@ -4,7 +4,13 @@ import ListForm from "./ListForm";
 import CancelButton from "./CancelButton";
 import { useFormStore } from "../store/useFormStore";
 
-const DynamicForm = ({ entityName, path = "", parentId, indentLevel = 0 }) => {
+const DynamicForm = ({
+  entityName,
+  path = "",
+  parentId,
+  indentLevel = 0,
+  onRemove, // Passed from App.js if available
+}) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -27,8 +33,13 @@ const DynamicForm = ({ entityName, path = "", parentId, indentLevel = 0 }) => {
   if (error) return <p>{error}</p>;
 
   const handleCancel = () => {
-    removeFormSection(path);
-    setIsVisible(false);
+    if (onRemove) {
+      onRemove(); // Use the onRemove function if provided
+    } else {
+      // Default logic if onRemove is not provided
+      removeFormSection(path);
+      setIsVisible(false);
+    }
   };
 
   if (!isVisible) {
