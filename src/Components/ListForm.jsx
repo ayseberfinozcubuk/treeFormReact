@@ -31,9 +31,9 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
   };
 
   return (
-    <div style={{ marginLeft: `${indentLevel * 20}px` }}>
-      <div className="flex items-center mb-2">
-        <label>{Label}</label>
+    <div className={`space-x-4 mb-4 ml-${indentLevel * 4}`}>
+      <div className="flex items-center mb-4">
+        <label className="form-label text-gray-700 font-medium">{Label}</label>
         <div className="ml-2">
           <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
         </div>
@@ -53,7 +53,7 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
               label={`Add ${ListType}`}
               icon="pi pi-plus"
               onClick={() => handleAddStoreClick(storeId)}
-              className="ml-4"
+              className="ml-4 mb-4" // Added margin-below the button
             />
             {subForms[`${parentId}.${storeId}`]?.[Name]?.map((formPath, i) => (
               <DynamicForm
