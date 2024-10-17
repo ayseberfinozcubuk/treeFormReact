@@ -38,7 +38,7 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
           <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
         </div>
         <FormButton
-          label={`Add ${Name}`}
+          label={`${Label} Ekle`}
           icon="pi pi-plus"
           onClick={handleAddListClick}
           disabled={isClicked}
@@ -50,7 +50,7 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
         {storeButtons.map((storeId) => (
           <div key={storeId} style={{ marginTop: "10px" }}>
             <FormButton
-              label={`Add ${ListType}`}
+              label={`${ListType} Ekle`}
               icon="pi pi-plus"
               onClick={() => handleAddStoreClick(storeId)}
               className="ml-4 mb-4" // Added margin-below the button

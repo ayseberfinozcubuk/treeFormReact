@@ -83,25 +83,17 @@ export const useFormStore = create((set) => ({
   removeFormSection: (path) =>
     set((state) => {
       const updatedFormValues = { ...state.formValues };
-      const updatedMandatoryFields = [...state.emptyMandatoryFields];
-      const updatedNotInRangeFields = [...state.notInRangeField];
+      const updatedMandatoryFields = state.emptyMandatoryFields.filter(
+        (key) => !key.startsWith(path)
+      );
+      const updatedNotInRangeFields = state.notInRangeField.filter(
+        (key) => !key.startsWith(path)
+      );
 
-      // Use a single iteration over formValues to remove the matching entries
+      // Remove form values that match the path
       Object.keys(updatedFormValues).forEach((key) => {
         if (key.startsWith(path)) {
           delete updatedFormValues[key];
-
-          // Remove from emptyMandatoryFields if it exists
-          const mandatoryIndex = updatedMandatoryFields.indexOf(key);
-          if (mandatoryIndex > -1) {
-            updatedMandatoryFields.splice(mandatoryIndex, 1);
-          }
-
-          // Remove from notInRangeField if it exists
-          const notInRangeIndex = updatedNotInRangeFields.indexOf(key);
-          if (notInRangeIndex > -1) {
-            updatedNotInRangeFields.splice(notInRangeIndex, 1);
-          }
         }
       });
 

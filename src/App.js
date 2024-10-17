@@ -68,9 +68,11 @@ const App = () => {
       {/* Use w-auto to fit to content and avoid excessive width */}
       <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">
         <div className="mb-4 flex items-center">
-          <label className="form-label">{rootEntity}</label>
+          <label className="form-label text-gray-700 font-medium">
+            {rootEntity}
+          </label>
           <FormButton
-            label={`Add ${rootEntity}`}
+            label={`${rootEntity} Ekle`}
             icon="pi pi-plus"
             onClick={handleStartForm}
             disabled={isClicked}

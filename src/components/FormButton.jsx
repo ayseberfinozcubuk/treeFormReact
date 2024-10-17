@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "primereact/button";
 import PropTypes from "prop-types";
+import { Button } from "primereact/button";
 
 const FormButton = ({
   label,
@@ -8,25 +8,22 @@ const FormButton = ({
   onClick,
   disabled = false, // Default parameter for disabled
   className = "", // Default parameter for className
-  style = {}, // Default parameter for style
 }) => {
-  // Combine default and custom styles (use custom styles to override)
-  const combinedStyles = {
-    padding: "8px 16px", // Default padding
-    backgroundColor: disabled ? "#d1d5db" : "#007bb5", // Gray when disabled, Blue otherwise
-    color: "white",
-    borderRadius: "4px", // Rounded corners
-    ...style, // Merge with passed custom styles
-  };
-
   return (
     <Button
       label={label}
       icon={icon}
       onClick={onClick}
       disabled={disabled}
-      className={`p-button ${className}`} // PrimeReact's default button class + any extra class
-      style={combinedStyles} // Use the combined styles
+      className={`p-button 
+        ${
+          disabled
+            ? "bg-gray-300 cursor-not-allowed"
+            : "bg-blue-500 hover:bg-blue-600"
+        } 
+        text-white py-2 px-4 rounded transition-colors duration-200 ${className}`}
+      iconPos="left" // Ensures the icon is placed on the left of the label
+      style={{ gap: "8px" }} // Adds space between the icon and label
     />
   );
 };
@@ -38,7 +35,6 @@ FormButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   className: PropTypes.string,
-  style: PropTypes.object,
 };
 
 export default FormButton;
