@@ -1,76 +1,76 @@
-// App.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DynamicForm from "./components/DynamicForm";
-import FormButton from "./components/FormButton"; // Import FormButton
+import FormButton from "./components/FormButton";
 import { useFormStore } from "./store/useFormStore";
 
 const App = () => {
-  const { formValues, resetFormValues } = useFormStore();
-  const [formKey, setFormKey] = useState(0); // Used to reset the form by changing its key
-  const [formStarted, setFormStarted] = useState(false); // Track if the form has started
-  const [root, setRoot] = useState("EmiterNodePri"); // Variable to store the form name
-  const [isClicked, setIsClicked] = useState(false); // Track button click
+  const { setFormData, formValues, resetFormValues } = useFormStore();
+  const [formKey, setFormKey] = useState(0);
+  const [formStarted, setFormStarted] = useState(false);
+  const [rootEntity, setRootEntity] = useState("");
+  const [isClicked, setIsClicked] = useState(false);
 
-  // Function to handle form submission
+  // Load JSON data from public folder dynamically
+  useEffect(() => {
+    fetch("/SampleData/sampleData.json")
+      .then((response) => response.json())
+      .then((data) => {
+        setFormData(data); // Store data in Zustand
+        setRootEntity(data[0].EntityName); // Set the initial root entity
+      })
+      .catch((error) => console.error("Error loading sampleData:", error));
+  }, [setFormData]);
+
   const handleSubmit = () => {
-    console.log("Submitted Form Values: ", formValues); // Log form values on submission
-    resetForm(); // Reset the form after submission
+    console.log("Submitted Form Values: ", formValues);
+    resetForm();
   };
 
-  // Function to reset the form programmatically
   const resetForm = () => {
-    resetFormValues(); // Clear the Zustand store
-    setFormKey((prevKey) => prevKey + 1); // Increment key to re-render DynamicForm and reset inputs
-    setFormStarted(false); // Reset to initial state
-    setIsClicked(false); // Reset the button click
+    resetFormValues();
+    setFormKey((prevKey) => prevKey + 1);
+    setFormStarted(false);
+    setIsClicked(false);
   };
 
-  // Function to handle the "Add EmiterNodePri" click
   const handleStartForm = () => {
-    setIsClicked(true); // Disable the button after the first click
-    setFormStarted(true); // Show the DynamicForm
+    setIsClicked(true);
+    setFormStarted(true);
   };
 
-  // Function to handle removal of the form instance
   const handleRemoveForm = () => {
-    setFormStarted(false); // Stop rendering the form
-    setIsClicked(false); // Enable the "Add EmiterNodePri" button again
+    setFormStarted(false);
+    setIsClicked(false);
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8">
-      {/* The header/title at the top */}
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
         Dynamic Form Example
       </h1>
 
-      {/* The form container */}
       <div className="w-full max-w-3xl p-6 bg-white shadow-md rounded-md border border-gray-300">
-        {/* Show the "Add Root" button aligned with the form's indentation */}
         <div className="mb-4 flex items-center">
-          <label className="form-label">{root}</label>
+          <label className="form-label">{rootEntity}</label>
           <FormButton
-            label={`Add ${root}`}
+            label={`Add ${rootEntity}`}
             icon="pi pi-plus"
             onClick={handleStartForm}
-            disabled={isClicked} // Disable the button after the first click
+            disabled={isClicked}
             className="ml-2"
           />
         </div>
 
-        {/* Once the button is clicked, render the form indented at the same level */}
         {formStarted && (
           <div>
             <DynamicForm
               key={formKey}
-              jsonPath={`/SampleData/${root}.json`}
-              indentLevel={1} // Start one tab to the right
-              onRemove={handleRemoveForm} // Pass the remove function
+              entityName={rootEntity}
+              onRemove={handleRemoveForm}
             />
           </div>
         )}
 
-        {/* Submit Button */}
         <FormButton
           label="Submit"
           icon="pi pi-check"

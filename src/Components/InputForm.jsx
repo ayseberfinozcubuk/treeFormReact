@@ -1,10 +1,14 @@
-// InputForm.jsx
 import React from "react";
 import { useFormStore } from "../store/useFormStore";
 
 const InputForm = ({ property, path, indentLevel }) => {
   const { updateFormValues, formValues } = useFormStore();
   const { Name, Label, Type, MinMax } = property;
+
+  // Skip rendering if the label is empty or the type is "Guid"
+  if (!Label || Type === "Guid") {
+    return null;
+  }
 
   const handleChange = (e) => {
     updateFormValues(`${path}.${Name}`, e.target.value);

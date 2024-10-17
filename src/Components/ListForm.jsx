@@ -6,68 +6,63 @@ import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
 const ListForm = ({ property, path, parentId, indentLevel }) => {
-  const { subForms, addSubForm } = useFormStore();
+  const { formData, subForms, addSubForm } = useFormStore();
   const { Name, Label, ListType } = property;
-  const [storeButtons, setStoreButtons] = useState([]); // Track independent Store buttons
-  const [isClicked, setIsClicked] = useState(false); // Track if the "Add Items" button has been clicked
-  const [isExpanded, setIsExpanded] = useState(true); // Manage the expand/shrink state
+  const [storeButtons, setStoreButtons] = useState([]);
+  const [isClicked, setIsClicked] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
-  // Toggle Expand/Collapse
+  const entity = formData[ListType]; // Use dictionary lookup
+
   const handleToggle = () => {
     setIsExpanded((prev) => !prev);
   };
 
-  // Handler to create an "Add Store" button when "Add Stores" is clicked
   const handleAddListClick = () => {
     if (!isExpanded) {
-      handleToggle(); // Automatically expand the section on first click
+      handleToggle();
     }
 
     const newId = uuidv4();
-    setStoreButtons((prevState) => [...prevState, newId]); // Create "Add Store" button dynamically
-    setIsClicked(true); // Disable the button after clicking
+    setStoreButtons((prevState) => [...prevState, newId]);
+    setIsClicked(true);
   };
 
-  // Handler for adding independent Store form when "Add Store" is clicked
   const handleAddStoreClick = (storeId) => {
-    addSubForm(Name, `/SampleData/${ListType}.json`, `${parentId}.${storeId}`); // Create an independent Store form
+    addSubForm(Name, `/SampleData/${ListType}.json`, `${parentId}.${storeId}`);
   };
 
   return (
     <div style={{ marginLeft: `${indentLevel * 20}px` }}>
-      {/* Label and ExtendShrinkButton */}
       <div className="flex items-center mb-2">
         <label>{Label}</label>
         <div className="ml-2">
           <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
         </div>
-        {/* Form Button */}
         <FormButton
-          label={`Add ${Name}`} // E.g., Add Stores
+          label={`Add ${Name}`}
           icon="pi pi-plus"
           onClick={handleAddListClick}
-          disabled={isClicked} // Disable after first click
+          disabled={isClicked}
           className="ml-2"
         />
       </div>
 
-      {/* Only show contents if expanded */}
       <div className={isExpanded ? "visible" : "hidden"}>
         {storeButtons.map((storeId) => (
           <div key={storeId} style={{ marginTop: "10px" }}>
             <FormButton
-              label={`Add ${ListType}`} // E.g., Add Store
+              label={`Add ${ListType}`}
               icon="pi pi-plus"
-              onClick={() => handleAddStoreClick(storeId)} // Create independent Store form
+              onClick={() => handleAddStoreClick(storeId)}
               className="ml-4"
             />
-            {/* Render dynamically created subforms */}
             {subForms[`${parentId}.${storeId}`]?.[Name]?.map((formPath, i) => (
               <DynamicForm
                 key={i}
-                jsonPath={formPath}
+                entityName={ListType}
                 path={`${path}.${Name}[${i}]`}
-                parentId={`${parentId}.${storeId}.${Name}[${i}]`} // Pass unique ID for each new form instance
+                parentId={`${parentId}.${storeId}.${Name}[${i}]`}
                 indentLevel={indentLevel + 1}
               />
             ))}

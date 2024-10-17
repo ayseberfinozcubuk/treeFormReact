@@ -3,7 +3,17 @@ import { create } from "zustand";
 
 export const useFormStore = create((set) => ({
   formValues: {},
+  formData: {}, // Store formData as a dictionary
   subForms: {},
+
+  // Set the form data in the store
+  setFormData: (dataArray) => {
+    const dataDict = dataArray.reduce((acc, item) => {
+      acc[item.EntityName] = item;
+      return acc;
+    }, {});
+    set(() => ({ formData: dataDict })); // Store the data as a dictionary
+  },
 
   // Update form values
   updateFormValues: (key, value) =>
