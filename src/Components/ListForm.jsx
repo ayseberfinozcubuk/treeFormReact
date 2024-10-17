@@ -6,13 +6,11 @@ import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
 const ListForm = ({ property, path, parentId, indentLevel }) => {
-  const { formData, subForms, addSubForm } = useFormStore();
+  const { subForms, addSubForm } = useFormStore();
   const { Name, Label, ListType } = property;
   const [storeButtons, setStoreButtons] = useState([]);
   const [isClicked, setIsClicked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
-
-  const entity = formData[ListType]; // Use dictionary lookup
 
   const handleToggle = () => {
     setIsExpanded((prev) => !prev);

@@ -80,18 +80,29 @@ export const useFormStore = create((set) => ({
       },
     })),
 
-  // Remove form section and its values
+  // Remove form section and its values along with validation fields
   removeFormSection: (path) =>
     set((state) => {
       const updatedFormValues = { ...state.formValues };
-      const keys = Object.keys(updatedFormValues);
-      keys.forEach((key) => {
+      const updatedMandatoryFields = state.emptyMandatoryFields.filter(
+        (key) => !key.startsWith(path)
+      );
+      const updatedNotInRangeFields = state.notInRangeField.filter(
+        (key) => !key.startsWith(path)
+      );
+
+      // Remove form values that match the path
+      Object.keys(updatedFormValues).forEach((key) => {
         if (key.startsWith(path)) {
           delete updatedFormValues[key];
         }
       });
 
-      return { formValues: updatedFormValues };
+      return {
+        formValues: updatedFormValues,
+        emptyMandatoryFields: updatedMandatoryFields,
+        notInRangeField: updatedNotInRangeFields,
+      };
     }),
 
   // Reset form values and subforms
@@ -99,5 +110,7 @@ export const useFormStore = create((set) => ({
     set(() => ({
       formValues: {},
       subForms: {},
+      emptyMandatoryFields: [], // Clear empty fields on reset
+      notInRangeField: [], // Clear range errors on reset
     })),
 }));
