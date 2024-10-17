@@ -60,12 +60,13 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8">
+    <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
         Dynamic Form Example
       </h1>
 
-      <div className="w-full max-w-3xl p-6 bg-white shadow-md rounded-md border border-gray-300">
+      {/* Use w-auto to fit to content and avoid excessive width */}
+      <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">
         <div className="mb-4 flex items-center">
           <label className="form-label">{rootEntity}</label>
           <FormButton
@@ -87,12 +88,15 @@ const App = () => {
           </div>
         )}
 
-        <FormButton
-          label="Submit"
-          icon="pi pi-check"
-          onClick={handleSubmit}
-          className="mt-6 bg-blue-500 text-white"
-        />
+        {/* Ensure that the Submit button is in its own block */}
+        <div className="mt-6">
+          <FormButton
+            label="Submit"
+            icon="pi pi-check"
+            onClick={handleSubmit}
+            className="bg-blue-500 text-white"
+          />
+        </div>
       </div>
     </div>
   );

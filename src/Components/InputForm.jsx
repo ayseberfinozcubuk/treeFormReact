@@ -47,14 +47,18 @@ const InputForm = ({ property, path, indentLevel }) => {
   };
 
   return (
-    <div className={`flex flex-col space-y-2 mb-4 ml-${indentLevel * 4}`}>
+    <div
+      className={`flex flex-row items-center space-x-4 mb-4 ml-${
+        indentLevel * 4
+      }`}
+    >
       {/* Label with optional asterisk for required fields */}
-      <label className="form-label text-gray-700 font-medium min-w-[150px]">
+      <label className="form-label text-gray-700 font-medium">
         {Label}
         {IsMandatory && <span className="text-red-500 ml-1">*</span>}
       </label>
 
-      {/* Input field */}
+      {/* Input field with fixed width */}
       <input
         type={Type === "Double" ? "number" : "text"}
         value={formValues[`${path}.${Name}`] || ""}
@@ -64,14 +68,12 @@ const InputForm = ({ property, path, indentLevel }) => {
         required={IsMandatory}
         className={`form-input border ${
           error ? "border-red-500" : "border-gray-300"
-        } rounded-md p-2 w-full`} // Highlight border in red on error
+        } rounded-md p-2 w-64`} // Fixed width for input field
       />
 
       {/* Unit label */}
       {Unit && (
-        <label className="form-label text-gray-700 font-medium min-w-[150px]">
-          {Unit}
-        </label>
+        <label className="form-label text-gray-700 font-medium">{Unit}</label>
       )}
 
       {/* Error message */}
