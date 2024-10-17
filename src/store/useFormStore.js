@@ -5,6 +5,8 @@ export const useFormStore = create((set) => ({
   formValues: {},
   formData: {}, // Store formData as a dictionary
   subForms: {},
+  emptyMandatoryFields: [], // Track mandatory fields that are empty
+  notInRangeField: [], // Track fields that are not in the min-max range
 
   // Set the form data in the store
   setFormData: (dataArray) => {
@@ -17,11 +19,53 @@ export const useFormStore = create((set) => ({
 
   // Update form values
   updateFormValues: (key, value) =>
-    set((state) => ({
-      formValues: {
+    set((state) => {
+      const updatedFormValues = {
         ...state.formValues,
         [key]: value,
-      },
+      };
+
+      const isEmpty = !value || value.trim() === "";
+      const isRequiredField = state.emptyMandatoryFields.includes(key);
+
+      // If the field is required and now filled, remove it from emptyMandatoryFields
+      if (!isEmpty && isRequiredField) {
+        const newEmptyFields = state.emptyMandatoryFields.filter(
+          (field) => field !== key
+        );
+        return {
+          formValues: updatedFormValues,
+          emptyMandatoryFields: newEmptyFields,
+        };
+      }
+
+      // If the field is empty and required, add it to emptyMandatoryFields
+      if (isEmpty && !isRequiredField) {
+        return {
+          formValues: updatedFormValues,
+          emptyMandatoryFields: [...state.emptyMandatoryFields, key],
+        };
+      }
+
+      return { formValues: updatedFormValues };
+    }),
+
+  // Track required fields that are initially empty
+  addEmptyMandatoryField: (key) =>
+    set((state) => ({
+      emptyMandatoryFields: [...state.emptyMandatoryFields, key],
+    })),
+
+  // Track fields outside the min-max range
+  addNotInRangeField: (key) =>
+    set((state) => ({
+      notInRangeField: [...state.notInRangeField, key],
+    })),
+
+  // Remove fields back in range
+  removeNotInRangeField: (key) =>
+    set((state) => ({
+      notInRangeField: state.notInRangeField.filter((field) => field !== key),
     })),
 
   // Add sub-form

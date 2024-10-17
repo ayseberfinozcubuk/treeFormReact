@@ -3,12 +3,6 @@
     "EntityName": "Emitter",
     "Properties": [
       {
-        "Name": "Id",
-        "Label": "",
-        "Type": "Guid",
-        "IsMandatory": true
-      },
-      {
         "Name": "Notation",
         "Label": "Notasyon",
         "Type": "string",
@@ -50,16 +44,6 @@
     "EntityName": "EmitterMode",
     "Properties": [
       {
-        "Name": "Id",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
-        "Name": "EmitterId",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
         "Name": "ModeName",
         "Label": "Mode Adı",
         "Type": "string",
@@ -98,16 +82,6 @@
   {
     "EntityName": "EmitterModeBeam",
     "Properties": [
-      {
-        "Name": "Id",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
-        "Name": "EmitterId",
-        "Label": "",
-        "Type": "Guid"
-      },
       {
         "Name": "BeamName",
         "Label": "Beam Adı",
@@ -176,16 +150,6 @@
     "EntityName": "EmitterModeBeamPositionDwellDurationValue",
     "Properties": [
       {
-        "Name": "Id",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
-        "Name": "EmitterModeBeamId",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
         "Name": "BeamWPositionDuration",
         "Label": "Hüzme Pozisyonu Kalış Süresi",
         "Type": "double",
@@ -208,16 +172,6 @@
     "EntityName": "EmitterModeBeamPositionSequence",
     "Properties": [
       {
-        "Name": "Id",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
-        "Name": "EmitterModeBeamId",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
         "Name": "SequenceName",
         "Label": "Parametre Dizisi Adı",
         "Type": "string",
@@ -234,16 +188,6 @@
   {
     "EntityName": "EmitterModeBeamPositionFiringOrder",
     "Properties": [
-      {
-        "Name": "Id",
-        "Label": "",
-        "Type": "Guid"
-      },
-      {
-        "Name": "EmitterModeBeamPositionSequenceId",
-        "Label": "",
-        "Type": "Guid"
-      },
       {
         "Name": "BeamPositionOrderIndex",
         "Label": "Gönderim Sıra No",
