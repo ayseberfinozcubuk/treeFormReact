@@ -29,6 +29,7 @@ const App = () => {
 
   const handleSubmit = () => {
     if (emptyMandatoryFields.length > 0) {
+      console.log(`empty mandatory fields: ${emptyMandatoryFields}`);
       alert("Please fill in all required fields before submitting.");
       return; // Prevent submission if there are empty mandatory fields
     }
@@ -38,8 +39,59 @@ const App = () => {
       return; // Prevent submission if there are fields out of range
     }
 
-    console.log("Submitted Form Values: ", formValues);
-    resetForm();
+    const convertToNestedJson = (formValues) => {
+      const result = {};
+
+      Object.keys(formValues).forEach((key) => {
+        const value = formValues[key];
+        const keys = key.split(".").filter(Boolean); // Split by dot and remove empty keys
+
+        keys.reduce((acc, currKey, idx) => {
+          // Check if the key is an array-like key (e.g., "Modes[0]")
+          const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
+          if (arrayMatch) {
+            const arrayKey = arrayMatch[1]; // e.g., "Modes"
+            const arrayIndex = parseInt(arrayMatch[2], 10); // e.g., 0
+
+            // Ensure the array exists at this key
+            acc[arrayKey] = acc[arrayKey] || [];
+
+            // Ensure the specific array index exists
+            acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
+
+            // If it's the last key, assign the value
+            if (idx === keys.length - 1) {
+              acc[arrayKey][arrayIndex] = value;
+            }
+
+            return acc[arrayKey][arrayIndex];
+          } else {
+            // Normal key handling (non-array)
+            if (idx === keys.length - 1) {
+              acc[currKey] = value;
+            } else {
+              acc[currKey] = acc[currKey] || {};
+            }
+            return acc[currKey];
+          }
+        }, result);
+      });
+
+      return result;
+    };
+
+    const structuredJson = convertToNestedJson(formValues);
+
+    // Log the structured JSON to verify
+    console.log(
+      "Structured Form Values as JSON: ",
+      JSON.stringify(structuredJson, null, 2)
+    );
+
+    // You can now send `structuredJson` to the backend
+    // Example: axios.post('/api/form-submit', structuredJson);
+
+    resetForm(); // Reset the form after submission
   };
 
   const resetForm = () => {

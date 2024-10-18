@@ -27,7 +27,14 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
   };
 
   const handleAddStoreClick = (storeId) => {
-    addSubForm(Name, `/SampleData/${ListType}.json`, `${parentId}.${storeId}`);
+    const { formData, addSubForm } = useFormStore.getState();
+    const subFormData = formData[ListType];
+
+    if (!subFormData) {
+      console.error(`No data found for ListType: ${ListType}`);
+      return;
+    }
+    addSubForm(Name, subFormData, `${parentId}.${storeId}`);
   };
 
   return (
