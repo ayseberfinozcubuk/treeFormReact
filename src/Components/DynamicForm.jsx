@@ -9,7 +9,7 @@ const DynamicForm = ({
   path = "",
   parentId,
   indentLevel = 0,
-  onRemove, // Passed from App.js if available
+  onRemove,
 }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ const DynamicForm = ({
 
   useEffect(() => {
     setLoading(true);
-    const entity = formData[entityName]; // Access formData as a dictionary
+    const entity = formData[entityName];
     if (entity) {
       setData(entity);
     } else {
@@ -33,13 +33,9 @@ const DynamicForm = ({
   if (error) return <p>{error}</p>;
 
   const handleCancel = () => {
-    if (onRemove) {
-      onRemove(); // Use the onRemove function if provided
-    } else {
-      // Default logic if onRemove is not provided
-      removeFormSection(path);
-      setIsVisible(false);
-    }
+    removeFormSection(path);
+    setIsVisible(false);
+    onRemove && onRemove();
   };
 
   if (!isVisible) {
@@ -69,9 +65,7 @@ const DynamicForm = ({
   };
 
   return (
-    <div
-      className={`relative p-6 pt-12 border border-gray-200 rounded-md bg-white shadow-md`}
-    >
+    <div className="relative p-6 pt-12 border border-gray-200 rounded-md bg-white shadow-md">
       <CancelButton onClick={handleCancel} className="absolute top-2 right-2" />
       {data?.Properties.map(renderInput)}
     </div>
