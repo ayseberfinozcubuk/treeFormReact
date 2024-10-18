@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DynamicForm from "./components/DynamicForm";
 import FormButton from "./components/FormButton";
+import axios from "axios";
 import { useFormStore } from "./store/useFormStore";
 
 const App = () => {
@@ -88,8 +89,17 @@ const App = () => {
       JSON.stringify(structuredJson, null, 2)
     );
 
-    // You can now send `structuredJson` to the backend
-    // Example: axios.post('/api/form-submit', structuredJson);
+    console.log("Sending JSON:", structuredJson);
+
+    // Send structuredJson to the backend using Axios
+    axios
+      .post("http://localhost:5000/api/Emitter", structuredJson)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
 
     resetForm(); // Reset the form after submission
   };

@@ -14,17 +14,34 @@ const InputForm = ({ property, path, indentLevel }) => {
 
   // Check if the field is required and empty, and add to emptyMandatoryFields
   useEffect(() => {
-    if (
-      IsMandatory &&
-      (!formValues[`${path}.${Name}`] ||
-        formValues[`${path}.${Name}`].trim() === "")
-    ) {
-      addEmptyMandatoryField(`${path}.${Name}`);
+    const formValue = formValues[`${path}.${Name}`];
+
+    if (IsMandatory) {
+      // Check if formValue is a string before trimming
+      if (typeof formValue === "string" && formValue.trim() === "") {
+        addEmptyMandatoryField(`${path}.${Name}`);
+      } else if (
+        formValue === undefined ||
+        formValue === null ||
+        formValue === ""
+      ) {
+        // For other types, simply check if they are undefined, null, or empty
+        addEmptyMandatoryField(`${path}.${Name}`);
+      }
     }
   }, [IsMandatory, formValues, Name, path, addEmptyMandatoryField]);
 
   const handleChange = (e) => {
-    const value = e.target.value;
+    let value = e.target.value;
+
+    // If the type is int, convert to integer
+    if (Type === "int") {
+      value = parseInt(value, 10);
+    }
+    // If the type is double, convert to float
+    else if (Type === "double") {
+      value = parseFloat(value);
+    }
 
     // Validate against min and max values
     if (MinMax) {

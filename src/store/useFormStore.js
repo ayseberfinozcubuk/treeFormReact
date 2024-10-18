@@ -24,7 +24,12 @@ export const useFormStore = create((set) => ({
         [key]: value,
       };
 
-      const isEmpty = !value || value.trim() === "";
+      // Check if the value is a string and trim it if necessary
+      const isStringValue = typeof value === "string";
+      const isEmpty = isStringValue
+        ? value.trim() === ""
+        : value === undefined || value === null || value === "";
+
       const isRequiredField = state.emptyMandatoryFields.includes(key);
 
       // If the field is required and now filled, remove it from emptyMandatoryFields
