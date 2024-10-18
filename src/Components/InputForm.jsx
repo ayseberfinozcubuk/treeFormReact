@@ -77,7 +77,7 @@ const InputForm = ({ property, path, indentLevel }) => {
 
       {/* Input field with fixed width */}
       <input
-        type={Type === "double" || Type === "int" ? "number" : "text"}
+        type={Type}
         value={formValues[`${path}.${Name}`] || ""}
         onChange={handleChange}
         min={MinMax?.Min}
