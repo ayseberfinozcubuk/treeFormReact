@@ -1,0 +1,183 @@
+[
+  {
+    "notation": "a",
+    "emitterName": "a",
+    "spotNo": "q",
+    "function": "1",
+    "numberOfModes": 1,
+    "modes": [
+      {
+        "modeName": "11",
+        "amplitude": 1,
+        "theoricalRange": 1,
+        "beams": [
+          {
+            "beamName": "1",
+            "antennaGain": 1,
+            "beamPosition": 1,
+            "beamWidthAzimute": 1,
+            "beamWidthElevation": 1,
+            "dwellDurationValues": [
+              {
+                "beamWPositionDuration": 1,
+                "beamWPositionIndex": 1
+              }
+            ],
+            "sequences": [
+              {
+                "sequenceName": "1",
+                "firingOrders": [
+                  {
+                    "beamPositionOrderIndex": 1,
+                    "beamPositionIndex": 1,
+                    "beamPositionDuration": 1,
+                    "elevation": 1,
+                    "azimuth": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "notation": "a",
+    "emitterName": "a",
+    "spotNo": "a",
+    "function": "a",
+    "numberOfModes": 1,
+    "modes": [
+      {
+        "modeName": "t",
+        "amplitude": 3,
+        "theoricalRange": 3,
+        "beams": [
+          {
+            "beamName": "3",
+            "antennaGain": 3,
+            "beamPosition": 3,
+            "beamWidthAzimute": 3,
+            "beamWidthElevation": 3,
+            "dwellDurationValues": [
+              {
+                "beamWPositionDuration": 3,
+                "beamWPositionIndex": 3
+              }
+            ],
+            "sequences": [
+              {
+                "sequenceName": "3",
+                "firingOrders": [
+                  {
+                    "beamPositionOrderIndex": 3,
+                    "beamPositionIndex": 3,
+                    "beamPositionDuration": 3,
+                    "elevation": 3,
+                    "azimuth": 3
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "notation": "1",
+    "emitterName": "1",
+    "spotNo": "1",
+    "function": "1",
+    "numberOfModes": 1,
+    "modes": [
+      {
+        "modeName": "1",
+        "amplitude": 1,
+        "theoricalRange": 1,
+        "beams": [
+          {
+            "beamName": "1",
+            "antennaGain": 1,
+            "beamPosition": 1,
+            "beamWidthAzimute": 1,
+            "beamWidthElevation": 1,
+            "dwellDurationValues": [
+              {
+                "beamWPositionDuration": 1,
+                "beamWPositionIndex": 1
+              }
+            ],
+            "sequences": [
+              {
+                "sequenceName": "1",
+                "firingOrders": [
+                  {
+                    "beamPositionOrderIndex": 1,
+                    "beamPositionIndex": 1,
+                    "beamPositionDuration": 1,
+                    "elevation": 1,
+                    "azimuth": 1
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "notation": "2",
+    "emitterName": "2",
+    "spotNo": "2",
+    "function": "2",
+    "numberOfModes": 2,
+    "modes": [
+      {
+        "modeName": "2",
+        "amplitude": 2,
+        "theoricalRange": 2,
+        "beams": [
+          {
+            "beamName": "2",
+            "antennaGain": 2,
+            "beamPosition": 2,
+            "beamWidthAzimute": 2,
+            "beamWidthElevation": 2,
+            "dwellDurationValues": [],
+            "sequences": []
+          },
+          {
+            "beamName": "23",
+            "antennaGain": 23,
+            "beamPosition": 23,
+            "beamWidthAzimute": 23,
+            "beamWidthElevation": 23,
+            "dwellDurationValues": [
+              {
+                "beamWPositionDuration": 3,
+                "beamWPositionIndex": 3
+              }
+            ],
+            "sequences": [
+              {
+                "sequenceName": "4",
+                "firingOrders": [
+                  {
+                    "beamPositionOrderIndex": 5,
+                    "beamPositionIndex": 5,
+                    "beamPositionDuration": 5,
+                    "elevation": 5,
+                    "azimuth": 5
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]
