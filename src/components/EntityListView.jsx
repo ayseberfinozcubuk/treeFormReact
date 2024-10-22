@@ -3,7 +3,6 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom"; // For navigation
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore"; // Use the new entity store
@@ -11,7 +10,6 @@ import { useEntityStore } from "../store/useEntityStore"; // Use the new entity 
 const EntityListView = ({ rootEntity }) => {
   const { entities, entityIndexes, setEntities, selectEntity } =
     useEntityStore();
-  const [metaKey, setMetaKey] = useState(false);
   const navigate = useNavigate(); // For programmatic navigation
 
   useEffect(() => {
@@ -55,17 +53,13 @@ const EntityListView = ({ rootEntity }) => {
   };
 
   return (
-    <div className="p-4 bg-gray-100 min-h-screen dark:bg-gray-900">
-      <Card title="Entity List" className="mb-4">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-            {rootEntity} List
-          </h1>
-          <div className="flex items-center space-x-2">
-            <InputSwitch
-              checked={metaKey}
-              onChange={(e) => setMetaKey(e.value)}
-            />
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="max-w-6xl w-full p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+        <Card title={`${rootEntity} List`} className="mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+              {rootEntity} List
+            </h1>
             <Button
               label={`Add New ${rootEntity}`}
               icon="pi pi-plus"
@@ -73,29 +67,28 @@ const EntityListView = ({ rootEntity }) => {
               onClick={() => navigate("/add-entity")}
             />
           </div>
-        </div>
 
-        <DataTable
-          value={entitiesList} // Use entities from Zustand without showing indexes
-          selectionMode="single"
-          onSelectionChange={handleRowSelect}
-          metaKeySelection={metaKey}
-          tableStyle={{ minWidth: "50rem" }}
-          className="p-datatable-gridlines p-datatable-striped p-datatable-responsive"
-        >
-          {/* Ensure each column has a stable and unique key */}
-          {entitiesList.length > 0 &&
-            getColumns(entitiesList).map((col) => (
-              <Column
-                key={col} // Use column name or field as key
-                field={col}
-                header={col.charAt(0).toUpperCase() + col.slice(1)} // Capitalize header
-                body={(rowData) => renderValue(rowData[col])} // Handle object/array rendering
-                sortable
-              />
-            ))}
-        </DataTable>
-      </Card>
+          <DataTable
+            value={entitiesList} // Use entities from Zustand without showing indexes
+            selectionMode="single"
+            onSelectionChange={handleRowSelect}
+            tableStyle={{ minWidth: "50rem" }}
+            className="p-datatable-gridlines p-datatable-striped p-datatable-responsive"
+          >
+            {/* Ensure each column has a stable and unique key */}
+            {entitiesList.length > 0 &&
+              getColumns(entitiesList).map((col) => (
+                <Column
+                  key={col} // Use column name or field as key
+                  field={col}
+                  header={col.charAt(0).toUpperCase() + col.slice(1)} // Capitalize header
+                  body={(rowData) => renderValue(rowData[col])} // Handle object/array rendering
+                  sortable
+                />
+              ))}
+          </DataTable>
+        </Card>
+      </div>
     </div>
   );
 };
