@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 import EntityListView from "./components/EntityListView";
 import AddNewEntity from "./components/AddNewEntity";
+import EntityDetails from "./components/EntityDetails"; // Import the new details component
 import { useFormStore } from "./store/useFormStore"; // Import Zustand store
 
 const App = () => {
@@ -43,6 +44,10 @@ const App = () => {
           <Route
             path="/add-entity"
             element={<AddNewEntity rootEntity={rootEntity} />} // Pass rootEntity as prop
+          />
+          <Route
+            path="/details/:id" // Dynamic route for details page
+            element={<EntityDetails rootEntity={rootEntity} />} // Pass rootEntity as prop
           />
         </Routes>
       </div>

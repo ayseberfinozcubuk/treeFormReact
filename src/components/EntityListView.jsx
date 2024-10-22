@@ -6,28 +6,35 @@ import { Column } from "primereact/column";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
+import { useEntityStore } from "../store/useEntityStore"; // Use the new entity store
 
 const EntityListView = ({ rootEntity }) => {
-  const [emitters, setEmitters] = useState([]);
-  const [selectedEmitter, setSelectedEmitter] = useState(null);
+  const { entities, entityIndexes, setEntities, selectEntity } =
+    useEntityStore();
   const [metaKey, setMetaKey] = useState(false);
   const navigate = useNavigate(); // For programmatic navigation
 
   useEffect(() => {
-    // Fetch emitters data from the API
+    // Fetch entities data from the API
     axios
       .get(`http://localhost:5000/api/${rootEntity}`)
-      .then((response) => setEmitters(response.data))
+      .then((response) => setEntities(rootEntity, response.data)) // Store entities in Zustand
       .catch((error) =>
         console.error(`Error fetching ${rootEntity} list:`, error)
       );
-  }, []);
+  }, [rootEntity, setEntities]);
+
+  const entitiesList = entities[rootEntity]
+    ? Object.values(entities[rootEntity])
+    : [];
+  const indexesList = entityIndexes[rootEntity] || []; // Get entity indexes
 
   // Navigate to EntityDetails page on row click
   const handleRowSelect = (e) => {
     const selected = e.value;
-    setSelectedEmitter(selected);
-    navigate(`/details/${selected.index}`); // Use the index for navigation
+    const index = indexesList[entitiesList.indexOf(selected)]; // Find the correct index for the selected entity
+    selectEntity(rootEntity, index); // Store selected entity in Zustand
+    navigate(`/details/${index}`); // Use the index for navigation
   };
 
   // Function to determine the keys (column names) dynamically
@@ -60,7 +67,7 @@ const EntityListView = ({ rootEntity }) => {
               onChange={(e) => setMetaKey(e.value)}
             />
             <Button
-              label="Add New Emitter"
+              label={`Add New ${rootEntity}`}
               icon="pi pi-plus"
               className="p-button-success"
               onClick={() => navigate("/add-entity")}
@@ -69,18 +76,16 @@ const EntityListView = ({ rootEntity }) => {
         </div>
 
         <DataTable
-          value={emitters.map((item, index) => ({ ...item, index }))} // Attach index to each item
+          value={entitiesList} // Use entities from Zustand without showing indexes
           selectionMode="single"
-          selection={selectedEmitter}
           onSelectionChange={handleRowSelect}
-          dataKey="index" // Use index as dataKey for unique identification
           metaKeySelection={metaKey}
           tableStyle={{ minWidth: "50rem" }}
           className="p-datatable-gridlines p-datatable-striped p-datatable-responsive"
         >
           {/* Ensure each column has a stable and unique key */}
-          {emitters.length > 0 &&
-            getColumns(emitters).map((col) => (
+          {entitiesList.length > 0 &&
+            getColumns(entitiesList).map((col) => (
               <Column
                 key={col} // Use column name or field as key
                 field={col}

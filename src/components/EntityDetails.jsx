@@ -1,37 +1,50 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React from "react";
 import { useParams } from "react-router-dom";
+import { useEntityStore } from "../store/useEntityStore"; // Access the Zustand store
 
-const EntityDetails = () => {
-  const { id } = useParams(); // Get ID from route
-  const [emitter, setEmitter] = useState(null);
+const EntityDetails = ({ rootEntity }) => {
+  const { id } = useParams(); // Get the entity ID from the URL
+  const { selectedEntity, updateEntity } = useEntityStore(); // Access selected entity and update method
 
-  useEffect(() => {
-    // Fetch the specific emitter details from API
-    axios
-      .get(`http://localhost:5000/api/Emitter/${id}`)
-      .then((response) => setEmitter(response.data))
-      .catch((error) =>
-        console.error("Error fetching emitter details:", error)
-      );
-  }, [id]);
+  if (!selectedEntity) {
+    return <div>Loading...</div>;
+  }
 
-  if (!emitter) return <p>Loading...</p>;
-
-  // Dynamically generate the details from the emitter object
-  const renderDetails = () => {
-    return Object.entries(emitter).map(([key, value]) => (
-      <p key={key}>
-        <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>{" "}
-        {Array.isArray(value) ? `[${value.length}]` : value}
-      </p>
-    ));
+  // Handle updates (you can replace this with actual update logic)
+  const handleUpdate = () => {
+    const updatedData = { ...selectedEntity, updatedField: "New Value" }; // Example update
+    updateEntity(rootEntity, id, updatedData); // Update entity in Zustand
   };
 
   return (
-    <div>
-      <h1>Emitter Details</h1>
-      {renderDetails()}
+    <div className="p-6 bg-white dark:bg-gray-800">
+      <h2 className="text-2xl font-semibold mb-4">Details of {rootEntity}</h2>
+
+      <div className="grid grid-cols-2 gap-4">
+        {Object.keys(selectedEntity).map((key) => (
+          <div key={key} className="p-4 border border-gray-300 rounded shadow">
+            <strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong>
+            <div className="mt-2">
+              {typeof selectedEntity[key] === "object" ? (
+                Array.isArray(selectedEntity[key]) ? (
+                  `[Array of ${selectedEntity[key].length} items]`
+                ) : (
+                  <pre>{JSON.stringify(selectedEntity[key], null, 2)}</pre>
+                )
+              ) : (
+                selectedEntity[key]
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={handleUpdate}
+        className="mt-4 p-2 bg-blue-500 text-white"
+      >
+        Update Entity
+      </button>
     </div>
   );
 };
