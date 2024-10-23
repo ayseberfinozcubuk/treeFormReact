@@ -1,14 +1,15 @@
 import { create } from "zustand";
 
 export const useEntityStore = create((set) => ({
-  entities: {}, // Store entities as a dictionary with keys based on rootEntity
-  entityIndexes: {}, // Store indexes for each entity separately
-  selectedEntity: null, // Track the currently selected entity
+  entities: {},
+  entityIndexes: {},
+  selectedEntity: null,
+  expandedSections: {}, // Track expanded/collapsed sections
 
   // Set the entities and their indexes in the store
   setEntities: (rootEntity, dataArray) => {
     const entityDict = dataArray.reduce((acc, item, index) => {
-      acc[index] = { ...item }; // Store entities without index in their values
+      acc[index] = { ...item };
       return acc;
     }, {});
 
@@ -19,7 +20,7 @@ export const useEntityStore = create((set) => ({
       },
       entityIndexes: {
         ...state.entityIndexes,
-        [rootEntity]: dataArray.map((_, index) => index), // Keep track of indexes separately
+        [rootEntity]: dataArray.map((_, index) => index),
       },
     }));
   },
@@ -40,9 +41,19 @@ export const useEntityStore = create((set) => ({
           ...state.entities[rootEntity],
           [index]: {
             ...state.entities[rootEntity][index],
-            ...updatedData, // Update with new data
+            ...updatedData,
           },
         },
+      },
+    }));
+  },
+
+  // Track expand/shrink states
+  toggleExpandSection: (key) => {
+    set((state) => ({
+      expandedSections: {
+        ...state.expandedSections,
+        [key]: !state.expandedSections[key], // Toggle the expand/collapse state
       },
     }));
   },

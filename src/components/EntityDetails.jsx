@@ -1,66 +1,132 @@
-import React from "react";
-import { useParams } from "react-router-dom";
-import { useEntityStore } from "../store/useEntityStore"; // Access the Zustand store
-import { Accordion, AccordionTab } from "primereact/accordion"; // For hierarchical display
+import React, { useState } from "react";
+import { useEntityStore } from "../store/useEntityStore";
+import FormButton from "./FormButton";
+import CancelButton from "./CancelButton";
+import ExtendShrinkButton from "./ExtendShrinkButton"; // Assuming you already have this component
 
 const EntityDetails = ({ rootEntity }) => {
-  const { id } = useParams(); // Get the entity ID from the URL
-  const { selectedEntity } = useEntityStore(); // Access selected entity from the store
+  const {
+    selectedEntity,
+    updateEntity,
+    expandedSections,
+    toggleExpandSection,
+  } = useEntityStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [localEntity, setLocalEntity] = useState(selectedEntity);
 
-  // Recursive function to render the object and array structure
-  const renderContent = (data) => {
-    if (Array.isArray(data)) {
-      // Render array elements with collapsible accordion for lists
-      return (
-        <Accordion>
-          {data.map((item, index) => (
-            <AccordionTab key={index} header={`Array Item ${index + 1}`}>
-              {renderContent(item)} {/* Recursively render array items */}
-            </AccordionTab>
-          ))}
-        </Accordion>
-      );
-    } else if (typeof data === "object" && data !== null) {
-      // Render object fields
-      return (
-        <div className="p-4 border border-gray-300 rounded shadow">
-          {Object.keys(data).map((key) => (
-            <div key={key} className="flex flex-col mb-2">
-              <div className="flex justify-between">
-                <strong>{key}:</strong>
-                {typeof data[key] === "object" && !Array.isArray(data[key]) ? (
-                  <div className="ml-4 flex-1">{renderContent(data[key])}</div> // Recursive for nested objects
-                ) : Array.isArray(data[key]) ? (
-                  <div className="ml-4 flex-1">{`[Array of ${data[key].length} items]`}</div> // Display array summary
-                ) : (
-                  <div className="ml-4 flex-1">{String(data[key])}</div> // Render primitive values
-                )}
-              </div>
-              {Array.isArray(data[key]) && (
-                <div className="ml-4 mt-2">{renderContent(data[key])}</div> // Render arrays below the key
-              )}
-            </div>
-          ))}
-        </div>
-      );
-    } else {
-      // Render primitive values
-      return <div>{String(data)}</div>;
-    }
+  // Handle input changes during editing mode
+  const handleInputChange = (path, value) => {
+    const updatedEntity = { ...localEntity };
+    path.reduce((acc, key, idx) => {
+      if (idx === path.length - 1) {
+        acc[key] = value;
+      } else {
+        return acc[key];
+      }
+    }, updatedEntity);
+    setLocalEntity(updatedEntity);
   };
 
-  if (!selectedEntity) {
-    return <div>Loading...</div>;
-  }
+  // Save the changes made during editing
+  const handleSave = () => {
+    updateEntity(rootEntity, localEntity._id, localEntity);
+    setIsEditing(false);
+  };
+
+  // Render a single value, handling arrays as expandable sections
+  const renderValue = (key, value, parentKey = "") => {
+    if (Array.isArray(value)) {
+      return (
+        <div className="ml-4">
+          {value.map((item, index) => {
+            const uniqueKey = `${parentKey}_${key}_${index}`; // Unique key for each array element
+            return (
+              <div key={uniqueKey} className="mb-2">
+                <div className="flex items-center">
+                  <ExtendShrinkButton
+                    isExtended={expandedSections[uniqueKey] || false}
+                    onToggle={() => toggleExpandSection(uniqueKey)}
+                  />
+                  <strong>
+                    {key} {index + 1}:
+                  </strong>
+                </div>
+                {expandedSections[uniqueKey] && (
+                  <div className="pl-4">{renderNested(item, uniqueKey)}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return value;
+  };
+
+  // Recursively render nested objects with expand/shrink buttons for arrays
+  const renderNested = (data, parentKey = "") => {
+    return (
+      <div className="ml-4">
+        {Object.entries(data).map(([key, value]) => {
+          const uniqueKey = `${parentKey}_${key}`; // Unique key for each section
+          return (
+            <div key={uniqueKey} className="mb-4">
+              <div className="flex items-center">
+                {Array.isArray(value) && ( // Show expand/shrink button for arrays
+                  <ExtendShrinkButton
+                    isExtended={expandedSections[uniqueKey] || false}
+                    onToggle={() => toggleExpandSection(uniqueKey)}
+                  />
+                )}
+                <strong className="font-bold">{key}:</strong>
+              </div>
+
+              {/* Render input field for editing or plain text for viewing */}
+              {(!Array.isArray(value) || expandedSections[uniqueKey]) && (
+                <div className="pl-4">
+                  {isEditing ? (
+                    <input
+                      className="border p-2 rounded w-full"
+                      type="text"
+                      value={value || ""}
+                      onChange={(e) => handleInputChange([key], e.target.value)}
+                    />
+                  ) : (
+                    <div className="pl-4">
+                      {renderValue(key, value, uniqueKey)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="max-w-4xl w-full p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4 text-center">
-          Details of {rootEntity}
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">
+          {isEditing ? "Edit" : "View"} {rootEntity} Details
         </h2>
-        {renderContent(selectedEntity)}
+        <FormButton
+          onClick={() => setIsEditing(!isEditing)}
+          label={isEditing ? "Switch to View Mode" : "Switch to Edit Mode"}
+        />
       </div>
+
+      <div className="bg-white shadow-md rounded-lg p-6">
+        {renderNested(localEntity)}
+      </div>
+
+      {isEditing && (
+        <div className="mt-6 flex justify-between">
+          <FormButton onClick={handleSave} label="Save Changes" />
+          <CancelButton onClick={() => setIsEditing(false)} label="Cancel" />
+        </div>
+      )}
     </div>
   );
 };
