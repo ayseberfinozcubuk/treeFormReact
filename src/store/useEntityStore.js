@@ -48,13 +48,20 @@ export const useEntityStore = create((set) => ({
     }));
   },
 
-  // Track expand/shrink states
+  // Toggle expand/shrink state for a specific section
   toggleExpandSection: (key) => {
     set((state) => ({
       expandedSections: {
         ...state.expandedSections,
-        [key]: !state.expandedSections[key], // Toggle the expand/collapse state
+        [key]: !state.expandedSections[key],
       },
+    }));
+  },
+
+  // Reset all expanded sections to false (shrink state)
+  resetExpandedSections: () => {
+    set(() => ({
+      expandedSections: {}, // Reset all sections to default (collapsed)
     }));
   },
 

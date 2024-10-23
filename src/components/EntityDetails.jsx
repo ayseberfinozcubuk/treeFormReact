@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useEntityStore } from "../store/useEntityStore";
 import FormButton from "./FormButton";
 import CancelButton from "./CancelButton";
-import ExtendShrinkButton from "./ExtendShrinkButton"; // Assuming you already have this component
+import ExtendShrinkButton from "./ExtendShrinkButton";
 
 const EntityDetails = ({ rootEntity }) => {
   const {
@@ -10,11 +10,16 @@ const EntityDetails = ({ rootEntity }) => {
     updateEntity,
     expandedSections,
     toggleExpandSection,
+    resetExpandedSections,
   } = useEntityStore();
   const [isEditing, setIsEditing] = useState(false);
   const [localEntity, setLocalEntity] = useState(selectedEntity);
 
-  // Handle input changes during editing mode
+  // Reset expanded sections (shrink mode) whenever the component is mounted
+  useEffect(() => {
+    resetExpandedSections();
+  }, [resetExpandedSections]);
+
   const handleInputChange = (path, value) => {
     const updatedEntity = { ...localEntity };
     path.reduce((acc, key, idx) => {
@@ -27,19 +32,25 @@ const EntityDetails = ({ rootEntity }) => {
     setLocalEntity(updatedEntity);
   };
 
-  // Save the changes made during editing
   const handleSave = () => {
     updateEntity(rootEntity, localEntity._id, localEntity);
     setIsEditing(false);
   };
 
-  // Render a single value, handling arrays as expandable sections
+  const isPrimitive = (value) => {
+    return (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    );
+  };
+
   const renderValue = (key, value, parentKey = "") => {
     if (Array.isArray(value)) {
       return (
         <div className="ml-4">
           {value.map((item, index) => {
-            const uniqueKey = `${parentKey}_${key}_${index}`; // Unique key for each array element
+            const uniqueKey = `${parentKey}_${key}_${index}`;
             return (
               <div key={uniqueKey} className="mb-2">
                 <div className="flex items-center">
@@ -63,41 +74,58 @@ const EntityDetails = ({ rootEntity }) => {
     return value;
   };
 
-  // Recursively render nested objects with expand/shrink buttons for arrays
   const renderNested = (data, parentKey = "") => {
     return (
       <div className="ml-4">
         {Object.entries(data).map(([key, value]) => {
-          const uniqueKey = `${parentKey}_${key}`; // Unique key for each section
+          const uniqueKey = `${parentKey}_${key}`;
           return (
             <div key={uniqueKey} className="mb-4">
               <div className="flex items-center">
-                {Array.isArray(value) && ( // Show expand/shrink button for arrays
+                {Array.isArray(value) && (
                   <ExtendShrinkButton
                     isExtended={expandedSections[uniqueKey] || false}
                     onToggle={() => toggleExpandSection(uniqueKey)}
                   />
                 )}
                 <strong className="font-bold">{key}:</strong>
+
+                {/* Render primitive types inline */}
+                {isPrimitive(value) && !isEditing && (
+                  <span className="ml-2">{value}</span>
+                )}
+
+                {/* Render input for primitive types in edit mode */}
+                {isPrimitive(value) && isEditing && (
+                  <input
+                    className="border p-2 rounded w-full ml-2"
+                    type="text"
+                    value={value || ""}
+                    onChange={(e) => handleInputChange([key], e.target.value)}
+                  />
+                )}
               </div>
 
-              {/* Render input field for editing or plain text for viewing */}
-              {(!Array.isArray(value) || expandedSections[uniqueKey]) && (
-                <div className="pl-4">
-                  {isEditing ? (
-                    <input
-                      className="border p-2 rounded w-full"
-                      type="text"
-                      value={value || ""}
-                      onChange={(e) => handleInputChange([key], e.target.value)}
-                    />
-                  ) : (
-                    <div className="pl-4">
-                      {renderValue(key, value, uniqueKey)}
-                    </div>
-                  )}
-                </div>
-              )}
+              {/* Render non-primitive types below */}
+              {!isPrimitive(value) &&
+                (!Array.isArray(value) || expandedSections[uniqueKey]) && (
+                  <div className="pl-4">
+                    {isEditing && !isPrimitive(value) ? (
+                      <input
+                        className="border p-2 rounded w-full"
+                        type="text"
+                        value={value || ""}
+                        onChange={(e) =>
+                          handleInputChange([key], e.target.value)
+                        }
+                      />
+                    ) : (
+                      <div className="pl-4">
+                        {renderValue(key, value, uniqueKey)}
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
           );
         })}
