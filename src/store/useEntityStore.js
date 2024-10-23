@@ -8,6 +8,7 @@ export const useEntityStore = create((set) => ({
 
   // Set the entities and their indexes in the store
   setEntities: (rootEntity, dataArray) => {
+    //console.log("dataArray useEntityyStore setEntities: ", dataArray);
     const entityDict = dataArray.reduce((acc, item, index) => {
       acc[index] = { ...item };
       return acc;

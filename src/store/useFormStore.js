@@ -109,6 +109,43 @@ export const useFormStore = create((set) => ({
       };
     }),
 
+  // Recursively set form values for nested objects and arrays
+  setFormValues: (values) => {
+    const flattenObject = (obj, parentKey = "") => {
+      let flattened = {};
+
+      Object.keys(obj).forEach((key) => {
+        const value = obj[key];
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+        // If the value is an array, we need to handle the elements recursively
+        if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            // Recursively flatten each array element
+            Object.assign(
+              flattened,
+              flattenObject(item, `${fullKey}[${index}]`)
+            );
+          });
+        }
+        // If the value is an object, we recursively flatten it
+        else if (typeof value === "object" && value !== null) {
+          Object.assign(flattened, flattenObject(value, fullKey));
+        }
+        // Otherwise, it's a primitive value, so we directly set it
+        else {
+          flattened[fullKey] = value;
+        }
+      });
+
+      return flattened;
+    };
+
+    const flattenedValues = flattenObject(values); // Flatten the values
+    set({ formValues: flattenedValues });
+    //console.log("from useFormStore setFormValues:", flattenedValues); // Log the flattened values
+  },
+
   // Reset form values and subforms
   resetFormValues: () =>
     set(() => ({

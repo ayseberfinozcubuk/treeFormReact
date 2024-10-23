@@ -1,160 +1,143 @@
 import React, { useState, useEffect } from "react";
-import { useEntityStore } from "../store/useEntityStore";
+import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
-import CancelButton from "./CancelButton";
-import ExtendShrinkButton from "./ExtendShrinkButton";
+import axios from "axios";
+import { useFormStore } from "../store/useFormStore";
+import { useEntityStore } from "../store/useEntityStore"; // Import useEntityStore
 
 const EntityDetails = ({ rootEntity }) => {
   const {
-    selectedEntity,
-    updateEntity,
-    expandedSections,
-    toggleExpandSection,
-    resetExpandedSections,
-  } = useEntityStore();
-  const [isEditing, setIsEditing] = useState(false);
-  const [localEntity, setLocalEntity] = useState(selectedEntity);
+    formValues,
+    setFormValues,
+    resetFormValues,
+    emptyMandatoryFields,
+    notInRangeField,
+  } = useFormStore();
 
-  // Reset expanded sections (shrink mode) whenever the component is mounted
+  const { selectedEntity } = useEntityStore(); // Get the selected entity from useEntityStore
+
+  const [formKey, setFormKey] = useState(0);
+  const [formStarted, setFormStarted] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+
+  // Initialize form values from useEntityStore when component mounts
   useEffect(() => {
-    resetExpandedSections();
-  }, [resetExpandedSections]);
-
-  const handleInputChange = (path, value) => {
-    const updatedEntity = { ...localEntity };
-    path.reduce((acc, key, idx) => {
-      if (idx === path.length - 1) {
-        acc[key] = value;
-      } else {
-        return acc[key];
-      }
-    }, updatedEntity);
-    setLocalEntity(updatedEntity);
-  };
-
-  const handleSave = () => {
-    updateEntity(rootEntity, localEntity._id, localEntity);
-    setIsEditing(false);
-  };
-
-  const isPrimitive = (value) => {
-    return (
-      typeof value === "string" ||
-      typeof value === "number" ||
-      typeof value === "boolean"
-    );
-  };
-
-  const renderValue = (key, value, parentKey = "") => {
-    if (Array.isArray(value)) {
-      return (
-        <div className="ml-4">
-          {value.map((item, index) => {
-            const uniqueKey = `${parentKey}_${key}_${index}`;
-            return (
-              <div key={uniqueKey} className="mb-2">
-                <div className="flex items-center">
-                  <ExtendShrinkButton
-                    isExtended={expandedSections[uniqueKey] || false}
-                    onToggle={() => toggleExpandSection(uniqueKey)}
-                  />
-                  <strong>
-                    {key} {index + 1}:
-                  </strong>
-                </div>
-                {expandedSections[uniqueKey] && (
-                  <div className="pl-4">{renderNested(item, uniqueKey)}</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      );
+    if (selectedEntity) {
+      console.log(`EntityDetails form values: ${formValues.EmitterName}`);
     }
-    return value;
+  }, [selectedEntity, setFormValues]);
+
+  const handleSubmit = () => {
+    if (emptyMandatoryFields.length > 0) {
+      alert("Please fill in all required fields before submitting.");
+      return;
+    }
+
+    if (notInRangeField.length > 0) {
+      alert("Please ensure all fields are within the allowed range.");
+      return;
+    }
+
+    const convertToNestedJson = (formValues) => {
+      const result = {};
+
+      Object.keys(formValues).forEach((key) => {
+        const value = formValues[key];
+        const keys = key.split(".").filter(Boolean);
+
+        keys.reduce((acc, currKey, idx) => {
+          const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
+          if (arrayMatch) {
+            const arrayKey = arrayMatch[1];
+            const arrayIndex = parseInt(arrayMatch[2], 10);
+
+            acc[arrayKey] = acc[arrayKey] || [];
+            acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
+
+            if (idx === keys.length - 1) {
+              acc[arrayKey][arrayIndex] = value;
+            }
+
+            return acc[arrayKey][arrayIndex];
+          } else {
+            if (idx === keys.length - 1) {
+              acc[currKey] = value;
+            } else {
+              acc[currKey] = acc[currKey] || {};
+            }
+            return acc[currKey];
+          }
+        }, result);
+      });
+
+      return result;
+    };
+
+    const structuredJson = convertToNestedJson(formValues);
+
+    // Log the structured JSON to verify
+    console.log(
+      "Structured Form Values as JSON: ",
+      JSON.stringify(structuredJson, null, 2)
+    );
+
+    //console.log("Sending JSON:", structuredJson);
+
+    axios
+      .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)
+      .then((response) => {
+        console.log(response.data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+
+    resetForm();
   };
 
-  const renderNested = (data, parentKey = "") => {
-    return (
-      <div className="ml-4">
-        {Object.entries(data).map(([key, value]) => {
-          const uniqueKey = `${parentKey}_${key}`;
-          return (
-            <div key={uniqueKey} className="mb-4">
-              <div className="flex items-center">
-                {Array.isArray(value) && (
-                  <ExtendShrinkButton
-                    isExtended={expandedSections[uniqueKey] || false}
-                    onToggle={() => toggleExpandSection(uniqueKey)}
-                  />
-                )}
-                <strong className="font-bold">{key}:</strong>
+  const resetForm = () => {
+    resetFormValues();
+    setFormKey((prevKey) => prevKey + 1);
+    setFormStarted(false);
+    setIsClicked(false);
+  };
 
-                {/* Render primitive types inline */}
-                {isPrimitive(value) && !isEditing && (
-                  <span className="ml-2">{value}</span>
-                )}
-
-                {/* Render input for primitive types in edit mode */}
-                {isPrimitive(value) && isEditing && (
-                  <input
-                    className="border p-2 rounded w-full ml-2"
-                    type="text"
-                    value={value || ""}
-                    onChange={(e) => handleInputChange([key], e.target.value)}
-                  />
-                )}
-              </div>
-
-              {/* Render non-primitive types below */}
-              {!isPrimitive(value) &&
-                (!Array.isArray(value) || expandedSections[uniqueKey]) && (
-                  <div className="pl-4">
-                    {isEditing && !isPrimitive(value) ? (
-                      <input
-                        className="border p-2 rounded w-full"
-                        type="text"
-                        value={value || ""}
-                        onChange={(e) =>
-                          handleInputChange([key], e.target.value)
-                        }
-                      />
-                    ) : (
-                      <div className="pl-4">
-                        {renderValue(key, value, uniqueKey)}
-                      </div>
-                    )}
-                  </div>
-                )}
-            </div>
-          );
-        })}
-      </div>
-    );
+  const handleRemoveForm = () => {
+    resetFormValues();
+    setFormStarted(false);
+    setIsClicked(false);
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">
-          {isEditing ? "Edit" : "View"} {rootEntity} Details
-        </h2>
-        <FormButton
-          onClick={() => setIsEditing(!isEditing)}
-          label={isEditing ? "Switch to View Mode" : "Switch to Edit Mode"}
-        />
-      </div>
+    <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
+      <h1 className="text-xl font-semibold text-gray-800 mb-8">
+        Update New Entity
+      </h1>
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        {renderNested(localEntity)}
-      </div>
-
-      {isEditing && (
-        <div className="mt-6 flex justify-between">
-          <FormButton onClick={handleSave} label="Save Changes" />
-          <CancelButton onClick={() => setIsEditing(false)} label="Cancel" />
+      <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">
+        <div className="mb-4 flex items-center">
+          <label className="form-label text-gray-700 font-medium">
+            {rootEntity}
+          </label>
         </div>
-      )}
+
+        <div>
+          <DynamicForm
+            key={formKey}
+            entityName={rootEntity}
+            onRemove={handleRemoveForm}
+          />
+        </div>
+
+        <div className="mt-6">
+          <FormButton
+            label="Submit"
+            icon="pi pi-check"
+            onClick={handleSubmit}
+            className="bg-blue-500 text-white"
+          />
+        </div>
+      </div>
     </div>
   );
 };

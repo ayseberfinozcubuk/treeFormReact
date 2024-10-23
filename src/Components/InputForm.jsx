@@ -12,24 +12,36 @@ const InputForm = ({ property, path, indentLevel }) => {
   const { Name, Label, Type, Unit, MinMax, IsMandatory } = property;
   const [error, setError] = useState(""); // Track validation errors
 
-  // Check if the field is required and empty, and add to emptyMandatoryFields
+  const formValueKey = path ? `${path}.${Name}` : Name; // Only add the dot if path is non-empty
+  const formValue = formValues[formValueKey];
+
+  // console.log("Input form property: ", property);
+  // console.log("Form values in component aaaa:", formValues); // Log here to ensure it's being passed correctly
+  console.log("formValues: ", formValues);
+  console.log("formValueKey: ", formValueKey);
+  // console.log("name: ", Name);
   useEffect(() => {
-    const formValue = formValues[`${path}.${Name}`];
+    // console.log(`form values inside input: ${formValues.emitterName}`);
+    console.log("Form values in component bbbb:", formValue); // Log here to ensure it's being passed correctly
 
     if (IsMandatory) {
-      // Check if formValue is a string before trimming
       if (typeof formValue === "string" && formValue.trim() === "") {
-        addEmptyMandatoryField(`${path}.${Name}`);
+        addEmptyMandatoryField(formValueKey);
       } else if (
         formValue === undefined ||
         formValue === null ||
         formValue === ""
       ) {
-        // For other types, simply check if they are undefined, null, or empty
-        addEmptyMandatoryField(`${path}.${Name}`);
+        addEmptyMandatoryField(formValueKey);
       }
     }
-  }, [IsMandatory, formValues, Name, path, addEmptyMandatoryField]);
+  }, [
+    IsMandatory,
+    formValues,
+    formValueKey,
+    addEmptyMandatoryField,
+    formValue,
+  ]);
 
   const handleChange = (e) => {
     let value = e.target.value;
@@ -48,19 +60,19 @@ const InputForm = ({ property, path, indentLevel }) => {
       const numValue = parseFloat(value);
       if (MinMax.Min !== undefined && numValue < MinMax.Min) {
         setError(`Value must be greater than or equal to ${MinMax.Min}`);
-        addNotInRangeField(`${path}.${Name}`); // Add to notInRangeField if invalid
+        addNotInRangeField(formValueKey); // Add to notInRangeField if invalid
       } else if (MinMax.Max !== undefined && numValue > MinMax.Max) {
         setError(`Value must be less than or equal to ${MinMax.Max}`);
-        addNotInRangeField(`${path}.${Name}`); // Add to notInRangeField if invalid
+        addNotInRangeField(formValueKey); // Add to notInRangeField if invalid
       } else {
         // Clear any existing errors if the value is valid
         setError("");
-        removeNotInRangeField(`${path}.${Name}`); // Remove from notInRangeField if valid
+        removeNotInRangeField(formValueKey); // Remove from notInRangeField if valid
       }
     }
 
     // Update form values in Zustand
-    updateFormValues(`${path}.${Name}`, value);
+    updateFormValues(formValueKey, value);
   };
 
   return (
@@ -77,8 +89,8 @@ const InputForm = ({ property, path, indentLevel }) => {
 
       {/* Input field with fixed width */}
       <input
-        type={Type}
-        value={formValues[`${path}.${Name}`] || ""}
+        type={Type === "int" || Type === "double" ? "number" : "text"} // Use number type for int and double
+        value={formValue ?? ""} // Use formValues if it exists, otherwise default to an empty string
         onChange={handleChange}
         min={MinMax?.Min}
         max={MinMax?.Max}

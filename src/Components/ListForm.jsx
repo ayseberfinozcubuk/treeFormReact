@@ -66,8 +66,12 @@ const ListForm = ({ property, path, parentId, indentLevel }) => {
               <DynamicForm
                 key={i}
                 entityName={ListType}
-                path={`${path}.${Name}[${i}]`}
-                parentId={`${parentId}.${storeId}.${Name}[${i}]`}
+                path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`} // Conditionally concatenate path
+                parentId={
+                  parentId
+                    ? `${parentId}.${storeId}.${Name}[${i}]`
+                    : `${storeId}.${Name}[${i}]`
+                } // Conditionally concatenate parentId
                 indentLevel={indentLevel + 1}
               />
             ))}

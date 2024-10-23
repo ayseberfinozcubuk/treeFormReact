@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
 import axios from "axios";
@@ -11,6 +11,11 @@ const AddNewEntity = ({ rootEntity }) => {
   const [formKey, setFormKey] = useState(0);
   const [formStarted, setFormStarted] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+
+  // Reset formValues when the component is mounted or rootEntity changes
+  useEffect(() => {
+    resetFormValues(); // Reset the form values
+  }, [resetFormValues, rootEntity]); // Ensure this runs when the component is rendered
 
   const handleSubmit = () => {
     if (emptyMandatoryFields.length > 0) {

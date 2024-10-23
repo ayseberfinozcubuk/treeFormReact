@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // For navigation
 import { DataTable } from "primereact/datatable";
@@ -6,17 +6,22 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore"; // Use the new entity store
+import { useFormStore } from "../store/useFormStore"; // Import useFormStore
 
 const EntityListView = ({ rootEntity }) => {
   const { entities, entityIndexes, setEntities, selectEntity } =
     useEntityStore();
+  const { setFormValues } = useFormStore(); // Access setFormValues from useFormStore
   const navigate = useNavigate(); // For programmatic navigation
 
   useEffect(() => {
     // Fetch entities data from the API
     axios
       .get(`http://localhost:5000/api/${rootEntity}`)
-      .then((response) => setEntities(rootEntity, response.data)) // Store entities in Zustand
+      .then((response) => {
+        setEntities(rootEntity, response.data);
+        //console.log("response.data EntityListView useEffect: ", response.data);
+      }) // Store entities in Zustand
       .catch((error) =>
         console.error(`Error fetching ${rootEntity} list:`, error)
       );
@@ -27,11 +32,20 @@ const EntityListView = ({ rootEntity }) => {
     : [];
   const indexesList = entityIndexes[rootEntity] || []; // Get entity indexes
 
+  //console.log("entities EntityListView: ", entities);
+  //console.log("entitiesList EntityListView: ", entitiesList);
+
   // Navigate to EntityDetails page on row click
   const handleRowSelect = (e) => {
     const selected = e.value;
     const index = indexesList[entitiesList.indexOf(selected)]; // Find the correct index for the selected entity
     selectEntity(rootEntity, index); // Store selected entity in Zustand
+
+    //console.log("selected: ", selected);
+    // Set the selected entity values in formValues
+    setFormValues(selected);
+
+    // Navigate to the details page with the entity's index
     navigate(`/details/${index}`); // Use the index for navigation
   };
 
