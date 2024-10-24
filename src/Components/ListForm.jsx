@@ -10,7 +10,7 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
   const { Name, Label, ListType } = property;
   const [storeButtons, setStoreButtons] = useState([]);
   const [isClicked, setIsClicked] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Ref to track if handleAddListClick has already been triggered
   const effectExecutedRef = useRef(false); // Ref to track whether the effect has already run
