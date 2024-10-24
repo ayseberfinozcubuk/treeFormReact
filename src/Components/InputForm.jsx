@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useFormStore } from "../store/useFormStore";
 
-const InputForm = ({ property, path, indentLevel }) => {
+const InputForm = ({ property, path, indentLevel, isEditMode }) => {
   const {
     updateFormValues,
     formValues,
@@ -15,15 +15,8 @@ const InputForm = ({ property, path, indentLevel }) => {
   const formValueKey = path ? `${path}.${Name}` : Name; // Only add the dot if path is non-empty
   const formValue = formValues[formValueKey];
 
-  // console.log("Input form property: ", property);
-  // console.log("Form values in component aaaa:", formValues); // Log here to ensure it's being passed correctly
-  console.log("formValues: ", formValues);
-  console.log("formValueKey: ", formValueKey);
-  // console.log("name: ", Name);
+  // Check if the field is mandatory and ensure validation
   useEffect(() => {
-    // console.log(`form values inside input: ${formValues.emitterName}`);
-    console.log("Form values in component bbbb:", formValue); // Log here to ensure it's being passed correctly
-
     if (IsMandatory) {
       if (typeof formValue === "string" && formValue.trim() === "") {
         addEmptyMandatoryField(formValueKey);
@@ -35,13 +28,7 @@ const InputForm = ({ property, path, indentLevel }) => {
         addEmptyMandatoryField(formValueKey);
       }
     }
-  }, [
-    IsMandatory,
-    formValues,
-    formValueKey,
-    addEmptyMandatoryField,
-    formValue,
-  ]);
+  }, [IsMandatory, formValueKey, formValue, addEmptyMandatoryField]);
 
   const handleChange = (e) => {
     let value = e.target.value;
@@ -87,25 +74,29 @@ const InputForm = ({ property, path, indentLevel }) => {
         {IsMandatory && <span className="text-red-500 ml-1">*</span>}
       </label>
 
-      {/* Input field with fixed width */}
-      <input
-        type={Type === "int" || Type === "double" ? "number" : "text"} // Use number type for int and double
-        value={formValue ?? ""} // Use formValues if it exists, otherwise default to an empty string
-        onChange={handleChange}
-        min={MinMax?.Min}
-        max={MinMax?.Max}
-        required={IsMandatory}
-        className={`form-input border ${
-          error ? "border-red-500" : "border-gray-300"
-        } rounded-md p-2 w-64`} // Fixed width for input field
-      />
+      {/* Conditional rendering: Input field in edit mode, plain text in view mode */}
+      {isEditMode ? (
+        <input
+          type={Type === "int" || Type === "double" ? "number" : "text"}
+          value={formValue ?? ""} // Use formValues if it exists, otherwise default to an empty string
+          onChange={handleChange}
+          min={MinMax?.Min}
+          max={MinMax?.Max}
+          required={IsMandatory}
+          className={`form-input border ${
+            error ? "border-red-500" : "border-gray-300"
+          } rounded-md p-2 w-64`} // Fixed width for input field
+        />
+      ) : (
+        <span className="text-gray-900">{formValue ?? "-"}</span> // Show form value in view mode
+      )}
 
-      {/* Unit label */}
+      {/* Unit label if applicable */}
       {Unit && (
         <label className="form-label text-gray-700 font-medium">{Unit}</label>
       )}
 
-      {/* Error message */}
+      {/* Error message if validation fails */}
       {error && <p className="text-red-500 text-sm">{error}</p>}
     </div>
   );

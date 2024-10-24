@@ -10,6 +10,7 @@ const DynamicForm = ({
   parentId,
   indentLevel = 0,
   onRemove,
+  isEditMode,
 }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -60,6 +61,7 @@ const DynamicForm = ({
         property={property}
         path={path}
         indentLevel={indentLevel}
+        isEditMode={isEditMode}
       />
     );
   };
