@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import InputForm from "./InputForm";
 import ListForm from "./ListForm";
-import CancelButton from "./CancelButton";
+import DeleteButton from "./DeleteButton";
 import { useFormStore } from "../store/useFormStore";
 
 const DynamicForm = ({
@@ -33,7 +33,7 @@ const DynamicForm = ({
   if (loading) return <p>Loading form data...</p>;
   if (error) return <p>{error}</p>;
 
-  const handleCancel = () => {
+  const handleDelete = () => {
     removeFormSection(path);
     setIsVisible(false);
     onRemove && onRemove();
@@ -69,8 +69,8 @@ const DynamicForm = ({
 
   return (
     <div className="relative p-6 pt-12 border border-gray-200 rounded-md bg-white shadow-md">
-      <CancelButton
-        onClick={handleCancel}
+      <DeleteButton
+        onClick={handleDelete}
         className={`absolute ${
           !isEditMode ? "hidden" : "visible"
         } top-2 right-2`}

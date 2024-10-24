@@ -91,7 +91,7 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
           icon="pi pi-plus"
           onClick={handleAddListClick}
           disabled={isClicked}
-          className={`ml-2 ${!isEditMode ? "hidden" : ""}`} // Hide button if not in edit mode
+          className={`ml-2 ${!isEditMode ? "hidden" : "visible"}`} // Hide button if not in edit mode
         />
       </div>
 
