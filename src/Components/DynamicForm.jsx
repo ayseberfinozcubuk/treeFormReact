@@ -52,6 +52,7 @@ const DynamicForm = ({
           path={path}
           parentId={parentId}
           indentLevel={indentLevel}
+          isEditMode={isEditMode}
         />
       );
     }

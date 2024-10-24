@@ -129,6 +129,7 @@ const AddNewEntity = ({ rootEntity }) => {
               key={formKey}
               entityName={rootEntity}
               onRemove={handleRemoveForm}
+              isEditMode={true}
             />
           </div>
         )}
