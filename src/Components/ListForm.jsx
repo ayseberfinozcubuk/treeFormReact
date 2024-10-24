@@ -84,23 +84,26 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
         <div className="ml-2">
           <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
         </div>
+
+        {/* Add Tailwind CSS class to hide the button if not in edit mode */}
         <FormButton
           label={`${Label} Ekle`}
           icon="pi pi-plus"
           onClick={handleAddListClick}
           disabled={isClicked}
-          className="ml-2"
+          className={`ml-2 ${!isEditMode ? "hidden" : ""}`} // Hide button if not in edit mode
         />
       </div>
 
       <div className={isExpanded ? "visible" : "hidden"}>
         {storeButtons.map((storeId) => (
           <div key={storeId} style={{ marginTop: "10px" }}>
+            {/* Add Tailwind CSS class to hide the store button if not in edit mode */}
             <FormButton
               label={`${ListType} Ekle`}
               icon="pi pi-plus"
               onClick={() => handleAddStoreClick(storeId)}
-              className="ml-4 mb-4" // Added margin-below the button
+              className={`ml-4 mb-4 ${!isEditMode ? "hidden" : "visible"}`} // Hide button if not in edit mode
             />
             {subForms[`${parentId}.${storeId}`]?.[Name]?.map((formPath, i) => (
               <DynamicForm

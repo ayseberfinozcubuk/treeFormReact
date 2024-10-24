@@ -69,7 +69,12 @@ const DynamicForm = ({
 
   return (
     <div className="relative p-6 pt-12 border border-gray-200 rounded-md bg-white shadow-md">
-      <CancelButton onClick={handleCancel} className="absolute top-2 right-2" />
+      <CancelButton
+        onClick={handleCancel}
+        className={`absolute ${
+          !isEditMode ? "hidden" : "visible"
+        } top-2 right-2`}
+      />
       {data?.Properties.map(renderInput)}
     </div>
   );
