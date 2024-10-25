@@ -5,7 +5,6 @@ export const useFormStore = create((set) => ({
   formValues: {},
   initialFormValues: {}, // Store initial form values from backend
   formData: {}, // Store formData as a dictionary
-  subForms: {},
   emptyMandatoryFields: [], // Track mandatory fields that are empty
   notInRangeField: [], // Track fields that are not in the min-max range
 
@@ -98,18 +97,6 @@ export const useFormStore = create((set) => ({
       notInRangeField: state.notInRangeField.filter((field) => field !== key),
     })),
 
-  // Add sub-form
-  addSubForm: (key, path, formId) =>
-    set((state) => ({
-      subForms: {
-        ...state.subForms,
-        [formId]: {
-          ...state.subForms[formId],
-          [key]: [...(state.subForms[formId]?.[key] || []), path],
-        },
-      },
-    })),
-
   // Optimized removal of form section and its validation fields
   removeFormSection: (path) =>
     set((state) => {
@@ -177,7 +164,6 @@ export const useFormStore = create((set) => ({
     set(() => ({
       formValues: {},
       initialFormValues: {}, // Clear initial form values on reset
-      subForms: {},
       emptyMandatoryFields: [], // Clear empty fields on reset
       notInRangeField: [], // Clear range errors on reset
     })),

@@ -6,7 +6,7 @@ import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
 const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
-  const { subForms, formValues } = useFormStore();
+  const { formValues } = useFormStore();
   const { Name, Label, ListType } = property;
   const [storeButtons, setStoreButtons] = useState([]);
   const [isClicked, setIsClicked] = useState(false);
@@ -67,16 +67,13 @@ const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
   };
 
   const handleAddStoreClick = (storeId) => {
-    const { formData, addSubForm, subForms } = useFormStore.getState();
+    const { formData } = useFormStore.getState();
     const subFormData = formData[ListType];
 
     if (!subFormData) {
       console.error(`No data found for ListType: ${ListType}`);
       return;
     }
-    addSubForm(Name, subFormData, `${entityId}.${storeId}`);
-    console.log("subForms: ", subForms);
-    console.log("subFormData: ", subFormData);
   };
 
   return (
@@ -107,16 +104,12 @@ const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
               onClick={() => handleAddStoreClick(storeId)}
               className={`ml-4 mb-4 ${!isEditMode ? "hidden" : "visible"}`} // Hide button if not in edit mode
             />
-            {subForms[`${entityId}.${storeId}`]?.[Name]?.map((formPath, i) => (
+            {subForms[`${entityId}.${storeId}`]?.map((formPath, i) => (
               <DynamicForm
                 key={i}
                 entityName={ListType}
                 path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`} // Conditionally concatenate path
-                parentId={
-                  entityId
-                    ? `${entityId}.${storeId}.${Name}[${i}]`
-                    : `${storeId}.${Name}[${i}]`
-                } // Conditionally concatenate parentId
+                parentId={entityId} // Conditionally concatenate parentId
                 indentLevel={indentLevel + 1}
                 isEditMode={isEditMode}
               />
