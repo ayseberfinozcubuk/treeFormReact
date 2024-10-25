@@ -21,6 +21,7 @@ export const useFormStore = create((set) => ({
       acc[item.EntityName] = item;
       return acc;
     }, {});
+    console.log("dataDict: ", dataDict);
     set(() => ({ formData: dataDict })); // Store the data as a dictionary
   },
 

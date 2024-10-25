@@ -5,7 +5,7 @@ import DynamicForm from "./DynamicForm";
 import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
-const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
+const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
   const { subForms, formValues } = useFormStore();
   const { Name, Label, ListType } = property;
   const [storeButtons, setStoreButtons] = useState([]);
@@ -74,7 +74,7 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
       console.error(`No data found for ListType: ${ListType}`);
       return;
     }
-    addSubForm(Name, subFormData, `${parentId}.${storeId}`);
+    addSubForm(Name, subFormData, `${entityId}.${storeId}`);
     console.log("subForms: ", subForms);
     console.log("subFormData: ", subFormData);
   };
@@ -107,14 +107,14 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
               onClick={() => handleAddStoreClick(storeId)}
               className={`ml-4 mb-4 ${!isEditMode ? "hidden" : "visible"}`} // Hide button if not in edit mode
             />
-            {subForms[`${parentId}.${storeId}`]?.[Name]?.map((formPath, i) => (
+            {subForms[`${entityId}.${storeId}`]?.[Name]?.map((formPath, i) => (
               <DynamicForm
                 key={i}
                 entityName={ListType}
                 path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`} // Conditionally concatenate path
                 parentId={
-                  parentId
-                    ? `${parentId}.${storeId}.${Name}[${i}]`
+                  entityId
+                    ? `${entityId}.${storeId}.${Name}[${i}]`
                     : `${storeId}.${Name}[${i}]`
                 } // Conditionally concatenate parentId
                 indentLevel={indentLevel + 1}

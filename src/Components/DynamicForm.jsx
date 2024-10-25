@@ -16,11 +16,12 @@ const DynamicForm = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
+  const [entityId, setEntityId] = useState(null);
 
   const { formData, removeFormSection, addIdValue } = useFormStore();
 
   useEffect(() => {
-    addIdValue(path);
+    setEntityId(addIdValue(path));
   }, []);
 
   useEffect(() => {
@@ -54,7 +55,7 @@ const DynamicForm = ({
           key={property.Name}
           property={property}
           path={path}
-          parentId={parentId}
+          entityId={entityId}
           indentLevel={indentLevel}
           isEditMode={isEditMode}
         />
