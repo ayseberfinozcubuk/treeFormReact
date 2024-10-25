@@ -67,7 +67,7 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
   };
 
   const handleAddStoreClick = (storeId) => {
-    const { formData, addSubForm } = useFormStore.getState();
+    const { formData, addSubForm, subForms } = useFormStore.getState();
     const subFormData = formData[ListType];
 
     if (!subFormData) {
@@ -75,6 +75,8 @@ const ListForm = ({ property, path, parentId, indentLevel, isEditMode }) => {
       return;
     }
     addSubForm(Name, subFormData, `${parentId}.${storeId}`);
+    console.log("subForms: ", subForms);
+    console.log("subFormData: ", subFormData);
   };
 
   return (

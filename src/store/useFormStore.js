@@ -1,11 +1,19 @@
 import { create } from "zustand";
+import { v4 as uuidv4 } from "uuid";
 
 export const useFormStore = create((set) => ({
   formValues: {},
+  initialFormValues: {}, // Store initial form values from backend
   formData: {}, // Store formData as a dictionary
   subForms: {},
   emptyMandatoryFields: [], // Track mandatory fields that are empty
   notInRangeField: [], // Track fields that are not in the min-max range
+
+  // Set the initial form values from the backend
+  setInitialFormValues: (values) =>
+    set(() => ({
+      initialFormValues: values, // Save the initial form values
+    })),
 
   // Set the form data in the store
   setFormData: (dataArray) => {
@@ -53,6 +61,23 @@ export const useFormStore = create((set) => ({
 
       return { formValues: updatedFormValues };
     }),
+
+  // Add ID value to formValues if not present
+  addIdValue: (path) => {
+    set((state) => {
+      const formValueKey = path ? `${path}.Id` : "Id"; // Determine the key path for ID
+      if (!state.formValues[formValueKey]) {
+        console.log("addedId");
+        return {
+          formValues: {
+            ...state.formValues,
+            [formValueKey]: uuidv4(), // Assign a new UUID if no ID exists
+          },
+        };
+      }
+      return {}; // Return empty if ID already exists
+    });
+  },
 
   // Track required fields that are initially empty
   addEmptyMandatoryField: (key) =>
@@ -150,6 +175,7 @@ export const useFormStore = create((set) => ({
   resetFormValues: () =>
     set(() => ({
       formValues: {},
+      initialFormValues: {}, // Clear initial form values on reset
       subForms: {},
       emptyMandatoryFields: [], // Clear empty fields on reset
       notInRangeField: [], // Clear range errors on reset

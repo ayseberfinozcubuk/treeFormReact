@@ -17,7 +17,11 @@ const DynamicForm = ({
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
 
-  const { formData, removeFormSection } = useFormStore();
+  const { formData, removeFormSection, addIdValue } = useFormStore();
+
+  useEffect(() => {
+    addIdValue(path);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -56,15 +60,19 @@ const DynamicForm = ({
         />
       );
     }
-    return (
-      <InputForm
-        key={property.Name}
-        property={property}
-        path={path}
-        indentLevel={indentLevel}
-        isEditMode={isEditMode}
-      />
-    );
+
+    // Check for Guid type and apply the rules
+    if (property.Type !== "Guid") {
+      return (
+        <InputForm
+          key={property.Name}
+          property={property}
+          path={path}
+          indentLevel={indentLevel}
+          isEditMode={isEditMode}
+        />
+      );
+    }
   };
 
   return (
