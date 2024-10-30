@@ -65,17 +65,18 @@ export const useFormStore = create((set) => ({
   // Add ID value to formValues if not present
   addIdValue: (path) => {
     set((state) => {
-      const formValueKey = path ? `${path}.Id` : "Id"; // Determine the key path for ID
+      const formValueKey = path ? `${path}.Id` : "Id";
+      // Only set a new ID if one doesn't exist at formValueKey
       if (!state.formValues[formValueKey]) {
-        console.log("addedId");
+        console.log("Adding new ID");
         return {
           formValues: {
             ...state.formValues,
-            [formValueKey]: uuidv4(), // Assign a new UUID if no ID exists
+            [formValueKey]: uuidv4(),
           },
         };
       }
-      return {}; // Return empty if ID already exists
+      return {}; // No update if ID already exists
     });
   },
 

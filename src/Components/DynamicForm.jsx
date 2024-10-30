@@ -28,7 +28,6 @@ const DynamicForm = ({
     const entity = formData[entityName];
     if (entity) {
       setData(entity);
-      console.log("entity: ", entity);
     } else {
       setError("Entity not found.");
     }

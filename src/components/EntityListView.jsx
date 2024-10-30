@@ -1,27 +1,25 @@
 import React, { useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { useEntityStore } from "../store/useEntityStore"; // Use the new entity store
-import { useFormStore } from "../store/useFormStore"; // Import useFormStore
+import { useEntityStore } from "../store/useEntityStore";
+import { useFormStore } from "../store/useFormStore";
 
 const EntityListView = ({ rootEntity }) => {
   const { entities, entityIndexes, setEntities, selectEntity } =
     useEntityStore();
-  const { setFormValues } = useFormStore(); // Access setFormValues from useFormStore
-  const navigate = useNavigate(); // For programmatic navigation
+  const { setFormValues } = useFormStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch entities data from the API
     axios
       .get(`http://localhost:5000/api/${rootEntity}`)
       .then((response) => {
         setEntities(rootEntity, response.data);
-        //console.log("response.data EntityListView useEffect: ", response.data);
-      }) // Store entities in Zustand
+      })
       .catch((error) =>
         console.error(`Error fetching ${rootEntity} list:`, error)
       );
@@ -30,39 +28,26 @@ const EntityListView = ({ rootEntity }) => {
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
     : [];
-  const indexesList = entityIndexes[rootEntity] || []; // Get entity indexes
+  const indexesList = entityIndexes[rootEntity] || [];
 
-  //console.log("entities EntityListView: ", entities);
-  //console.log("entitiesList EntityListView: ", entitiesList);
-
-  // Navigate to EntityDetails page on row click
   const handleRowSelect = (e) => {
     const selected = e.value;
-    const index = indexesList[entitiesList.indexOf(selected)]; // Find the correct index for the selected entity
-    selectEntity(rootEntity, index); // Store selected entity in Zustand
-
-    console.log("selected: ", selected);
-    // Set the selected entity values in formValues
-    setFormValues(selected);
-
-    // Navigate to the details page with the entity's index
-    navigate(`/details/${index}`); // Use the index for navigation
+    const index = indexesList[entitiesList.indexOf(selected)];
+    selectEntity(rootEntity, index);
+    setFormValues(selected); // Store the selected entity’s data into formValues
+    navigate(`/details/${index}`);
   };
 
-  // Function to determine the keys (column names) dynamically
-  const getColumns = (data) => {
-    if (!data || data.length === 0) return [];
-    return Object.keys(data[0]); // Get keys from the first object as column names
-  };
+  const getColumns = (data) =>
+    data && data.length > 0 ? Object.keys(data[0]) : [];
 
-  // Helper function to render objects or arrays correctly
   const renderValue = (value) => {
     if (Array.isArray(value)) {
-      return `[Array of ${value.length} items]`; // Display array length or map over it
+      return `[Array of ${value.length} items]`;
     } else if (typeof value === "object" && value !== null) {
-      return JSON.stringify(value); // Convert object to a string for display
+      return JSON.stringify(value);
     } else {
-      return value; // Render other primitive types as they are
+      return value;
     }
   };
 
@@ -81,22 +66,20 @@ const EntityListView = ({ rootEntity }) => {
               onClick={() => navigate("/add-entity")}
             />
           </div>
-
           <DataTable
-            value={entitiesList} // Use entities from Zustand without showing indexes
+            value={entitiesList}
             selectionMode="single"
             onSelectionChange={handleRowSelect}
             tableStyle={{ minWidth: "50rem" }}
             className="p-datatable-gridlines p-datatable-striped p-datatable-responsive"
           >
-            {/* Ensure each column has a stable and unique key */}
             {entitiesList.length > 0 &&
               getColumns(entitiesList).map((col) => (
                 <Column
-                  key={col} // Use column name or field as key
+                  key={col}
                   field={col}
-                  header={col.charAt(0).toUpperCase() + col.slice(1)} // Capitalize header
-                  body={(rowData) => renderValue(rowData[col])} // Handle object/array rendering
+                  header={col.charAt(0).toUpperCase() + col.slice(1)}
+                  body={(rowData) => renderValue(rowData[col])}
                   sortable
                 />
               ))}

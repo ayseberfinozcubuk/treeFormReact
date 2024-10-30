@@ -3,8 +3,8 @@ import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
 import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
-import { useEntityStore } from "../store/useEntityStore"; // Import useEntityStore
-import { InputSwitch } from "primereact/inputswitch"; // Import PrimeReact's InputSwitch
+import { useEntityStore } from "../store/useEntityStore";
+import { InputSwitch } from "primereact/inputswitch";
 
 const EntityDetails = ({ rootEntity }) => {
   const {
@@ -15,16 +15,13 @@ const EntityDetails = ({ rootEntity }) => {
     notInRangeField,
   } = useFormStore();
 
-  const { selectedEntity } = useEntityStore(); // Get the selected entity from useEntityStore
+  const { selectedEntity } = useEntityStore();
   const [formKey, setFormKey] = useState(0);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // State to track view or edit mode (default is view mode, hence false)
-  const [isEditMode, setIsEditMode] = useState(false); // Default to view mode
-
-  // Initialize form values from useEntityStore when component mounts
   useEffect(() => {
     if (selectedEntity) {
-      console.log(`EntityDetails form values: ${formValues.EmitterName}`);
+      setFormValues(selectedEntity);
     }
   }, [selectedEntity, setFormValues]);
 
@@ -41,7 +38,6 @@ const EntityDetails = ({ rootEntity }) => {
 
     const convertToNestedJson = (formValues) => {
       const result = {};
-
       Object.keys(formValues).forEach((key) => {
         const value = formValues[key];
         const keys = key.split(".").filter(Boolean);
@@ -76,19 +72,17 @@ const EntityDetails = ({ rootEntity }) => {
 
     const structuredJson = convertToNestedJson(formValues);
 
-    // Log the structured JSON to verify
-    console.log(
-      "Structured Form Values as JSON: ",
-      JSON.stringify(structuredJson, null, 2)
-    );
-
+    // PUT request with the entity's existing ID
     axios
-      .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)
+      .put(
+        `http://localhost:5000/api/${rootEntity}/${selectedEntity?.Id}`,
+        structuredJson
+      )
       .then((response) => {
-        console.log(response.data);
+        console.log("Update successful:", response.data);
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Update error:", error);
       });
 
     resetForm();
@@ -99,22 +93,16 @@ const EntityDetails = ({ rootEntity }) => {
     setFormKey((prevKey) => prevKey + 1);
   };
 
-  const handleRemoveForm = () => {
-    resetFormValues();
-  };
-
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
         {isEditMode ? "Edit Entity" : "View Entity"}
       </h1>
-
       <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">
         <div className="mb-4 flex items-center">
           <label className="form-label text-gray-700 font-medium">
             {rootEntity}
           </label>
-          {/* Use PrimeReact InputSwitch to toggle between Edit/View mode */}
           <InputSwitch
             checked={isEditMode}
             onChange={(e) => setIsEditMode(e.value)}
@@ -123,20 +111,19 @@ const EntityDetails = ({ rootEntity }) => {
           <span className="ml-2">{isEditMode ? "Edit Mode" : "View Mode"}</span>
         </div>
 
-        {/* Render form in view or edit mode based on isEditMode state */}
         <div>
           <DynamicForm
             key={formKey}
             entityName={rootEntity}
-            onRemove={handleRemoveForm}
-            isEditMode={isEditMode} // Pass the mode to DynamicForm
+            onRemove={resetFormValues}
+            isEditMode={isEditMode}
           />
         </div>
 
         {isEditMode && (
           <div className="mt-6">
             <FormButton
-              label="Submit"
+              label="Update Entity"
               icon="pi pi-check"
               onClick={handleSubmit}
               className="bg-blue-500 text-white"
