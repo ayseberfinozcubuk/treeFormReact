@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import InputForm from "./InputForm";
 import ListForm from "./ListForm";
 import DeleteButton from "./DeleteButton";
+import CancelButton from "./CancelButton"; // Import the new CancelButton
 import { useFormStore } from "../store/useFormStore";
+import { getNestedValue } from "../utils/utils.js"; // Adjust path if utils.js is in a different folder
 
 const DynamicForm = ({
   entityName,
@@ -17,10 +19,18 @@ const DynamicForm = ({
   const [isVisible, setIsVisible] = useState(true);
   const [entityId, setEntityId] = useState(null);
 
-  const { formData, removeFormSection, addIdValue } = useFormStore();
+  const {
+    formData,
+    formValues,
+    initialFormValues,
+    removeFormSection,
+    addIdValue,
+    resetToInitialValues,
+  } = useFormStore();
 
   useEffect(() => {
     setEntityId(addIdValue(path));
+    console.log("path id set for: ", path);
   }, []);
 
   useEffect(() => {
@@ -34,10 +44,7 @@ const DynamicForm = ({
     setLoading(false);
   }, [entityName, formData]);
 
-  if (loading) return <p>Loading form data...</p>;
-  if (error) return <p>{error}</p>;
-
-  const handleDelete = () => {
+  const handleDelete = (path = path) => {
     removeFormSection(path);
     setIsVisible(false);
     onRemove && onRemove();
@@ -61,7 +68,6 @@ const DynamicForm = ({
       );
     }
 
-    // Check for Guid type and apply the rules
     if (property.Type !== "Guid") {
       return (
         <InputForm

@@ -4,6 +4,9 @@ import EntityListView from "./components/EntityListView";
 import AddNewEntity from "./components/AddNewEntity";
 import EntityDetails from "./components/EntityDetails"; // Import the new details component
 import { useFormStore } from "./store/useFormStore"; // Import Zustand store
+import "primereact/resources/themes/saga-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
 
 const App = () => {
   const { setFormData } = useFormStore(); // Zustand store action to set form data

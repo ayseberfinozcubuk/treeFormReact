@@ -14,15 +14,8 @@ export const updateNestedValues = (formValues, path, propertyName, value) => {
   return updatedValues;
 };
 
-export const getNestedValue = (formValues, path, propertyName) => {
-  if (!path) return formValues[propertyName] || "";
-  const paths = path.split(".");
-  let current = formValues;
-
-  for (const p of paths) {
-    current = current[p];
-    if (!current) return ""; // If not found, return an empty string
-  }
-
-  return current[propertyName] || ""; // Return the found value or empty string
+export const getNestedValue = (initialFormValues, fullPath) => {
+  return initialFormValues.hasOwnProperty(fullPath)
+    ? initialFormValues[fullPath]
+    : undefined;
 };

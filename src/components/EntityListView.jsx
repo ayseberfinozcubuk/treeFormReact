@@ -38,6 +38,39 @@ const EntityListView = ({ rootEntity }) => {
     navigate(`/details/${index}`);
   };
 
+  const handleDelete = (id) => {
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete ${rootEntity} with id: ${id}?`
+    );
+
+    if (isConfirmed) {
+      axios
+        .delete(`http://localhost:5000/api/${rootEntity}/${id}`)
+        .then(() => {
+          // Refresh entities after deletion
+          setEntities(
+            rootEntity,
+            entitiesList.filter((entity) => entity.Id !== id)
+          );
+        })
+        .catch((error) =>
+          console.error(`Error deleting ${rootEntity} with ID ${id}:`, error)
+        );
+    }
+  };
+
+  const renderDeleteButton = (rowData) => {
+    return (
+      <Button
+        icon="pi pi-trash"
+        className="p-button-danger p-button-text"
+        onClick={() => handleDelete(rowData.Id)}
+        tooltip="Delete"
+        tooltipOptions={{ position: "top" }}
+      />
+    );
+  };
+
   const getColumns = (data) =>
     data && data.length > 0 ? Object.keys(data[0]) : [];
 
@@ -83,6 +116,12 @@ const EntityListView = ({ rootEntity }) => {
                   sortable
                 />
               ))}
+            {/* Add the delete column */}
+            <Column
+              body={renderDeleteButton}
+              headerStyle={{ width: "4rem", textAlign: "center" }}
+              bodyStyle={{ textAlign: "center", overflow: "visible" }}
+            />
           </DataTable>
         </Card>
       </div>

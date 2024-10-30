@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
+import CancelButton from "./CancelButton"; // Add CancelButton here
 import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
 import { useEntityStore } from "../store/useEntityStore";
 import { InputSwitch } from "primereact/inputswitch";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 
 const EntityDetails = ({ rootEntity }) => {
   const {
@@ -14,11 +15,13 @@ const EntityDetails = ({ rootEntity }) => {
     resetFormValues,
     emptyMandatoryFields,
     notInRangeField,
+    resetFormValuesToInitial,
   } = useFormStore();
   const { selectedEntity } = useEntityStore();
   const [isEditMode, setIsEditMode] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
+  // Load selected entity into formValues when component mounts or selectedEntity changes
   useEffect(() => {
     if (selectedEntity) {
       setFormValues(selectedEntity);
@@ -87,6 +90,11 @@ const EntityDetails = ({ rootEntity }) => {
     return result;
   };
 
+  const handleCancelChanges = () => {
+    alert("Changes will be cancelled!");
+    navigate("/"); // Redirect back to main list view after update
+  };
+
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
@@ -108,12 +116,18 @@ const EntityDetails = ({ rootEntity }) => {
         <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
 
         {isEditMode && (
-          <FormButton
-            label="Update Entity"
-            icon="pi pi-check"
-            onClick={handleSubmit}
-            className="bg-blue-500 text-white"
-          />
+          <>
+            <FormButton
+              label="Update Entity"
+              icon="pi pi-check"
+              onClick={handleSubmit}
+              className="bg-blue-500 text-white"
+            />
+            <CancelButton
+              onClick={handleCancelChanges} // Call handleCancelChanges when clicked
+              className="bg-gray-500 text-white ml-4"
+            />
+          </>
         )}
       </div>
     </div>
