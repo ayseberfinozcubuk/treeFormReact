@@ -41,7 +41,7 @@ const EntityListView = ({ rootEntity }) => {
     const index = indexesList[entitiesList.indexOf(selected)]; // Find the correct index for the selected entity
     selectEntity(rootEntity, index); // Store selected entity in Zustand
 
-    //console.log("selected: ", selected);
+    console.log("selected: ", selected);
     // Set the selected entity values in formValues
     setFormValues(selected);
 

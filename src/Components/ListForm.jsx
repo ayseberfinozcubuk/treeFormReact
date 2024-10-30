@@ -8,40 +8,35 @@ import { v4 as uuidv4 } from "uuid";
 const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
   const { formValues } = useFormStore();
   const { Name, Label, ListType } = property;
-  const [storeButtons, setStoreButtons] = useState([]);
-  const [isClicked, setIsClicked] = useState(false);
+  const [storeForms, setStoreForms] = useState([]); // Array to store unique DynamicForm instances
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // Ref to track if handleAddListClick has already been triggered
-  const effectExecutedRef = useRef(false); // Ref to track whether the effect has already run
+  const effectExecutedRef = useRef(false); // Track if useEffect has run
 
   useEffect(() => {
     const keyPrefix = `${path}.${Name}`.replace(/^\./, ""); // Remove leading dot if present
     const arrayLength = getArrayLength(keyPrefix); // Get the number of array elements
 
-    // If the effect has already run, exit early
-    if (effectExecutedRef.current) {
-      return;
-    }
+    // Prevent repeated execution if effect has already run
+    if (effectExecutedRef.current) return;
 
-    // If not in edit mode and there are existing elements in formValues
-    if (!isEditMode && arrayLength > 0 && !isClicked) {
-      const newId = uuidv4();
-      setStoreButtons((prevState) => [...prevState, newId]);
-      // Automatically simulate the store button clicks for each existing entry
-      for (let i = 0; i < arrayLength; i++) {
-        handleAddStoreClick(newId); // Call handleAddStoreClick with the new storeId
-      }
-      setIsClicked(true); // Mark as clicked to prevent further automatic clicks
-      effectExecutedRef.current = true; // Set the ref to indicate that the effect has run
-    }
-  }, [isEditMode, formValues, path, Name, isClicked]);
+    // Populate initial storeForms based on array length if we are in view mode
+    if (!isEditMode && arrayLength > 0) {
+      const initialForms = Array.from({ length: arrayLength }).map(
+        (_, index) => {
+          const storeId = uuidv4(); // Generate a unique ID for each form
+          const uniqueFormPath = `${keyPrefix}[${index}]`; // Consistent path with formValues keys
+          return { id: storeId, path: uniqueFormPath, key: storeId };
+        }
+      );
 
-  // Helper function to determine the number of array elements (e.g., Modes[0], Modes[1], etc.)
+      setStoreForms(initialForms); // Set initial forms with paths aligned to formValues
+      effectExecutedRef.current = true;
+    }
+  }, [isEditMode, formValues, path, Name]);
+
+  // Helper function to determine the number of array elements in formValues
   const getArrayLength = (keyPrefix) => {
     let count = 0;
-
-    // Loop until formValues has no key that matches the pattern `${keyPrefix}[${count}]`
     while (
       Object.keys(formValues).some((key) =>
         key.startsWith(`${keyPrefix}[${count}]`)
@@ -60,20 +55,16 @@ const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
     if (!isExpanded) {
       handleToggle();
     }
-
-    const newId = uuidv4();
-    setStoreButtons((prevState) => [...prevState, newId]);
-    setIsClicked(true);
+    handleAddStoreClick(); // Trigger adding a new store form entry
   };
 
-  const handleAddStoreClick = (storeId) => {
-    const { formData } = useFormStore.getState();
-    const subFormData = formData[ListType];
-
-    if (!subFormData) {
-      console.error(`No data found for ListType: ${ListType}`);
-      return;
-    }
+  const handleAddStoreClick = () => {
+    const storeId = uuidv4();
+    const uniqueFormPath = `${path}.${Name}[${storeForms.length}]`; // Path based on existing count in storeForms
+    setStoreForms((prevForms) => [
+      ...prevForms,
+      { id: storeId, path: uniqueFormPath, key: storeId },
+    ]);
   };
 
   return (
@@ -83,37 +74,26 @@ const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
         <div className="ml-2">
           <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
         </div>
-
-        {/* Add Tailwind CSS class to hide the button if not in edit mode */}
+        {/* Only show add button in edit mode */}
         <FormButton
           label={`${Label} Ekle`}
           icon="pi pi-plus"
           onClick={handleAddListClick}
-          disabled={isClicked}
-          className={`ml-2 ${!isEditMode ? "hidden" : "visible"}`} // Hide button if not in edit mode
+          className={`ml-2 ${!isEditMode ? "hidden" : "visible"}`}
         />
       </div>
 
       <div className={isExpanded ? "visible" : "hidden"}>
-        {storeButtons.map((storeId) => (
-          <div key={storeId} style={{ marginTop: "10px" }}>
-            {/* Add Tailwind CSS class to hide the store button if not in edit mode */}
-            <FormButton
-              label={`${ListType} Ekle`}
-              icon="pi pi-plus"
-              onClick={() => handleAddStoreClick(storeId)}
-              className={`ml-4 mb-4 ${!isEditMode ? "hidden" : "visible"}`} // Hide button if not in edit mode
+        {/* Render each DynamicForm instance from storeForms */}
+        {storeForms.map((form, index) => (
+          <div key={form.key} style={{ marginTop: "10px" }}>
+            <DynamicForm
+              entityName={ListType}
+              path={form.path} // Use unique path for each instance
+              parentId={entityId}
+              indentLevel={indentLevel + 1}
+              isEditMode={isEditMode}
             />
-            {subForms[`${entityId}.${storeId}`]?.map((formPath, i) => (
-              <DynamicForm
-                key={i}
-                entityName={ListType}
-                path={path ? `${path}.${Name}[${i}]` : `${Name}[${i}]`} // Conditionally concatenate path
-                parentId={entityId} // Conditionally concatenate parentId
-                indentLevel={indentLevel + 1}
-                isEditMode={isEditMode}
-              />
-            ))}
           </div>
         ))}
       </div>

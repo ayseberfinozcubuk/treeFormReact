@@ -7,7 +7,6 @@ import { useFormStore } from "../store/useFormStore";
 const DynamicForm = ({
   entityName,
   path = "",
-  parentId,
   indentLevel = 0,
   onRemove,
   isEditMode,
@@ -29,6 +28,7 @@ const DynamicForm = ({
     const entity = formData[entityName];
     if (entity) {
       setData(entity);
+      console.log("entity: ", entity);
     } else {
       setError("Entity not found.");
     }
