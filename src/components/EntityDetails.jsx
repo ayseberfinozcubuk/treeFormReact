@@ -5,6 +5,7 @@ import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
 import { useEntityStore } from "../store/useEntityStore";
 import { InputSwitch } from "primereact/inputswitch";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const EntityDetails = ({ rootEntity }) => {
   const {
@@ -14,10 +15,9 @@ const EntityDetails = ({ rootEntity }) => {
     emptyMandatoryFields,
     notInRangeField,
   } = useFormStore();
-
   const { selectedEntity } = useEntityStore();
-  const [formKey, setFormKey] = useState(0);
   const [isEditMode, setIsEditMode] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate
 
   useEffect(() => {
     if (selectedEntity) {
@@ -25,7 +25,7 @@ const EntityDetails = ({ rootEntity }) => {
     }
   }, [selectedEntity, setFormValues]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const missingRequiredFields = emptyMandatoryFields.filter(
       (field) => formValues[field] === "" || formValues[field] === null
     );
@@ -40,61 +40,51 @@ const EntityDetails = ({ rootEntity }) => {
       return;
     }
 
-    const convertToNestedJson = (formValues) => {
-      const result = {};
-      Object.keys(formValues).forEach((key) => {
-        const value = formValues[key];
-        const keys = key.split(".").filter(Boolean);
-
-        keys.reduce((acc, currKey, idx) => {
-          const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
-          if (arrayMatch) {
-            const arrayKey = arrayMatch[1];
-            const arrayIndex = parseInt(arrayMatch[2], 10);
-
-            acc[arrayKey] = acc[arrayKey] || [];
-            acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
-
-            if (idx === keys.length - 1) {
-              acc[arrayKey][arrayIndex] = value;
-            }
-
-            return acc[arrayKey][arrayIndex];
-          } else {
-            if (idx === keys.length - 1) {
-              acc[currKey] = value;
-            } else {
-              acc[currKey] = acc[currKey] || {};
-            }
-            return acc[currKey];
-          }
-        }, result);
-      });
-
-      return result;
-    };
-
     const structuredJson = convertToNestedJson(formValues);
 
-    // PUT request with the entity's existing ID
-    axios
-      .put(
+    try {
+      await axios.put(
         `http://localhost:5000/api/${rootEntity}/${selectedEntity?.Id}`,
         structuredJson
-      )
-      .then((response) => {
-        console.log("Update successful:", response.data);
-      })
-      .catch((error) => {
-        console.error("Update error:", error);
-      });
-
-    resetForm();
+      );
+      alert("Entity updated successfully!");
+      navigate("/"); // Redirect back to main list view after update
+    } catch (error) {
+      console.error("Update error:", error);
+    }
   };
 
-  const resetForm = () => {
-    resetFormValues();
-    setFormKey((prevKey) => prevKey + 1);
+  const convertToNestedJson = (formValues) => {
+    const result = {};
+    Object.keys(formValues).forEach((key) => {
+      const value = formValues[key];
+      const keys = key.split(".").filter(Boolean);
+
+      keys.reduce((acc, currKey, idx) => {
+        const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
+        if (arrayMatch) {
+          const arrayKey = arrayMatch[1];
+          const arrayIndex = parseInt(arrayMatch[2], 10);
+
+          acc[arrayKey] = acc[arrayKey] || [];
+          acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
+
+          if (idx === keys.length - 1) {
+            acc[arrayKey][arrayIndex] = value;
+          }
+          return acc[arrayKey][arrayIndex];
+        } else {
+          if (idx === keys.length - 1) {
+            acc[currKey] = value;
+          } else {
+            acc[currKey] = acc[currKey] || {};
+          }
+          return acc[currKey];
+        }
+      }, result);
+    });
+
+    return result;
   };
 
   return (
@@ -115,24 +105,15 @@ const EntityDetails = ({ rootEntity }) => {
           <span className="ml-2">{isEditMode ? "Edit Mode" : "View Mode"}</span>
         </div>
 
-        <div>
-          <DynamicForm
-            key={formKey}
-            entityName={rootEntity}
-            onRemove={resetFormValues}
-            isEditMode={isEditMode}
-          />
-        </div>
+        <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
 
         {isEditMode && (
-          <div className="mt-6">
-            <FormButton
-              label="Update Entity"
-              icon="pi pi-check"
-              onClick={handleSubmit}
-              className="bg-blue-500 text-white"
-            />
-          </div>
+          <FormButton
+            label="Update Entity"
+            icon="pi pi-check"
+            onClick={handleSubmit}
+            className="bg-blue-500 text-white"
+          />
         )}
       </div>
     </div>
