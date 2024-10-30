@@ -26,7 +26,11 @@ const EntityDetails = ({ rootEntity }) => {
   }, [selectedEntity, setFormValues]);
 
   const handleSubmit = () => {
-    if (emptyMandatoryFields.length > 0) {
+    const missingRequiredFields = emptyMandatoryFields.filter(
+      (field) => formValues[field] === "" || formValues[field] === null
+    );
+
+    if (missingRequiredFields.length > 0) {
       alert("Please fill in all required fields before submitting.");
       return;
     }

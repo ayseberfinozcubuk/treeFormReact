@@ -33,13 +33,18 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
   const handleChange = (e) => {
     let value = e.target.value;
 
-    // If the type is int, convert to integer
-    if (Type === "int") {
-      value = parseInt(value, 10);
-    }
-    // If the type is double, convert to float
-    else if (Type === "double") {
-      value = parseFloat(value);
+    // If the field is empty, set it to null
+    if (value === "") {
+      value = null;
+    } else {
+      // If the type is int, convert to integer
+      if (Type === "int") {
+        value = parseInt(value, 10);
+      }
+      // If the type is double, convert to float
+      else if (Type === "double") {
+        value = parseFloat(value);
+      }
     }
 
     // Validate against min and max values
@@ -47,14 +52,13 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
       const numValue = parseFloat(value);
       if (MinMax.Min !== undefined && numValue < MinMax.Min) {
         setError(`Value must be greater than or equal to ${MinMax.Min}`);
-        addNotInRangeField(formValueKey); // Add to notInRangeField if invalid
+        addNotInRangeField(formValueKey);
       } else if (MinMax.Max !== undefined && numValue > MinMax.Max) {
         setError(`Value must be less than or equal to ${MinMax.Max}`);
-        addNotInRangeField(formValueKey); // Add to notInRangeField if invalid
+        addNotInRangeField(formValueKey);
       } else {
-        // Clear any existing errors if the value is valid
         setError("");
-        removeNotInRangeField(formValueKey); // Remove from notInRangeField if valid
+        removeNotInRangeField(formValueKey);
       }
     }
 

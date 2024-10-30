@@ -18,6 +18,11 @@ const AddNewEntity = ({ rootEntity }) => {
   }, [resetFormValues, rootEntity]); // Ensure this runs when the component is rendered
 
   const handleSubmit = () => {
+    if (!formStarted) {
+      alert("Please start the form before submitting.");
+      return;
+    }
+
     if (emptyMandatoryFields.length > 0) {
       alert("Please fill in all required fields before submitting.");
       return;
@@ -76,10 +81,11 @@ const AddNewEntity = ({ rootEntity }) => {
     axios
       .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)
       .then((response) => {
-        console.log(response.data);
+        console.log("Entity created successfully:", response.data);
+        resetForm(); // Reset form only after successful submission
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Error submitting entity:", error);
       });
 
     resetForm();
