@@ -8,22 +8,17 @@ const FormButton = ({
   onClick,
   disabled = false, // Default parameter for disabled
   className = "", // Default parameter for className
+  style = {}, // Optional style prop to further customize
 }) => {
   return (
     <Button
-      label={label}
-      icon={icon}
+      icon={icon} // Display only the icon
       onClick={onClick}
       disabled={disabled}
-      className={`p-button 
-        ${
-          disabled
-            ? "bg-gray-300 cursor-not-allowed"
-            : "bg-blue-500 hover:bg-blue-600"
-        } 
-        text-white py-2 px-4 rounded transition-colors duration-200 ${className}`}
-      iconPos="left" // Ensures the icon is placed on the left of the label
-      style={{ gap: "8px" }} // Adds space between the icon and label
+      className={`p-button-text p-button-icon-only p-button-rounded p-button-danger ${className}`} // Similar style as DeleteButton
+      style={style} // Apply any additional styles passed as props
+      tooltip={label} // Use label as the tooltip text
+      tooltipOptions={{ position: "top" }} // Tooltip positioned at the top
     />
   );
 };
@@ -35,6 +30,7 @@ FormButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   className: PropTypes.string,
+  style: PropTypes.object,
 };
 
 export default FormButton;

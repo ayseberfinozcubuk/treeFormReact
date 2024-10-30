@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
+import SubmitButton from "./SubmitButton";
 import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
 
@@ -141,7 +142,7 @@ const AddNewEntity = ({ rootEntity }) => {
         )}
 
         <div className="mt-6">
-          <FormButton
+          <SubmitButton
             label="Submit"
             icon="pi pi-check"
             onClick={handleSubmit}

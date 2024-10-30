@@ -7,6 +7,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore";
 import { useFormStore } from "../store/useFormStore";
+import DeleteButton from "./DeleteButton";
 
 const EntityListView = ({ rootEntity }) => {
   const { entities, entityIndexes, setEntities, selectEntity } =
@@ -61,7 +62,7 @@ const EntityListView = ({ rootEntity }) => {
 
   const renderDeleteButton = (rowData) => {
     return (
-      <Button
+      <DeleteButton
         icon="pi pi-trash"
         className="p-button-danger p-button-text"
         onClick={() => handleDelete(rowData.Id)}

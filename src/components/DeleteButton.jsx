@@ -1,20 +1,24 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { Button } from "primereact/button";
 
-const DeleteButton = ({ onClick, className = "" }) => {
+const DeleteButton = ({ onClick, className = "", style }) => {
   return (
-    <button
-      className={`bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600 mb-4 ${className}`}
+    <Button
+      icon="pi pi-trash"
+      className={`p-button-danger p-button-text ${className}`}
       onClick={onClick}
-    >
-      Delete
-    </button>
+      style={style} // Apply the passed style prop here
+      tooltip="Delete"
+      tooltipOptions={{ position: "top" }}
+    />
   );
 };
 
 DeleteButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   className: PropTypes.string,
+  style: PropTypes.object, // Add style prop validation
 };
 
 export default DeleteButton;

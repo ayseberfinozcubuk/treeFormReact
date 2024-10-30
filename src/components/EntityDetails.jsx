@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
-import FormButton from "./FormButton";
+import SubmitButton from "./SubmitButton";
 import CancelButton from "./CancelButton"; // Add CancelButton here
 import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
@@ -117,7 +117,7 @@ const EntityDetails = ({ rootEntity }) => {
 
         {isEditMode && (
           <>
-            <FormButton
+            <SubmitButton
               label="Update Entity"
               icon="pi pi-check"
               onClick={handleSubmit}
@@ -125,7 +125,6 @@ const EntityDetails = ({ rootEntity }) => {
             />
             <CancelButton
               onClick={handleCancelChanges} // Call handleCancelChanges when clicked
-              className="bg-gray-500 text-white ml-4"
             />
           </>
         )}

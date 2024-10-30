@@ -30,7 +30,6 @@ const DynamicForm = ({
 
   useEffect(() => {
     setEntityId(addIdValue(path));
-    console.log("path id set for: ", path);
   }, []);
 
   useEffect(() => {
@@ -85,9 +84,8 @@ const DynamicForm = ({
     <div className="relative p-6 pt-12 border border-gray-200 rounded-md bg-white shadow-md">
       <DeleteButton
         onClick={handleDelete}
-        className={`absolute ${
-          !isEditMode ? "hidden" : "visible"
-        } top-2 right-2`}
+        className={isEditMode ? "visible" : "hidden"}
+        style={{ position: "absolute", top: "0.5rem", right: "0.5rem" }} // Add inline styling for position
       />
       {data?.Properties.map(renderInput)}
     </div>
