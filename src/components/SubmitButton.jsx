@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Button } from "primereact/button";
 
 const SubmitButton = ({
-  label = "Submit",
+  label = "Gönder",
   icon = "pi pi-check",
   onClick,
   disabled = false,

@@ -9,14 +9,8 @@ import { InputSwitch } from "primereact/inputswitch";
 import { useNavigate } from "react-router-dom";
 
 const EntityDetails = ({ rootEntity }) => {
-  const {
-    formValues,
-    setFormValues,
-    resetFormValues,
-    emptyMandatoryFields,
-    notInRangeField,
-    resetFormValuesToInitial,
-  } = useFormStore();
+  const { formValues, setFormValues, emptyMandatoryFields, notInRangeField } =
+    useFormStore();
   const { selectedEntity } = useEntityStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const navigate = useNavigate();
@@ -34,12 +28,12 @@ const EntityDetails = ({ rootEntity }) => {
     );
 
     if (missingRequiredFields.length > 0) {
-      alert("Please fill in all required fields before submitting.");
+      alert("Lütfen göndermeden önce tüm gerekli alanları doldurun.");
       return;
     }
 
     if (notInRangeField.length > 0) {
-      alert("Please ensure all fields are within the allowed range.");
+      alert("Lütfen tüm alanların izin verilen aralıkta olduğundan emin olun.");
       return;
     }
 
@@ -52,7 +46,7 @@ const EntityDetails = ({ rootEntity }) => {
         `http://localhost:5000/api/${rootEntity}/${selectedEntity?.Id}`,
         structuredJson
       );
-      alert("Entity updated successfully!");
+      alert("Entity başarıyla güncellendi!");
       navigate("/"); // Redirect back to main list view after update
     } catch (error) {
       console.error("Update error:", error);
@@ -93,14 +87,14 @@ const EntityDetails = ({ rootEntity }) => {
   };
 
   const handleCancelChanges = () => {
-    alert("Changes will be cancelled!");
+    alert("Değişiklikler iptal edilecek!");
     navigate("/"); // Redirect back to main list view after update
   };
 
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
-        {isEditMode ? "Edit Entity" : "View Entity"}
+        {isEditMode ? `${rootEntity} Düzenle` : `${rootEntity} Görüntüle`}
       </h1>
       <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">
         <div className="mb-4 flex items-center">
@@ -112,7 +106,9 @@ const EntityDetails = ({ rootEntity }) => {
             onChange={(e) => setIsEditMode(e.value)}
             className="ml-4"
           />
-          <span className="ml-2">{isEditMode ? "Edit Mode" : "View Mode"}</span>
+          <span className="ml-2">
+            {isEditMode ? "Düzenleme Modu" : "Görüntüleme Modu"}
+          </span>
         </div>
 
         <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
@@ -120,7 +116,7 @@ const EntityDetails = ({ rootEntity }) => {
         {isEditMode && (
           <>
             <SubmitButton
-              label="Update Entity"
+              label="Güncelle"
               icon="pi pi-check"
               onClick={handleSubmit}
               className="bg-blue-500 text-white"

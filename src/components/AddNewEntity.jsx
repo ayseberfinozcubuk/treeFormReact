@@ -4,6 +4,8 @@ import FormButton from "./FormButton";
 import SubmitButton from "./SubmitButton";
 import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
+import BackButton from "./BackButton";
+import { useNavigate } from "react-router-dom";
 
 const AddNewEntity = ({ rootEntity }) => {
   const { formValues, resetFormValues, emptyMandatoryFields, notInRangeField } =
@@ -12,11 +14,11 @@ const AddNewEntity = ({ rootEntity }) => {
   const [formKey, setFormKey] = useState(0);
   const [formStarted, setFormStarted] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const navigate = useNavigate();
 
-  // Reset formValues when the component is mounted or rootEntity changes
   useEffect(() => {
-    resetFormValues(); // Reset the form values
-  }, [resetFormValues, rootEntity]); // Ensure this runs when the component is rendered
+    resetFormValues();
+  }, [resetFormValues, rootEntity]);
 
   const handleSubmit = () => {
     if (!formStarted) {
@@ -71,19 +73,11 @@ const AddNewEntity = ({ rootEntity }) => {
 
     const structuredJson = convertToNestedJson(formValues);
 
-    // Log the structured JSON to verify
-    console.log(
-      "Structured Form Values as JSON: ",
-      JSON.stringify(structuredJson, null, 2)
-    );
-
-    console.log("Sending JSON:", structuredJson);
-
     axios
       .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)
       .then((response) => {
         console.log("Entity created successfully:", response.data);
-        resetForm(); // Reset form only after successful submission
+        resetForm();
       })
       .catch((error) => {
         console.error("Error submitting entity:", error);
@@ -110,11 +104,23 @@ const AddNewEntity = ({ rootEntity }) => {
     setIsClicked(false);
   };
 
+  const handleBack = () => {
+    navigate("/"); // Navigate to the viewing list page
+  };
+
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
-      <h1 className="text-xl font-semibold text-gray-800 mb-8">
-        Add New {rootEntity}
-      </h1>
+      {/* Container for BackButton */}
+      <div className="w-full max-w-3xl mb-2">
+        <BackButton onClick={handleBack} className="ml-0" />
+      </div>
+
+      {/* Container for title */}
+      <div className="w-full max-w-3xl flex justify-center mb-8">
+        <h1 className="text-xl font-semibold text-gray-800">
+          Yeni {rootEntity} Ekle
+        </h1>
+      </div>
 
       <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">
         <div className="mb-4 flex items-center">
@@ -143,7 +149,6 @@ const AddNewEntity = ({ rootEntity }) => {
 
         <div className="mt-6">
           <SubmitButton
-            label="Submit"
             icon="pi pi-check"
             onClick={handleSubmit}
             className="bg-blue-500 text-white"

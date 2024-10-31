@@ -50,12 +50,12 @@ const AppWithNavbar = ({ rootEntity }) => {
 
   const menuItems = [
     {
-      label: `View ${rootEntity} List`,
+      label: `${rootEntity} Listesini Görüntüle`,
       icon: "pi pi-list",
       command: () => navigate("/"),
     },
     {
-      label: `Add New ${rootEntity}`,
+      label: `Yeni ${rootEntity} Ekle`,
       icon: "pi pi-plus",
       command: () => navigate("/add-entity"),
     },

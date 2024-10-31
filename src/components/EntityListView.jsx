@@ -12,7 +12,7 @@ import DeleteButton from "./DeleteButton";
 const EntityListView = ({ rootEntity }) => {
   const { entities, entityIndexes, setEntities, selectEntity } =
     useEntityStore();
-  const { setFormValues } = useFormStore();
+  const { setFormValues, formData } = useFormStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,23 +40,17 @@ const EntityListView = ({ rootEntity }) => {
   };
 
   const handleDelete = (id) => {
-    const isConfirmed = window.confirm(
-      `Are you sure you want to delete ${rootEntity} with id: ${id}?`
-    );
-
-    if (isConfirmed) {
-      axios
-        .delete(`http://localhost:5000/api/${rootEntity}/${id}`)
-        .then(() => {
-          setEntities(
-            rootEntity,
-            entitiesList.filter((entity) => entity.Id !== id)
-          );
-        })
-        .catch((error) =>
-          console.error(`Error deleting ${rootEntity} with ID ${id}:`, error)
+    axios
+      .delete(`http://localhost:5000/api/${rootEntity}/${id}`)
+      .then(() => {
+        setEntities(
+          rootEntity,
+          entitiesList.filter((entity) => entity.Id !== id)
         );
-    }
+      })
+      .catch((error) =>
+        console.error(`Error deleting ${rootEntity} with ID ${id}:`, error)
+      );
   };
 
   const renderDeleteButton = (rowData) => {
@@ -64,25 +58,29 @@ const EntityListView = ({ rootEntity }) => {
       <DeleteButton
         icon="pi pi-trash"
         className="p-button-danger p-button-text"
-        onClick={() => handleDelete(rowData.Id)}
+        onClick={() => handleDelete(rowData.Id, rowData.EmitterName)}
+        emitterName={rowData.EmitterName}
+        rootEntity={rootEntity}
       />
     );
   };
 
-  // Exclude 'Id' and 'list' type properties from columns
+  // Exclude 'Id' and 'list' type properties from columns and get corresponding labels
   const getColumns = (data) => {
     if (data && data.length > 0) {
-      return Object.keys(data[0]).filter(
-        (col) => col !== "Id" && !Array.isArray(data[0][col])
-      );
+      const rootProperties = formData[rootEntity]?.Properties || [];
+      return rootProperties
+        .filter((prop) => prop.Name !== "Id" && prop.Type !== "list")
+        .map((prop) => ({
+          field: prop.Name,
+          header: prop.Label || prop.Name, // Use Label if available, otherwise Name
+        }));
     }
     return [];
   };
 
   const renderValue = (value) => {
-    if (Array.isArray(value)) {
-      return `[Array of ${value.length} items]`;
-    } else if (typeof value === "object" && value !== null) {
+    if (typeof value === "object" && value !== null) {
       return JSON.stringify(value);
     } else {
       return value;
@@ -92,13 +90,13 @@ const EntityListView = ({ rootEntity }) => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="max-w-6xl w-full p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
-        <Card title={`${rootEntity} List`} className="mb-4">
+        <Card title={`${rootEntity} Listesi`} className="mb-4">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-              {rootEntity} List
+              {rootEntity} Listesi
             </h1>
             <Button
-              label={`Add New ${rootEntity}`}
+              label={`Yeni ${rootEntity} Ekle`}
               icon="pi pi-plus"
               className="p-button-success"
               onClick={() => navigate("/add-entity")}
@@ -109,19 +107,19 @@ const EntityListView = ({ rootEntity }) => {
             selectionMode="single"
             onSelectionChange={handleRowSelect}
             scrollable
-            scrollHeight="60vh" // Set a shorter scrollable height
+            scrollHeight="60vh"
             tableStyle={{ minWidth: "50rem" }}
             className="p-datatable-gridlines p-datatable-striped p-datatable-responsive text-sm leading-tight"
           >
             {entitiesList.length > 0 &&
               getColumns(entitiesList).map((col) => (
                 <Column
-                  key={col}
-                  field={col}
-                  header={col.charAt(0).toUpperCase() + col.slice(1)}
-                  body={(rowData) => renderValue(rowData[col])}
+                  key={col.field}
+                  field={col.field}
+                  header={col.header}
+                  body={(rowData) => renderValue(rowData[col.field])}
                   sortable
-                  className="px-3 py-2" // Reduce padding for shorter rows
+                  className="px-3 py-2"
                 />
               ))}
             <Column
