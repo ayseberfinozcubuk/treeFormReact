@@ -113,7 +113,7 @@ const AddNewEntity = ({ rootEntity }) => {
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
-        Add New Entity
+        Add New {rootEntity}
       </h1>
 
       <div className="responsive-container p-6 bg-white shadow-md rounded-md border border-gray-300 w-auto">

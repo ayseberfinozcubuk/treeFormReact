@@ -19,7 +19,7 @@ const ExtendShrinkButton = ({
         marginLeft: "0.5rem",
         backgroundColor: "transparent",
         color: "#707070",
-        border: "1px solid #ddd", // Subtle border
+        // border: "1px solid #ddd", // Subtle border
         padding: "0.4rem 0.6rem",
         borderRadius: "5px",
         transition: "background-color 0.2s ease, color 0.2s ease",

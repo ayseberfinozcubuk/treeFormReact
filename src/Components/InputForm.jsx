@@ -68,12 +68,12 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
 
   return (
     <div
-      className={`flex flex-row items-center space-x-4 mb-4 ml-${
-        indentLevel * 4
-      }`}
+      className={`flex flex-row items-center space-x-2 mb-2 ml-${
+        indentLevel * 3
+      }`} // Reduced spacing and margin
     >
       {/* Label with optional asterisk for required fields */}
-      <label className="form-label text-gray-700 font-medium">
+      <label className="text-sm text-gray-700 font-medium">
         {Label}
         {IsMandatory && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -87,21 +87,28 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
           min={MinMax?.Min}
           max={MinMax?.Max}
           required={IsMandatory}
-          className={`form-input border ${
+          className={`border ${
             error ? "border-red-500" : "border-gray-300"
-          } rounded-md p-2 w-64`} // Fixed width for input field
+          } rounded-md p-1 w-48 text-sm`} // Reduced width, padding, and font size
         />
       ) : (
-        <span className="text-gray-900">{formValue ?? "-"}</span> // Show form value in view mode
+        <div
+          className={`border ${
+            error ? "border-red-500" : "border-gray-300"
+          } rounded-md p-1 w-48 text-gray-900 bg-gray-100 text-sm`} // Smaller font, padding, and width
+          style={{ pointerEvents: "none" }} // Makes the div non-interactive
+        >
+          {formValue ?? "-"}
+        </div>
       )}
 
       {/* Unit label if applicable */}
       {Unit && (
-        <label className="form-label text-gray-700 font-medium">{Unit}</label>
+        <label className="text-sm text-gray-600 font-medium">{Unit}</label>
       )}
 
       {/* Error message if validation fails */}
-      {error && <p className="text-red-500 text-sm">{error}</p>}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 };

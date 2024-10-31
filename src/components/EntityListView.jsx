@@ -35,7 +35,7 @@ const EntityListView = ({ rootEntity }) => {
     const selected = e.value;
     const index = indexesList[entitiesList.indexOf(selected)];
     selectEntity(rootEntity, index);
-    setFormValues(selected); // Store the selected entity’s data into formValues
+    setFormValues(selected);
     navigate(`/details/${index}`);
   };
 
@@ -48,7 +48,6 @@ const EntityListView = ({ rootEntity }) => {
       axios
         .delete(`http://localhost:5000/api/${rootEntity}/${id}`)
         .then(() => {
-          // Refresh entities after deletion
           setEntities(
             rootEntity,
             entitiesList.filter((entity) => entity.Id !== id)
@@ -66,14 +65,19 @@ const EntityListView = ({ rootEntity }) => {
         icon="pi pi-trash"
         className="p-button-danger p-button-text"
         onClick={() => handleDelete(rowData.Id)}
-        tooltip="Delete"
-        tooltipOptions={{ position: "top" }}
       />
     );
   };
 
-  const getColumns = (data) =>
-    data && data.length > 0 ? Object.keys(data[0]) : [];
+  // Exclude 'Id' and 'list' type properties from columns
+  const getColumns = (data) => {
+    if (data && data.length > 0) {
+      return Object.keys(data[0]).filter(
+        (col) => col !== "Id" && !Array.isArray(data[0][col])
+      );
+    }
+    return [];
+  };
 
   const renderValue = (value) => {
     if (Array.isArray(value)) {
@@ -104,8 +108,10 @@ const EntityListView = ({ rootEntity }) => {
             value={entitiesList}
             selectionMode="single"
             onSelectionChange={handleRowSelect}
+            scrollable
+            scrollHeight="60vh" // Set a shorter scrollable height
             tableStyle={{ minWidth: "50rem" }}
-            className="p-datatable-gridlines p-datatable-striped p-datatable-responsive"
+            className="p-datatable-gridlines p-datatable-striped p-datatable-responsive text-sm leading-tight"
           >
             {entitiesList.length > 0 &&
               getColumns(entitiesList).map((col) => (
@@ -115,9 +121,9 @@ const EntityListView = ({ rootEntity }) => {
                   header={col.charAt(0).toUpperCase() + col.slice(1)}
                   body={(rowData) => renderValue(rowData[col])}
                   sortable
+                  className="px-3 py-2" // Reduce padding for shorter rows
                 />
               ))}
-            {/* Add the delete column */}
             <Column
               body={renderDeleteButton}
               headerStyle={{ width: "4rem", textAlign: "center" }}

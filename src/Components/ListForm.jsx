@@ -70,7 +70,7 @@ const ListForm = ({ property, path, entityId, indentLevel, isEditMode }) => {
   return (
     <div className={`space-x-4 mb-4 ml-${indentLevel * 4}`}>
       <div className="flex items-center mb-4">
-        <label className="form-label text-gray-700 font-medium">{Label}</label>
+        <label className="text-sm text-gray-700 font-medium">{Label}</label>
         <div className="ml-2">
           <ExtendShrinkButton isExtended={isExpanded} onToggle={handleToggle} />
         </div>
