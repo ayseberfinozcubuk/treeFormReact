@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useFormStore } from "../store/useFormStore";
 
-const InputForm = ({ property, path, indentLevel, isEditMode }) => {
+const InputForm = ({ property, path, isEditMode }) => {
   const {
     updateFormValues,
     formValues,
@@ -67,13 +67,18 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
   };
 
   return (
-    <div
-      className={`flex flex-row items-center space-x-2 mb-2 ml-${
-        indentLevel * 3
-      }`} // Reduced spacing and margin
-    >
-      {/* Label with optional asterisk for required fields */}
-      <label className="text-sm text-gray-700 font-medium">
+    <div className="flex items-center mb-2">
+      {/* Label with wrapping for long text */}
+      <label
+        className="text-sm text-gray-700 font-medium"
+        style={{
+          minWidth: "150px",
+          maxWidth: "150px", // Fixed width for alignment
+          overflowWrap: "break-word", // Enable word wrap
+          wordWrap: "break-word",
+          lineHeight: "1.25rem", // Adjust line height for readability
+        }}
+      >
         {Label}
         {IsMandatory && <span className="text-red-500 ml-1">*</span>}
       </label>
@@ -82,21 +87,21 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
       {isEditMode ? (
         <input
           type={Type === "int" || Type === "double" ? "number" : "text"}
-          value={formValue ?? ""} // Use formValues if it exists, otherwise default to an empty string
+          value={formValue ?? ""}
           onChange={handleChange}
           min={MinMax?.Min}
           max={MinMax?.Max}
           required={IsMandatory}
           className={`border ${
             error ? "border-red-500" : "border-gray-300"
-          } rounded-md p-1 w-48 text-sm`} // Reduced width, padding, and font size
+          } rounded-md p-1 w-48 text-sm ml-2`} // Added margin for spacing
         />
       ) : (
         <div
           className={`border ${
             error ? "border-red-500" : "border-gray-300"
-          } rounded-md p-1 w-48 text-gray-900 bg-gray-100 text-sm`} // Smaller font, padding, and width
-          style={{ pointerEvents: "none" }} // Makes the div non-interactive
+          } rounded-md p-1 w-48 text-gray-900 bg-gray-100 text-sm ml-2`}
+          style={{ pointerEvents: "none" }}
         >
           {formValue ?? "-"}
         </div>
@@ -104,7 +109,7 @@ const InputForm = ({ property, path, indentLevel, isEditMode }) => {
 
       {/* Unit label if applicable */}
       {Unit && (
-        <label className="text-sm text-gray-600 font-medium">{Unit}</label>
+        <label className="text-sm text-gray-600 font-medium ml-2">{Unit}</label>
       )}
 
       {/* Error message if validation fails */}

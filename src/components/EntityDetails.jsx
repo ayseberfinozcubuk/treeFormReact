@@ -45,6 +45,8 @@ const EntityDetails = ({ rootEntity }) => {
 
     const structuredJson = convertToNestedJson(formValues);
 
+    console.log("structured json: ", structuredJson);
+
     try {
       await axios.put(
         `http://localhost:5000/api/${rootEntity}/${selectedEntity?.Id}`,

@@ -96,6 +96,8 @@ export const useFormStore = create((set) => ({
         }
       });
 
+      console.log("updated form values: ", updatedFormValues);
+
       return {
         formValues: updatedFormValues,
         emptyMandatoryFields: updatedMandatoryFields,

@@ -43,7 +43,7 @@ const DynamicForm = ({
     setLoading(false);
   }, [entityName, formData]);
 
-  const handleDelete = (path = path) => {
+  const handleDelete = () => {
     removeFormSection(path);
     setIsVisible(false);
     onRemove && onRemove();
