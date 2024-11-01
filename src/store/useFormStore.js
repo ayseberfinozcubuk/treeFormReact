@@ -67,10 +67,12 @@ export const useFormStore = create((set) => ({
     });
   },
 
-  addEmptyMandatoryField: (key) =>
+  addEmptyMandatoryField: (key) => {
+    console.log("addEmptyMandatoryField: ", key);
     set((state) => ({
       emptyMandatoryFields: [...state.emptyMandatoryFields, key],
-    })),
+    }));
+  },
 
   addNotInRangeField: (key) =>
     set((state) => ({ notInRangeField: [...state.notInRangeField, key] })),
@@ -79,6 +81,14 @@ export const useFormStore = create((set) => ({
     set((state) => ({
       notInRangeField: state.notInRangeField.filter((field) => field !== key),
     })),
+
+  removeEmptyMandatoryField: (key) => {
+    set((state) => ({
+      emptyMandatoryFields: state.emptyMandatoryFields.filter(
+        (field) => field !== key
+      ),
+    }));
+  },
 
   removeFormSection: (path) =>
     set((state) => {

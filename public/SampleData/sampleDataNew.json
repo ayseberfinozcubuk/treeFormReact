@@ -12,7 +12,16 @@
         "Label": "Notasyon",
         "Type": "string",
         "IsMandatory": true,
-        "Not": "Emiter Notasyonu alfanumerik olmalıdır.",
+        "ValidationRules": {
+          "isAlphanumeric": true,
+          "minLength": 3,
+          "maxLength": 20,
+          "noSpaces": true,
+          "startsWith": "",
+          "mustContain": [""],
+          "prohibitedCharacters": ["~"],
+          "regexPattern": "^[a-zA-Z0-9]*$"
+        },
         "IsUnique": true
       },
       {

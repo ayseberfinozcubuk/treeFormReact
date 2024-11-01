@@ -26,8 +26,13 @@ const AddNewEntity = ({ rootEntity }) => {
       return;
     }
 
-    if (emptyMandatoryFields.length > 0) {
-      alert("Please fill in all required fields before submitting.");
+    const missingRequiredFields = emptyMandatoryFields.filter(
+      (field) => formValues[field] === "" || formValues[field] === null
+    );
+
+    if (missingRequiredFields.length > 0) {
+      console.log("missingRequiredFields: ", missingRequiredFields);
+      alert("Lütfen göndermeden önce tüm gerekli alanları doldurun.");
       return;
     }
 
