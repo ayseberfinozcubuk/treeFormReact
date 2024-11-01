@@ -9,7 +9,16 @@ const InputForm = ({ property, path, isEditMode }) => {
     addNotInRangeField,
     removeNotInRangeField,
   } = useFormStore();
-  const { Name, Label, Type, Unit, MinMax, IsMandatory } = property;
+  const {
+    Name,
+    Label,
+    Type,
+    Unit,
+    MinMax,
+    IsMandatory,
+    EnumValues,
+    IsCalculated,
+  } = property;
   const [error, setError] = useState(""); // Track validation errors
 
   const formValueKey = path ? `${path}.${Name}` : Name; // Only add the dot if path is non-empty
@@ -66,6 +75,11 @@ const InputForm = ({ property, path, isEditMode }) => {
     updateFormValues(formValueKey, value);
   };
 
+  // Get the label for the selected enum value when in view mode
+  const selectedLabel = EnumValues?.find(
+    (enumOption) => enumOption.Value === formValue
+  )?.Label;
+
   return (
     <div className="flex items-center mb-2">
       {/* Label with wrapping for long text */}
@@ -83,27 +97,49 @@ const InputForm = ({ property, path, isEditMode }) => {
         {IsMandatory && <span className="text-red-500 ml-1">*</span>}
       </label>
 
-      {/* Conditional rendering: Input field in edit mode, plain text in view mode */}
-      {isEditMode ? (
-        <input
-          type={Type === "int" || Type === "double" ? "number" : "text"}
-          value={formValue ?? ""}
-          onChange={handleChange}
-          min={MinMax?.Min}
-          max={MinMax?.Max}
-          required={IsMandatory}
-          className={`border ${
-            error ? "border-red-500" : "border-gray-300"
-          } rounded-md p-1 w-48 text-sm ml-2`} // Added margin for spacing
-        />
+      {/* Conditional rendering based on type and IsCalculated */}
+      {IsCalculated !== true && isEditMode ? (
+        Type === "enum" && EnumValues ? (
+          // Render dropdown for enum type
+          <select
+            value={formValue ?? ""}
+            onChange={handleChange}
+            className={`border ${
+              error ? "border-red-500" : "border-gray-300"
+            } rounded-md p-1 w-48 text-sm ml-2`}
+          >
+            <option value="">Select {Label}</option>
+            {EnumValues.map((enumOption) => (
+              <option key={enumOption.Value} value={enumOption.Value}>
+                {enumOption.Label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          // Render input for other types
+          <input
+            type={Type === "int" || Type === "double" ? "number" : "text"}
+            value={formValue ?? ""}
+            onChange={handleChange}
+            min={MinMax?.Min}
+            max={MinMax?.Max}
+            required={IsMandatory}
+            className={`border ${
+              error ? "border-red-500" : "border-gray-300"
+            } rounded-md p-1 w-48 text-sm ml-2`}
+          />
+        )
       ) : (
+        // Plain text display in view mode or when isCalculated is true
         <div
           className={`border ${
             error ? "border-red-500" : "border-gray-300"
           } rounded-md p-1 w-48 text-gray-900 bg-gray-100 text-sm ml-2`}
           style={{ pointerEvents: "none" }}
         >
-          {formValue ?? "-"}
+          {Type === "enum" && EnumValues
+            ? selectedLabel ?? "-"
+            : formValue ?? "-"}
         </div>
       )}
 

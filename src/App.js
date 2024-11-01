@@ -21,7 +21,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/SampleData/sampleData.json")
+    fetch("/SampleData/sampleDataNew.json")
       .then((response) => response.json())
       .then((data) => {
         setFormData(data);

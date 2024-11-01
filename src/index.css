@@ -4,6 +4,11 @@
 @import "primereact/resources/themes/saga-blue/theme.css";
 @import "tailwindcss/utilities";
 
+/* Inert style compatibility */
+[aria-hidden="true"] {
+  pointer-events: none;
+}
+
 /* Custom body styles */
 body {
   margin: 0;
