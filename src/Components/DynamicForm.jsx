@@ -47,6 +47,26 @@ const DynamicForm = ({
     setLoading(false);
   }, [entityName, formData]);
 
+  // New useEffect to handle updating parent ID if needed
+  useEffect(() => {
+    if (data && parentId) {
+      const parentProperty = data.Properties.find(
+        (property) => property.Name === `${parentName}Id`
+      );
+
+      if (parentProperty) {
+        const currentPath = path
+          ? `${path}.${parentProperty.Name}`
+          : parentProperty.Name;
+        const currentValue = getNestedValue(formValues, currentPath);
+
+        if (currentValue !== parentId) {
+          updateFormValues(currentPath, parentId);
+        }
+      }
+    }
+  }, [data, parentId, parentName, formValues, path, updateFormValues]);
+
   const handleDelete = () => {
     setIsVisible(false);
     onRemove && onRemove();
@@ -81,16 +101,9 @@ const DynamicForm = ({
           isEditMode={isEditMode}
         />
       );
-    } else if (property.Name === `${parentName}Id`) {
-      const currentPath = path ? `${path}.${property.Name}` : property.Name;
-      const currentValue = getNestedValue(formValues, currentPath);
-
-      if (currentValue !== parentId) {
-        updateFormValues(currentPath, parentId);
-      }
-
-      return null; // Render nothing or replace this line if other actions are needed
     }
+
+    return null; // Render nothing if the type is Guid and does not match parentName
   };
 
   return (
