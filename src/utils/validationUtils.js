@@ -1,11 +1,11 @@
 // validationUtils.js
 
 export const validateField = (value, validationRules) => {
-  console.log("value: ", value);
-  console.log("validationRules: ", validationRules);
+  // console.log("value: ", value);
+  // console.log("validationRules: ", validationRules);
 
   if (validationRules === undefined) {
-    console.log("no validation rules!");
+    // console.log("no validation rules!");
     return { isValid: true, error: "" }; // No rules, so it's valid by default
   }
 

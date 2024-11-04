@@ -77,6 +77,7 @@ const AddNewEntity = ({ rootEntity }) => {
     };
 
     const structuredJson = convertToNestedJson(formValues);
+    // console.log("sending to back: ", structuredJson);
 
     axios
       .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)

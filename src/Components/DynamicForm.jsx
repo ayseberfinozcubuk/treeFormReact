@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import InputForm from "./InputForm";
 import ListForm from "./ListForm";
 import DeleteButton from "./DeleteButton";
-import CancelButton from "./CancelButton"; // Import the new CancelButton
 import { useFormStore } from "../store/useFormStore";
-import { getNestedValue } from "../utils/utils.js"; // Adjust path if utils.js is in a different folder
+import { getNestedValue } from "../utils/utils.js";
 
 const DynamicForm = ({
   entityName,
@@ -12,6 +11,8 @@ const DynamicForm = ({
   indentLevel = 0,
   onRemove,
   isEditMode,
+  parentId,
+  parentName,
 }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,15 +23,18 @@ const DynamicForm = ({
   const {
     formData,
     formValues,
-    initialFormValues,
-    removeFormSection,
-    addIdValue,
-    resetToInitialValues,
+    updateFormValues,
+    generateNewId,
+    addIdToFormValues,
   } = useFormStore();
 
   useEffect(() => {
-    setEntityId(addIdValue(path));
-  }, []);
+    if (!entityId) {
+      const newId = generateNewId();
+      setEntityId(newId);
+      addIdToFormValues(path, newId); // Add ID to formValues after setting it in local state
+    }
+  }, [entityId, path, generateNewId, addIdToFormValues]);
 
   useEffect(() => {
     setLoading(true);
@@ -44,7 +48,6 @@ const DynamicForm = ({
   }, [entityName, formData]);
 
   const handleDelete = () => {
-    removeFormSection(path);
     setIsVisible(false);
     onRemove && onRemove();
   };
@@ -61,6 +64,7 @@ const DynamicForm = ({
           property={property}
           path={path}
           entityId={entityId}
+          entityName={entityName}
           indentLevel={indentLevel}
           isEditMode={isEditMode}
         />
@@ -77,6 +81,15 @@ const DynamicForm = ({
           isEditMode={isEditMode}
         />
       );
+    } else if (property.Name === `${parentName}Id`) {
+      const currentPath = path ? `${path}.${property.Name}` : property.Name;
+      const currentValue = getNestedValue(formValues, currentPath);
+
+      if (currentValue !== parentId) {
+        updateFormValues(currentPath, parentId);
+      }
+
+      return null; // Render nothing or replace this line if other actions are needed
     }
   };
 
@@ -85,7 +98,7 @@ const DynamicForm = ({
       <DeleteButton
         onClick={handleDelete}
         className={isEditMode ? "visible" : "hidden"}
-        style={{ position: "absolute", top: "0.5rem", right: "0.5rem" }} // Add inline styling for position
+        style={{ position: "absolute", top: "0.5rem", right: "0.5rem" }}
       />
       {data?.Properties.map(renderInput)}
     </div>

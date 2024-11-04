@@ -5,7 +5,7 @@ import DynamicForm from "./DynamicForm";
 import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
 
-const ListForm = ({ property, path, entityId, isEditMode }) => {
+const ListForm = ({ property, path, entityId, isEditMode, entityName }) => {
   const { formValues } = useFormStore();
   const { Name, Label, ListType } = property;
   const [storeForms, setStoreForms] = useState([]);
@@ -88,6 +88,7 @@ const ListForm = ({ property, path, entityId, isEditMode }) => {
               path={form.path}
               parentId={entityId}
               isEditMode={isEditMode}
+              parentName={entityName}
             />
           </div>
         ))}

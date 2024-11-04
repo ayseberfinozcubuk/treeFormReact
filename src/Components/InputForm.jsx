@@ -29,9 +29,9 @@ const InputForm = ({ property, path, isEditMode }) => {
   const formValue = formValues[formValueKey];
 
   useEffect(() => {
-    console.log("emptyMandatoryFields", emptyMandatoryFields);
+    // console.log("emptyMandatoryFields", emptyMandatoryFields);
     if (IsMandatory) {
-      console.log(Name, " is mandatory!");
+      // console.log(Name, " is mandatory!");
       if (typeof formValue === "string" && formValue.trim() === "") {
         addEmptyMandatoryField(formValueKey);
       } else if (

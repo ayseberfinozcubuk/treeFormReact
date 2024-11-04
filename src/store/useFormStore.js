@@ -31,6 +31,7 @@ export const useFormStore = create((set) => ({
         : value === undefined || value === null || value === "";
 
       const isRequiredField = state.emptyMandatoryFields.includes(key);
+      // console.log("updated form values: ", updatedFormValues);
 
       if (!isEmpty && isRequiredField) {
         const newEmptyFields = state.emptyMandatoryFields.filter(
@@ -45,23 +46,18 @@ export const useFormStore = create((set) => ({
       return { formValues: updatedFormValues };
     }),
 
-  addIdValue: (path) => {
-    set((state) => {
-      const formValueKey = path ? `${path}.Id` : "Id";
-      if (!state.formValues[formValueKey]) {
-        return {
-          formValues: {
-            ...state.formValues,
-            [formValueKey]: uuidv4(),
-          },
-        };
-      }
-      return {};
-    });
-  },
+  generateNewId: () => uuidv4(), // Generate a new ID without updating state
+
+  addIdToFormValues: (path, id) =>
+    set((state) => ({
+      formValues: {
+        ...state.formValues,
+        [path ? `${path}.Id` : "Id"]: id,
+      },
+    })),
 
   addEmptyMandatoryField: (key) => {
-    console.log("addEmptyMandatoryField: ", key);
+    // ("addEmptyMandatoryField: ", key);
     set((state) => ({
       emptyMandatoryFields: [...state.emptyMandatoryFields, key],
     }));
@@ -99,7 +95,7 @@ export const useFormStore = create((set) => ({
         }
       });
 
-      console.log("updated form values: ", updatedFormValues);
+      console.log("after remove form values: ", updatedFormValues);
 
       return {
         formValues: updatedFormValues,

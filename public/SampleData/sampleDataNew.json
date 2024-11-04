@@ -626,7 +626,7 @@
         "IsMandatory": true
       },
       {
-        "Name": "EmitterId",
+        "Name": "EmitterModeId",
         "Label": "",
         "Type": "Guid"
       },
