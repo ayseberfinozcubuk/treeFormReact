@@ -42,13 +42,6 @@ export const useFormStore = create((set) => ({
         };
       }
 
-      if (isEmpty && !isRequiredField) {
-        return {
-          formValues: updatedFormValues,
-          emptyMandatoryFields: [...state.emptyMandatoryFields, key],
-        };
-      }
-
       return { formValues: updatedFormValues };
     }),
 
