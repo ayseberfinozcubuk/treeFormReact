@@ -7,7 +7,6 @@ const InputForm = ({ property, path, isEditMode }) => {
     updateFormValues,
     formValues,
     addEmptyMandatoryField,
-    emptyMandatoryFields,
     addNotInRangeField,
     removeNotInRangeField,
   } = useFormStore();
@@ -20,7 +19,8 @@ const InputForm = ({ property, path, isEditMode }) => {
     IsMandatory,
     EnumValues,
     IsCalculated,
-    ValidationRules, // Include ValidationRules from property
+    DependsOn,
+    ValidationRules,
   } = property;
 
   const [error, setError] = useState(""); // Track validation errors
@@ -28,10 +28,29 @@ const InputForm = ({ property, path, isEditMode }) => {
   const formValueKey = path ? `${path}.${Name}` : Name;
   const formValue = formValues[formValueKey];
 
+  // Automatically update IsCalculated fields based on DependsOn
   useEffect(() => {
-    // console.log("emptyMandatoryFields", emptyMandatoryFields);
+    if (IsCalculated && DependsOn) {
+      const dependencyKey = path ? `${path}.${DependsOn}` : DependsOn;
+      const dependentValue = formValues[dependencyKey];
+
+      // Only update if the calculated field's current value differs from the dependent value
+      if (dependentValue !== undefined && formValue !== dependentValue) {
+        updateFormValues(formValueKey, dependentValue);
+      }
+    }
+  }, [
+    IsCalculated,
+    DependsOn,
+    formValues,
+    formValueKey,
+    path,
+    formValue,
+    updateFormValues,
+  ]);
+
+  useEffect(() => {
     if (IsMandatory) {
-      // console.log(Name, " is mandatory!");
       if (typeof formValue === "string" && formValue.trim() === "") {
         addEmptyMandatoryField(formValueKey);
       } else if (
@@ -83,7 +102,6 @@ const InputForm = ({ property, path, isEditMode }) => {
       !MinMax ||
       (MinMax && value >= MinMax.Min && value <= MinMax.Max)
     ) {
-      // Only clear the error if there’s no MinMax error and ValidationRules pass
       setError("");
       removeNotInRangeField(formValueKey);
     }
