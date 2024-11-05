@@ -7,6 +7,7 @@ const InputForm = ({ property, path, isEditMode }) => {
     updateFormValues,
     formValues,
     addEmptyMandatoryField,
+    removeEmptyMandatoryField,
     addNotInRangeField,
     removeNotInRangeField,
   } = useFormStore();
@@ -21,6 +22,7 @@ const InputForm = ({ property, path, isEditMode }) => {
     IsCalculated,
     DependsOn,
     ValidationRules,
+    Note,
   } = property;
 
   const [error, setError] = useState(""); // Track validation errors
@@ -28,20 +30,31 @@ const InputForm = ({ property, path, isEditMode }) => {
   const formValueKey = path ? `${path}.${Name}` : Name;
   const formValue = formValues[formValueKey];
 
-  // Automatically update IsCalculated fields based on DependsOn
+  // Automatically update IsCalculated fields based on DependsOn with calculation
   useEffect(() => {
     if (IsCalculated && DependsOn) {
       const dependencyKey = path ? `${path}.${DependsOn}` : DependsOn;
       const dependentValue = formValues[dependencyKey];
 
-      // Only update if the calculated field's current value differs from the dependent value
-      if (dependentValue !== undefined && formValue !== dependentValue) {
-        updateFormValues(formValueKey, dependentValue);
+      if (dependentValue !== undefined && dependentValue !== null) {
+        try {
+          const calculatedValue = eval(Note.replace(DependsOn, dependentValue));
+          if (formValue !== calculatedValue) {
+            updateFormValues(formValueKey, calculatedValue);
+          }
+        } catch (error) {
+          console.error("Error calculating value:", error);
+        }
+      } else {
+        if (formValue !== null) {
+          updateFormValues(formValueKey, null);
+        }
       }
     }
   }, [
     IsCalculated,
     DependsOn,
+    Note,
     formValues,
     formValueKey,
     path,
@@ -63,11 +76,56 @@ const InputForm = ({ property, path, isEditMode }) => {
     }
   }, [IsMandatory, formValueKey, formValue, addEmptyMandatoryField]);
 
+  const validateAndSetError = (value) => {
+    if (value === null || value === undefined || value === "") {
+      setError("");
+      removeNotInRangeField(formValueKey);
+      removeEmptyMandatoryField(formValueKey);
+      return;
+    }
+
+    if (MinMax) {
+      const numValue = parseFloat(value);
+      if (MinMax.Min !== undefined && numValue < MinMax.Min) {
+        setError(`Value must be greater than or equal to ${MinMax.Min}`);
+        addNotInRangeField(formValueKey);
+        return;
+      } else if (MinMax.Max !== undefined && numValue > MinMax.Max) {
+        setError(`Value must be less than or equal to ${MinMax.Max}`);
+        addNotInRangeField(formValueKey);
+        return;
+      } else {
+        removeNotInRangeField(formValueKey);
+      }
+    }
+
+    const { isValid, error: validationError } = validateField(
+      value,
+      ValidationRules
+    );
+    if (!isValid) {
+      setError(validationError);
+      addNotInRangeField(formValueKey);
+    } else {
+      setError("");
+      removeNotInRangeField(formValueKey);
+    }
+  };
+
+  useEffect(() => {
+    if (IsCalculated) {
+      validateAndSetError(formValue);
+    }
+  }, [formValue, IsCalculated, MinMax, ValidationRules]);
+
   const handleChange = (e) => {
     let value = e.target.value;
 
     if (value === "") {
       value = null;
+      setError(""); // Clear the error state when input is cleared
+      removeNotInRangeField(formValueKey);
+      removeEmptyMandatoryField(formValueKey);
     } else {
       if (Type === "int") {
         value = parseInt(value, 10);
@@ -76,37 +134,7 @@ const InputForm = ({ property, path, isEditMode }) => {
       }
     }
 
-    // Validation for MinMax values
-    if (MinMax && value !== null) {
-      const numValue = parseFloat(value);
-      if (MinMax.Min !== undefined && numValue < MinMax.Min) {
-        setError(`Value must be greater than or equal to ${MinMax.Min}`);
-        addNotInRangeField(formValueKey);
-      } else if (MinMax.Max !== undefined && numValue > MinMax.Max) {
-        setError(`Value must be less than or equal to ${MinMax.Max}`);
-        addNotInRangeField(formValueKey);
-      } else {
-        removeNotInRangeField(formValueKey);
-      }
-    }
-
-    // Validation based on ValidationRules
-    const { isValid, error: validationError } = validateField(
-      value,
-      ValidationRules
-    );
-    if (!isValid) {
-      setError(validationError);
-      addNotInRangeField(formValueKey);
-    } else if (
-      !MinMax ||
-      (MinMax && value >= MinMax.Min && value <= MinMax.Max)
-    ) {
-      setError("");
-      removeNotInRangeField(formValueKey);
-    }
-
-    // Update form values in Zustand
+    validateAndSetError(value);
     updateFormValues(formValueKey, value);
   };
 
@@ -174,7 +202,6 @@ const InputForm = ({ property, path, isEditMode }) => {
             </div>
           )}
 
-          {/* Error message positioned below the input area */}
           {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
         </div>
 
