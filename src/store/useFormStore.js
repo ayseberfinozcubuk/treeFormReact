@@ -52,7 +52,7 @@ export const useFormStore = create((set) => ({
     set((state) => ({
       formValues: {
         ...state.formValues,
-        [path ? `${path}.Id` : "Id"]: id,
+        [path !== "" ? `${path}.Id` : "Id"]: id,
       },
     })),
 
@@ -114,7 +114,7 @@ export const useFormStore = create((set) => ({
 
       Object.keys(obj).forEach((key) => {
         const value = obj[key];
-        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+        const fullKey = parentKey !== "" ? `${parentKey}.${key}` : key;
 
         if (Array.isArray(value)) {
           value.forEach((item, index) => {

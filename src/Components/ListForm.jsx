@@ -4,6 +4,7 @@ import ExtendShrinkButton from "./ExtendShrinkButton";
 import DynamicForm from "./DynamicForm";
 import { useFormStore } from "../store/useFormStore";
 import { v4 as uuidv4 } from "uuid";
+import { getLength } from "../utils/utils";
 
 const ListForm = ({ property, path, entityId, isEditMode, entityName }) => {
   const { formValues } = useFormStore();
@@ -13,8 +14,9 @@ const ListForm = ({ property, path, entityId, isEditMode, entityName }) => {
   const effectExecutedRef = useRef(false);
 
   useEffect(() => {
-    const keyPrefix = `${path}.${Name}`.replace(/^\./, "");
-    const arrayLength = getArrayLength(keyPrefix);
+    const keyPrefix = path !== "" ? `${path}.${Name}` : Name;
+    // console.log("key prefix: ", keyPrefix, " path: ", path);
+    const arrayLength = getLength(formValues, keyPrefix);
 
     if (effectExecutedRef.current) return;
 
@@ -32,18 +34,6 @@ const ListForm = ({ property, path, entityId, isEditMode, entityName }) => {
     }
   }, [isEditMode, formValues, path, Name]);
 
-  const getArrayLength = (keyPrefix) => {
-    let count = 0;
-    while (
-      Object.keys(formValues).some((key) =>
-        key.startsWith(`${keyPrefix}[${count}]`)
-      )
-    ) {
-      count++;
-    }
-    return count;
-  };
-
   const handleToggle = () => {
     setIsExpanded((prev) => !prev);
   };
@@ -57,7 +47,10 @@ const ListForm = ({ property, path, entityId, isEditMode, entityName }) => {
 
   const handleAddStoreClick = () => {
     const storeId = uuidv4();
-    const uniqueFormPath = `${path}.${Name}[${storeForms.length}]`;
+    const uniqueFormPath =
+      path !== ""
+        ? `${path}.${Name}[${storeForms.length}]`
+        : `${Name}[${storeForms.length}]`;
     setStoreForms((prevForms) => [
       ...prevForms,
       { id: storeId, path: uniqueFormPath, key: storeId },

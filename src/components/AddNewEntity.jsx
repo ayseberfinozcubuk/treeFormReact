@@ -147,7 +147,6 @@ const AddNewEntity = ({ rootEntity }) => {
             <DynamicForm
               key={formKey}
               entityName={rootEntity}
-              onRemove={handleRemoveForm}
               isEditMode={true}
             />
           </div>

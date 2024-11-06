@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useFormStore } from "../store/useFormStore";
 import { validateField } from "../utils/validationUtils"; // Import the validation utility
+import { getLength } from "../utils/utils"; // Import the validation utility
 
-const InputForm = ({ property, path, isEditMode }) => {
+const InputForm = ({ entityName, property, path, isEditMode }) => {
   const {
     updateFormValues,
     formValues,
+    formData, // Added this line to access formData
     addEmptyMandatoryField,
     removeEmptyMandatoryField,
     addNotInRangeField,
     removeNotInRangeField,
   } = useFormStore();
+
   const {
     Name,
     Label,
@@ -27,28 +30,65 @@ const InputForm = ({ property, path, isEditMode }) => {
 
   const [error, setError] = useState(""); // Track validation errors
 
-  const formValueKey = path ? `${path}.${Name}` : Name;
+  const formValueKey = path !== "" ? `${path}.${Name}` : Name;
   const formValue = formValues[formValueKey];
 
   // Automatically update IsCalculated fields based on DependsOn with calculation
   useEffect(() => {
     if (IsCalculated && DependsOn) {
-      const dependencyKey = path ? `${path}.${DependsOn}` : DependsOn;
+      const dependencyKey = path !== "" ? `${path}.${DependsOn}` : DependsOn;
       const dependentValue = formValues[dependencyKey];
 
-      if (dependentValue !== undefined && dependentValue !== null) {
-        try {
-          const calculatedValue = eval(Note.replace(DependsOn, dependentValue));
-          if (formValue !== calculatedValue) {
-            updateFormValues(formValueKey, calculatedValue);
+      // Check if the entityName has a property matching DependsOn in formData
+      const entityData = formData[entityName];
+
+      if (entityData) {
+        const propertyData = entityData.Properties.find(
+          (prop) => prop.Name === DependsOn
+        ); // Find the property with Name equal to DependsOn
+        const { Type: dependentType } = propertyData || {}; // Get the Type of the DependsOn property
+
+        /*
+        console.log("entityData: ", entityData);
+        console.log("propertyData: ", propertyData);
+        console.log("dependentType: ", dependentType);
+        console.log("dependencyKey: ", dependencyKey);
+        console.log("dependentValue: ", dependentValue);
+        console.log("formValues: ", formValues);
+        */
+
+        if (
+          dependentType === "list" &&
+          Note &&
+          Note.includes(`${DependsOn}.length`)
+        ) {
+          if (
+            (formValues[formValueKey] === undefined ||
+              formValues[formValueKey] === null) &&
+            formValues[formValueKey] !== 0
+          ) {
+            updateFormValues(formValueKey, 0);
+          } else {
+            const arrayLength = getLength(formValues, dependencyKey);
+            if (formValues[formValueKey] !== arrayLength) {
+              updateFormValues(formValueKey, arrayLength);
+            }
           }
-        } catch (error) {
-          console.error("Error calculating value:", error);
+        } else if (dependentValue !== undefined && dependentValue !== null) {
+          // Normal calculation process if dependentValue is available
+          try {
+            const calculatedValue = eval(
+              Note.replace(DependsOn, dependentValue)
+            );
+            if (formValue !== calculatedValue) {
+              updateFormValues(formValueKey, calculatedValue);
+            }
+          } catch (error) {
+            console.error("Error calculating value:", error);
+          }
         }
       } else {
-        if (formValue !== null) {
-          updateFormValues(formValueKey, null);
-        }
+        console.log("AAAAAAA BIG TROUBLE! NO ENTITY DATA!");
       }
     }
   }, [
@@ -60,6 +100,7 @@ const InputForm = ({ property, path, isEditMode }) => {
     path,
     formValue,
     updateFormValues,
+    formData, // Added formData to dependencies
   ]);
 
   useEffect(() => {

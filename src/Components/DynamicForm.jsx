@@ -26,6 +26,7 @@ const DynamicForm = ({
     updateFormValues,
     generateNewId,
     addIdToFormValues,
+    removeFormSection,
   } = useFormStore();
 
   useEffect(() => {
@@ -49,18 +50,19 @@ const DynamicForm = ({
 
   // New useEffect to handle updating parent ID if needed
   useEffect(() => {
+    // console.log("data: ", data);
     if (data && parentId) {
       const parentProperty = data.Properties.find(
         (property) => property.Name === `${parentName}Id`
       );
 
       if (parentProperty) {
-        const currentPath = path
-          ? `${path}.${parentProperty.Name}`
-          : parentProperty.Name;
+        const currentPath =
+          path !== "" ? `${path}.${parentProperty.Name}` : parentProperty.Name;
         const currentValue = getNestedValue(formValues, currentPath);
 
-        if (currentValue !== parentId) {
+        if ((currentValue != undefined) & (currentValue !== parentId)) {
+          // console.log("added parentId to: ", currentPath);
           updateFormValues(currentPath, parentId);
         }
       }
@@ -68,6 +70,7 @@ const DynamicForm = ({
   }, [data, parentId, parentName, formValues, path, updateFormValues]);
 
   const handleDelete = () => {
+    removeFormSection(path);
     setIsVisible(false);
     onRemove && onRemove();
   };
@@ -94,6 +97,7 @@ const DynamicForm = ({
     if (property.Type !== "Guid") {
       return (
         <InputForm
+          entityName={entityName}
           key={property.Name}
           property={property}
           path={path}
