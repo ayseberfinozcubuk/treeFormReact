@@ -36,7 +36,6 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
   useEffect(() => {
     if (formValue === undefined) {
       updateFormValues(formValueKey, null);
-      formValue = null;
     }
   }, [formValue, formValueKey, updateFormValues]);
 
@@ -44,7 +43,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
   useEffect(() => {
     if (IsCalculated && DependsOn) {
       const dependencyKey = path !== "" ? `${path}.${DependsOn}` : DependsOn;
-      const dependentValue = formValues[dependencyKey];
+      const dependentValue = getNestedValue(formValues, dependencyKey);
 
       // Check if the entityName has a property matching DependsOn in formData
       const entityData = formData[entityName];
@@ -93,6 +92,8 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
           } catch (error) {
             console.error("Error calculating value:", error);
           }
+        } else if (dependentValue === null && formValue !== dependentValue) {
+          updateFormValues(formValueKey, dependentValue);
         }
       } else {
         console.log("AAAAAAA BIG TROUBLE! NO ENTITY DATA!");
@@ -122,10 +123,9 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
 
   const validateAndSetError = (value) => {
     console.log("validate value: ", value);
-    if (value === undefined) {
+    if (value === null) {
       setError("");
-      // removeNotInRangeField(formValueKey);
-      // removeEmptyMandatoryField(formValueKey);
+      removeNotInRangeField(formValueKey);
       return;
     }
 
@@ -133,14 +133,6 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
       value,
       ValidationRules
     );
-
-    if (!isValid) {
-      setError(validationError);
-      addNotInRangeField(formValueKey);
-    } else {
-      setError("");
-      removeNotInRangeField(formValueKey);
-    }
 
     if (MinMax) {
       const numValue = parseFloat(value);
@@ -156,6 +148,14 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
         removeNotInRangeField(formValueKey);
       }
     }
+
+    if (!isValid) {
+      setError(validationError);
+      addNotInRangeField(formValueKey);
+    } else {
+      setError("");
+      removeNotInRangeField(formValueKey);
+    }
   };
 
   useEffect(() => {
@@ -170,8 +170,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     if (value === "") {
       value = null;
       setError(""); // Clear the error state when input is cleared
-      // removeNotInRangeField(formValueKey);
-      // removeEmptyMandatoryField(formValueKey);
+      removeNotInRangeField(formValueKey);
     } else {
       if (Type === "int") {
         value = parseInt(value, 10);

@@ -76,15 +76,6 @@ export const useFormStore = create((set) => ({
       notInRangeField: state.notInRangeField.filter((field) => field !== key),
     })),
 
-  removeEmptyMandatoryField: (key) => {
-    console.log("removeEmptyMandatoryField: ", key);
-    set((state) => ({
-      emptyMandatoryFields: state.emptyMandatoryFields.filter(
-        (field) => field !== key
-      ),
-    }));
-  },
-
   removeFormSection: (path) =>
     set((state) => {
       console.log("removed path: ", path);
