@@ -6,6 +6,7 @@ import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
 import BackButton from "./BackButton";
 import { useNavigate } from "react-router-dom";
+import { getNestedValue } from "../utils/utils";
 
 const AddNewEntity = ({ rootEntity }) => {
   const { formValues, resetFormValues, emptyMandatoryFields, notInRangeField } =
@@ -25,10 +26,14 @@ const AddNewEntity = ({ rootEntity }) => {
       alert("Please start the form before submitting.");
       return;
     }
+    console.log("emptyMandatoryFields before submit: ", emptyMandatoryFields);
 
-    const missingRequiredFields = emptyMandatoryFields.filter(
-      (field) => formValues[field] === "" || formValues[field] === null
-    );
+    const missingRequiredFields = emptyMandatoryFields.filter((field) => {
+      const value = getNestedValue(formValues, field);
+      console.log(`Checking field ${field}:`, value);
+      return value === "" || value === null;
+    });
+    console.log("missingRequiredFields: ", missingRequiredFields);
 
     if (missingRequiredFields.length > 0) {
       console.log("missingRequiredFields: ", missingRequiredFields);
@@ -148,6 +153,7 @@ const AddNewEntity = ({ rootEntity }) => {
               key={formKey}
               entityName={rootEntity}
               isEditMode={true}
+              onRemove={handleRemoveForm}
             />
           </div>
         )}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useFormStore } from "../store/useFormStore";
 import { validateField } from "../utils/validationUtils"; // Import the validation utility
-import { getLength } from "../utils/utils"; // Import the validation utility
+import { getLength, getNestedValue } from "../utils/utils"; // Import the validation utility
 
 const InputForm = ({ entityName, property, path, isEditMode }) => {
   const {
@@ -31,7 +31,14 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
   const [error, setError] = useState(""); // Track validation errors
 
   const formValueKey = path !== "" ? `${path}.${Name}` : Name;
-  const formValue = formValues[formValueKey];
+  var formValue = getNestedValue(formValues, formValueKey);
+
+  useEffect(() => {
+    if (formValue === undefined) {
+      updateFormValues(formValueKey, null);
+      formValue = null;
+    }
+  }, [formValue, formValueKey, updateFormValues]);
 
   // Automatically update IsCalculated fields based on DependsOn with calculation
   useEffect(() => {
@@ -107,22 +114,32 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     if (IsMandatory) {
       if (typeof formValue === "string" && formValue.trim() === "") {
         addEmptyMandatoryField(formValueKey);
-      } else if (
-        formValue === undefined ||
-        formValue === null ||
-        formValue === ""
-      ) {
+      } else if (formValue === null || formValue === "") {
         addEmptyMandatoryField(formValueKey);
       }
     }
   }, [IsMandatory, formValueKey, formValue, addEmptyMandatoryField]);
 
   const validateAndSetError = (value) => {
-    if (value === null || value === undefined || value === "") {
+    console.log("validate value: ", value);
+    if (value === undefined) {
+      setError("");
+      // removeNotInRangeField(formValueKey);
+      // removeEmptyMandatoryField(formValueKey);
+      return;
+    }
+
+    const { isValid, error: validationError } = validateField(
+      value,
+      ValidationRules
+    );
+
+    if (!isValid) {
+      setError(validationError);
+      addNotInRangeField(formValueKey);
+    } else {
       setError("");
       removeNotInRangeField(formValueKey);
-      removeEmptyMandatoryField(formValueKey);
-      return;
     }
 
     if (MinMax) {
@@ -139,18 +156,6 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
         removeNotInRangeField(formValueKey);
       }
     }
-
-    const { isValid, error: validationError } = validateField(
-      value,
-      ValidationRules
-    );
-    if (!isValid) {
-      setError(validationError);
-      addNotInRangeField(formValueKey);
-    } else {
-      setError("");
-      removeNotInRangeField(formValueKey);
-    }
   };
 
   useEffect(() => {
@@ -165,8 +170,8 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     if (value === "") {
       value = null;
       setError(""); // Clear the error state when input is cleared
-      removeNotInRangeField(formValueKey);
-      removeEmptyMandatoryField(formValueKey);
+      // removeNotInRangeField(formValueKey);
+      // removeEmptyMandatoryField(formValueKey);
     } else {
       if (Type === "int") {
         value = parseInt(value, 10);
@@ -174,7 +179,6 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
         value = parseFloat(value);
       }
     }
-
     validateAndSetError(value);
     updateFormValues(formValueKey, value);
   };
