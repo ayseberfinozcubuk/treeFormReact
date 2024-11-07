@@ -3,6 +3,7 @@ export const getNestedValue = (formValues, fullPath) => {
 };
 
 export const getLength = (formValues, keyPrefix) => {
+  // console.log("formValues: ", formValues);
   const uniqueKeys = new Set();
 
   // Loop through the keys in formValues

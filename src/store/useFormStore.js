@@ -81,6 +81,7 @@ export const useFormStore = create((set) => ({
 
   removeFormSection: (path) =>
     set((state) => {
+      console.log("removed path: ", path);
       const updatedFormValues = { ...state.formValues };
       const updatedMandatoryFields = state.emptyMandatoryFields.filter(
         (key) => !key.startsWith(path)
