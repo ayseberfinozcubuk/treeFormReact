@@ -6,10 +6,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import EntityListView from "./components/EntityListView";
-import AddNewEntity from "./components/AddNewEntity";
-import EntityDetails from "./components/EntityDetails";
-import AppWithNavbar from ".//components/AppWithNavbar";
+import AppWithNavbar from "./components/AppWithNavbar";
 import LoginPage from "./components/LoginPage";
 import { useFormStore } from "./store/useFormStore";
 import "primereact/resources/themes/saga-blue/theme.css";
@@ -20,10 +17,14 @@ const App = () => {
   const { setFormData } = useFormStore();
   const [rootEntity, setRootEntity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Auth state without persistence
 
   const handleLogin = () => {
     setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
   };
 
   useEffect(() => {
@@ -48,12 +49,12 @@ const App = () => {
     <Router>
       <Routes>
         {isAuthenticated ? (
-          <>
-            <Route
-              path="/*"
-              element={<AppWithNavbar rootEntity={rootEntity} />}
-            />
-          </>
+          <Route
+            path="/*"
+            element={
+              <AppWithNavbar rootEntity={rootEntity} onLogout={handleLogout} />
+            }
+          />
         ) : (
           <>
             <Route

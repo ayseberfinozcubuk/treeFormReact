@@ -16,15 +16,43 @@ const EntityListView = ({ rootEntity }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:5000/api/${rootEntity}`)
-      .then((response) => {
+    const fetchEntities = async () => {
+      const token = localStorage.getItem("token"); // Retrieve the JWT token from localStorage
+
+      // Log the token value for debugging
+      console.log("Token from localStorage:", token);
+
+      // If token is missing, redirect to login
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        navigate("/login");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/api/${rootEntity}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach token to the Authorization header
+            },
+          }
+        );
+
         setEntities(rootEntity, response.data);
-      })
-      .catch((error) =>
-        console.error(`Error fetching ${rootEntity} list:`, error)
-      );
-  }, [rootEntity, setEntities]);
+      } catch (error) {
+        console.error(`Error fetching ${rootEntity} list:`, error);
+
+        // If we get a 401 error, redirect to login
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("token"); // Clear token
+          navigate("/login"); // Redirect to login
+        }
+      }
+    };
+
+    fetchEntities();
+  }, [rootEntity, setEntities, navigate]);
 
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
@@ -39,18 +67,27 @@ const EntityListView = ({ rootEntity }) => {
     navigate(`/details/${index}`);
   };
 
-  const handleDelete = (id) => {
-    axios
-      .delete(`http://localhost:5000/api/${rootEntity}/${id}`)
-      .then(() => {
-        setEntities(
-          rootEntity,
-          entitiesList.filter((entity) => entity.Id !== id)
-        );
-      })
-      .catch((error) =>
-        console.error(`Error deleting ${rootEntity} with ID ${id}:`, error)
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("token"); // Retrieve the JWT token again for delete requests
+
+      await axios.delete(`http://localhost:5000/api/${rootEntity}/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach token to the Authorization header
+        },
+      });
+
+      setEntities(
+        rootEntity,
+        entitiesList.filter((entity) => entity.Id !== id)
       );
+    } catch (error) {
+      console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
+      if (error.response && error.response.status === 401) {
+        localStorage.removeItem("token"); // Clear token
+        navigate("/login"); // Redirect to login
+      }
+    }
   };
 
   const renderDeleteButton = (rowData) => {
@@ -65,7 +102,6 @@ const EntityListView = ({ rootEntity }) => {
     );
   };
 
-  // Exclude 'Id' and 'list' type properties from columns and get corresponding labels
   const getColumns = (data) => {
     if (data && data.length > 0) {
       const rootProperties = formData[rootEntity]?.Properties || [];
@@ -73,7 +109,7 @@ const EntityListView = ({ rootEntity }) => {
         .filter((prop) => prop.Name !== "Id" && prop.Type !== "list")
         .map((prop) => ({
           field: prop.Name,
-          header: prop.Label || prop.Name, // Use Label if available, otherwise Name
+          header: prop.Label || prop.Name,
         }));
     }
     return [];
@@ -102,17 +138,17 @@ const EntityListView = ({ rootEntity }) => {
               onClick={() => navigate("/add-entity")}
             />
           </div>
-          <DataTable
-            value={entitiesList}
-            selectionMode="single"
-            onSelectionChange={handleRowSelect}
-            scrollable
-            scrollHeight="60vh"
-            tableStyle={{ minWidth: "50rem" }}
-            className="p-datatable-gridlines p-datatable-striped p-datatable-responsive text-sm leading-tight"
-          >
-            {entitiesList.length > 0 &&
-              getColumns(entitiesList).map((col) => (
+          {entitiesList.length > 0 ? (
+            <DataTable
+              value={entitiesList}
+              selectionMode="single"
+              onSelectionChange={handleRowSelect}
+              scrollable
+              scrollHeight="60vh"
+              tableStyle={{ minWidth: "50rem" }}
+              className="p-datatable-gridlines p-datatable-striped p-datatable-responsive text-sm leading-tight"
+            >
+              {getColumns(entitiesList).map((col) => (
                 <Column
                   key={col.field}
                   field={col.field}
@@ -122,12 +158,15 @@ const EntityListView = ({ rootEntity }) => {
                   className="px-3 py-2"
                 />
               ))}
-            <Column
-              body={renderDeleteButton}
-              headerStyle={{ width: "4rem", textAlign: "center" }}
-              bodyStyle={{ textAlign: "center", overflow: "visible" }}
-            />
-          </DataTable>
+              <Column
+                body={renderDeleteButton}
+                headerStyle={{ width: "4rem", textAlign: "center" }}
+                bodyStyle={{ textAlign: "center", overflow: "visible" }}
+              />
+            </DataTable>
+          ) : (
+            <p className="text-center text-gray-500">No data available</p>
+          )}
         </Card>
       </div>
     </div>

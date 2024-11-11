@@ -5,6 +5,7 @@ import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState("");
@@ -15,21 +16,55 @@ const LoginPage = ({ onLogin }) => {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0); // 0 = Sign In, 1 = Sign Up
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (email && password) {
-      // Authentication logic here (mock or actual API call)
-      onLogin();
-      navigate("/"); // Redirect to home after login
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/users/signin",
+          {
+            email,
+            password,
+          }
+        );
+
+        const token = response.data.Token;
+        localStorage.setItem("token", token); // Save token for future use
+        onLogin(); // Update auth state
+        navigate("/"); // Redirect to home page
+      } catch (error) {
+        console.error("Error during sign-in:", error);
+        setError("Invalid login credentials");
+      }
     } else {
       setError("Please fill in all fields.");
     }
   };
 
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (email && password && userName && password === confirmPassword) {
-      // Sign-up logic here (mock or actual API call)
-      onLogin();
-      navigate("/"); // Redirect to home after sign-up
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/users/signup",
+          {
+            email,
+            password,
+            userName,
+          }
+        );
+
+        const token = response.data.Token;
+        if (token) {
+          localStorage.setItem("token", token); // Save token after signup
+          // console.log("handle sign up token: ", token);
+          onLogin(); // Update auth state
+          navigate("/"); // Redirect to home page
+        } else {
+          setError("Signup successful, but no token returned. Please log in.");
+        }
+      } catch (error) {
+        console.error("Error during sign-up:", error);
+        setError("Signup failed.");
+      }
     } else {
       setError("Please fill in all fields correctly.");
     }
@@ -44,12 +79,13 @@ const LoginPage = ({ onLogin }) => {
             {error}
           </div>
         )}
-
         <TabView
           activeIndex={activeIndex}
-          onTabChange={(e) => setActiveIndex(e.index)}
+          onTabChange={(e) => {
+            setActiveIndex(e.index);
+            setError(""); // Clear error on tab change
+          }}
         >
-          {/* Sign-In Tab */}
           <TabPanel header="Sign In">
             <div className="p-field">
               <label htmlFor="email">Email</label>
@@ -81,7 +117,6 @@ const LoginPage = ({ onLogin }) => {
             />
           </TabPanel>
 
-          {/* Sign-Up Tab */}
           <TabPanel header="Sign Up">
             <div className="p-field">
               <label htmlFor="userName">Username</label>

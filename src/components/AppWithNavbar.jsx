@@ -1,4 +1,4 @@
-// AppWithNavbar.jsx
+// components/AppWithNavbar.jsx
 import React from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import EntityListView from "./EntityListView";
@@ -7,7 +7,7 @@ import EntityDetails from "./EntityDetails";
 import { Menubar } from "primereact/menubar";
 import UserProfile from "./UserProfile";
 
-const AppWithNavbar = ({ rootEntity }) => {
+const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
 
   const menuItems = [
@@ -20,6 +20,14 @@ const AppWithNavbar = ({ rootEntity }) => {
       label: `Yeni ${rootEntity} Ekle`,
       icon: "pi pi-plus",
       command: () => navigate("/add-entity"),
+    },
+    {
+      label: "Logout",
+      icon: "pi pi-sign-out",
+      command: () => {
+        onLogout(); // Trigger logout
+        navigate("/login");
+      },
     },
   ];
 
