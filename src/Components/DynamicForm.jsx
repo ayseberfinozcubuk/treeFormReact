@@ -66,7 +66,7 @@ const DynamicForm = ({
           currentValue !== parentId &&
           getNestedValue(formValues, `${path}.Id`) !== undefined
         ) {
-          console.log("added parentId to: ", currentPath);
+          // console.log("added parentId to: ", currentPath);
           updateFormValues(currentPath, parentId);
         }
       }

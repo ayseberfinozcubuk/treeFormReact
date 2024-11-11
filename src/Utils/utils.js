@@ -3,19 +3,32 @@ export const getNestedValue = (formValues, fullPath) => {
 };
 
 export const getLength = (formValues, keyPrefix) => {
-  // console.log("formValues: ", formValues);
   const uniqueKeys = new Set();
+  // console.log("formValues: ", formValues);
+  // console.log("keyPrefix: ", keyPrefix);
+
+  // Escape `keyPrefix` so dots and other characters are interpreted literally
+  const escapedPrefix = keyPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  // Regex to match escaped keyPrefix followed by an index in square brackets, allowing any additional properties
+  const regex = new RegExp(`^${escapedPrefix}\\[(\\d+)\\](\\..*)?$`);
+
+  // Debug: List all keys in formValues to confirm structure
+  // console.log("All keys in formValues:");
+  // Object.keys(formValues).forEach((key) => console.log("key: ", key));
 
   // Loop through the keys in formValues
   Object.keys(formValues).forEach((key) => {
-    // Check if the key starts with the specified keyPrefix and has a valid number in the square brackets
-    const match = key.match(new RegExp(`^${keyPrefix}\\[(\\d+)\\]`));
+    const match = key.match(regex);
     if (match) {
-      // Add the number to the set for uniqueness
+      // console.log(`Match found: ${key}, index: ${match[1]}`);
       uniqueKeys.add(parseInt(match[1], 10));
+    } else {
+      // console.log(`No match for key: ${key} with prefix: ${keyPrefix}`);
     }
   });
 
-  // console.log("AAA COUNT: ", uniqueKeys.size);
+  // console.log("Unique indices found:", Array.from(uniqueKeys));
+  // console.log("COUNT: ", uniqueKeys.size, " OF ", keyPrefix);
   return uniqueKeys.size; // Return the count of unique numbers
 };
