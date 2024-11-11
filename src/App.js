@@ -1,15 +1,16 @@
+// App.jsx
 import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
   Routes,
-  Link,
-  useNavigate,
+  Navigate,
 } from "react-router-dom";
 import EntityListView from "./components/EntityListView";
 import AddNewEntity from "./components/AddNewEntity";
 import EntityDetails from "./components/EntityDetails";
-import { Menubar } from "primereact/menubar";
+import AppWithNavbar from ".//components/AppWithNavbar";
+import LoginPage from "./components/LoginPage";
 import { useFormStore } from "./store/useFormStore";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -19,6 +20,11 @@ const App = () => {
   const { setFormData } = useFormStore();
   const [rootEntity, setRootEntity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
 
   useEffect(() => {
     fetch("/SampleData/sampleDataNew.json")
@@ -40,53 +46,25 @@ const App = () => {
 
   return (
     <Router>
-      <AppWithNavbar rootEntity={rootEntity} />
+      <Routes>
+        {isAuthenticated ? (
+          <>
+            <Route
+              path="/*"
+              element={<AppWithNavbar rootEntity={rootEntity} />}
+            />
+          </>
+        ) : (
+          <>
+            <Route
+              path="/login"
+              element={<LoginPage onLogin={handleLogin} />}
+            />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </>
+        )}
+      </Routes>
     </Router>
-  );
-};
-
-const AppWithNavbar = ({ rootEntity }) => {
-  const navigate = useNavigate();
-
-  const menuItems = [
-    {
-      label: `${rootEntity} Listesini Görüntüle`,
-      icon: "pi pi-list",
-      command: () => navigate("/"),
-    },
-    {
-      label: `Yeni ${rootEntity} Ekle`,
-      icon: "pi pi-plus",
-      command: () => navigate("/add-entity"),
-    },
-  ];
-
-  const start = <span className="text-xl font-semibold">EHBB</span>;
-
-  return (
-    <>
-      <Menubar
-        model={menuItems}
-        start={start}
-        className="bg-gray-800 text-white shadow-md"
-      />
-      <div className="p-6">
-        <Routes>
-          <Route
-            path="/"
-            element={<EntityListView rootEntity={rootEntity} />}
-          />
-          <Route
-            path="/add-entity"
-            element={<AddNewEntity rootEntity={rootEntity} />}
-          />
-          <Route
-            path="/details/:id"
-            element={<EntityDetails rootEntity={rootEntity} />}
-          />
-        </Routes>
-      </div>
-    </>
   );
 };
 
