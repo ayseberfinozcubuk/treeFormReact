@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { v4 as uuidv4 } from "uuid";
 
 export const useFormStore = create((set) => ({
   formValues: {},
@@ -45,8 +44,6 @@ export const useFormStore = create((set) => ({
 
       return { formValues: updatedFormValues };
     }),
-
-  generateNewId: () => uuidv4(), // Generate a new ID without updating state
 
   addIdToFormValues: (path, id) =>
     set((state) => ({

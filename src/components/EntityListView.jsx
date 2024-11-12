@@ -61,6 +61,7 @@ const EntityListView = ({ rootEntity }) => {
 
   const handleRowSelect = (e) => {
     const selected = e.value;
+    console.log("selected: ", selected);
     const index = indexesList[entitiesList.indexOf(selected)];
     selectEntity(rootEntity, index);
     setFormValues(selected);

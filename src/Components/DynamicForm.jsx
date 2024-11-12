@@ -4,6 +4,7 @@ import ListForm from "./ListForm";
 import DeleteButton from "./DeleteButton";
 import { useFormStore } from "../store/useFormStore";
 import { getNestedValue } from "../utils/utils.js";
+import { v4 as uuidv4 } from "uuid";
 
 const DynamicForm = ({
   entityName,
@@ -24,18 +25,17 @@ const DynamicForm = ({
     formData,
     formValues,
     updateFormValues,
-    generateNewId,
     addIdToFormValues,
     removeFormSection,
   } = useFormStore();
 
   useEffect(() => {
     if (!entityId) {
-      const newId = generateNewId();
+      const newId = uuidv4();
       setEntityId(newId);
       addIdToFormValues(path, newId); // Add ID to formValues after setting it in local state
     }
-  }, [entityId, path, generateNewId, addIdToFormValues]);
+  }, [entityId, path, addIdToFormValues]);
 
   useEffect(() => {
     setLoading(true);
