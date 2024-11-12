@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +13,10 @@ const LoginPage = ({ onLogin }) => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(0); // 0 = Sign In, 1 = Sign Up
+
+  // Toggle visibility states
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   const handleSignIn = async () => {
     if (email && password) {
@@ -98,16 +101,21 @@ const LoginPage = ({ onLogin }) => {
                 className="w-full"
               />
             </div>
-            <div className="p-field">
+            <div className="p-field relative">
               <label htmlFor="password">Password</label>
-              <Password
+              <InputText
                 id="password"
+                type={passwordVisible ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                feedback={false}
-                toggleMask
                 className="w-full"
+              />
+              <i
+                className={`absolute right-3 top-9 pi ${
+                  passwordVisible ? "pi-eye-slash" : "pi-eye"
+                } cursor-pointer`}
+                onClick={() => setPasswordVisible(!passwordVisible)}
               />
             </div>
             <Button
@@ -139,28 +147,40 @@ const LoginPage = ({ onLogin }) => {
                 className="w-full"
               />
             </div>
-            <div className="p-field">
+            <div className="p-field relative">
               <label htmlFor="password">Password</label>
-              <Password
+              <InputText
                 id="password"
+                type={passwordVisible ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                feedback={false}
-                toggleMask
                 className="w-full"
               />
+              <i
+                className={`absolute right-3 top-9 pi ${
+                  passwordVisible ? "pi-eye-slash" : "pi-eye"
+                } cursor-pointer`}
+                onClick={() => setPasswordVisible(!passwordVisible)}
+              />
             </div>
-            <div className="p-field">
+            <div className="p-field relative">
               <label htmlFor="confirmPassword">Confirm Password</label>
-              <Password
+              <InputText
                 id="confirmPassword"
+                type={confirmPasswordVisible ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm your password"
-                feedback={false}
-                toggleMask
                 className="w-full"
+              />
+              <i
+                className={`absolute right-3 top-9 pi ${
+                  confirmPasswordVisible ? "pi-eye-slash" : "pi-eye"
+                } cursor-pointer`}
+                onClick={() =>
+                  setConfirmPasswordVisible(!confirmPasswordVisible)
+                }
               />
             </div>
             <Button

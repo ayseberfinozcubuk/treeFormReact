@@ -10,33 +10,45 @@ import { Button } from "primereact/button";
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
 
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    onLogout();
+    navigate("/login");
+  };
+
   const menuItems = [
     {
       label: `${rootEntity} Listesini Görüntüle`,
       icon: "pi pi-list",
       command: () => navigate("/"),
+      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
     {
       label: `Yeni ${rootEntity} Ekle`,
       icon: "pi pi-plus",
       command: () => navigate("/add-entity"),
+      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
     {
       label: "Logout",
       icon: "pi pi-sign-out",
-      command: () => {
-        onLogout(); // Trigger logout
-        navigate("/login");
-      },
+      command: handleLogout,
+      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
   ];
 
-  const start = <span className="text-xl font-semibold">EHBB</span>;
+  const start = (
+    <span className="text-xl font-medium text-gray-200 hover:text-white">
+      EHBB
+    </span>
+  );
   const end = (
     <Button
       icon="pi pi-user"
-      className="p-button-text text-white"
+      className="p-button-text text-gray-200 font-medium hover:text-white mx-3"
       onClick={() => navigate("/profile")}
+      style={{ fontSize: "0.95rem" }}
     />
   );
 
@@ -46,7 +58,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         model={menuItems}
         start={start}
         end={end}
-        className="bg-gray-800 text-white shadow-md"
+        className="bg-gray-800 text-white"
       />
       <div className="p-6">
         <Routes>

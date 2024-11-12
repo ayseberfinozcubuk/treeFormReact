@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
 import { Button } from "primereact/button";
-import { TabView, TabPanel } from "primereact/tabview";
 import axios from "axios";
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [activeIndex, setActiveIndex] = useState(0); // 0 = Profile, 1 = Update Password
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+
+  // Toggle password visibility states
+  const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -27,11 +31,6 @@ const UserProfile = () => {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userId = storedUser?.Id;
 
-      if (!userId) {
-        console.error("User ID is missing.");
-        return;
-      }
-
       const response = await axios.put(
         `http://localhost:5000/api/users/${userId}`,
         {
@@ -41,7 +40,6 @@ const UserProfile = () => {
       );
 
       if (response.status === 200) {
-        console.log("Profile updated successfully");
         localStorage.setItem(
           "user",
           JSON.stringify({ ...storedUser, Email: email, UserName: userName })
@@ -52,21 +50,42 @@ const UserProfile = () => {
         setError("Failed to update profile");
       }
     } catch (error) {
-      console.error("Error updating profile:", error);
       setError("Error updating profile");
     }
   };
 
-  const handlePasswordUpdate = () => {
+  const handlePasswordUpdate = async () => {
+    setError("");
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match");
+      setError("New password and confirmation do not match.");
       return;
     }
-    // Placeholder for password update logic
-    console.log("Password updated successfully");
-    setNewPassword("");
-    setConfirmPassword("");
-    setError("");
+
+    try {
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      const userId = storedUser?.Id;
+
+      const response = await axios.put(
+        `http://localhost:5000/api/users/${userId}/change-password`,
+        {
+          currentPassword,
+          newPassword,
+          confirmNewPassword: confirmPassword,
+        }
+      );
+
+      if (response.status === 200) {
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setError("Password updated successfully");
+        setShowPasswordFields(false);
+      } else {
+        setError(response.data || "Failed to update password");
+      }
+    } catch (error) {
+      setError("Error updating password: " + error.response.data);
+    }
   };
 
   return (
@@ -78,114 +97,167 @@ const UserProfile = () => {
             {error}
           </div>
         )}
-        <TabView
-          activeIndex={activeIndex}
-          onTabChange={(e) => setActiveIndex(e.index)}
-        >
-          <TabPanel header="Profile">
-            <div className="p-field">
-              <label
-                htmlFor="userName"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                Username
-              </label>
-              <InputText
-                id="userName"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-                placeholder="Enter your username"
-                className="w-full"
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="p-field">
-              <label
-                htmlFor="email"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                Email
-              </label>
-              <InputText
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full"
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="mt-6 flex justify-center space-x-4">
-              {isEditing ? (
-                <>
-                  <Button
-                    label="Cancel"
-                    icon="pi pi-times"
-                    className="p-button-outlined p-button-secondary"
-                    onClick={() => setIsEditing(false)}
-                  />
-                  <Button
-                    label="Save"
-                    icon="pi pi-check"
-                    className="p-button p-button-success"
-                    onClick={handleSave}
-                  />
-                </>
-              ) : (
-                <Button
-                  label="Edit Profile"
-                  icon="pi pi-pencil"
-                  className="p-button p-button-primary"
-                  onClick={() => setIsEditing(true)}
-                />
-              )}
-            </div>
-          </TabPanel>
 
-          <TabPanel header="Update Password">
-            <div className="p-field">
+        {/* User Information */}
+        <div className="p-field">
+          <label
+            htmlFor="userName"
+            className="block text-gray-700 font-medium mb-2"
+          >
+            Username
+          </label>
+          <InputText
+            id="userName"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Enter your username"
+            className="w-full"
+            disabled={!isEditing}
+          />
+        </div>
+        <div className="p-field">
+          <label
+            htmlFor="email"
+            className="block text-gray-700 font-medium mb-2"
+          >
+            Email
+          </label>
+          <InputText
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            className="w-full"
+            disabled={!isEditing}
+          />
+        </div>
+        <div className="mt-6 flex justify-center space-x-4">
+          {isEditing ? (
+            <>
+              <Button
+                label="Cancel"
+                icon="pi pi-times"
+                className="p-button-outlined p-button-secondary"
+                onClick={() => setIsEditing(false)}
+              />
+              <Button
+                label="Save"
+                icon="pi pi-check"
+                className="p-button p-button-success"
+                onClick={handleSave}
+              />
+            </>
+          ) : (
+            <Button
+              label="Edit Profile"
+              icon="pi pi-pencil"
+              className="p-button p-button-primary"
+              onClick={() => setIsEditing(true)}
+            />
+          )}
+        </div>
+
+        {/* Toggle Password Fields */}
+        <div className="mt-4 flex justify-center">
+          {!showPasswordFields ? (
+            <Button
+              label="Update Password"
+              icon="pi pi-key"
+              onClick={() => setShowPasswordFields(true)}
+              className="p-button-warning"
+            />
+          ) : (
+            <Button
+              icon="pi pi-times"
+              className="p-button-text p-button-danger"
+              onClick={() => setShowPasswordFields(false)}
+              label="Cancel Password Update"
+            />
+          )}
+        </div>
+
+        {/* Password Update Fields */}
+        {showPasswordFields && (
+          <div className="mt-6 space-y-4 border-t pt-4">
+            <div className="p-field relative">
+              <label
+                htmlFor="currentPassword"
+                className="block text-gray-700 font-medium mb-2"
+              >
+                Current Password
+              </label>
+              <InputText
+                id="currentPassword"
+                type={currentPasswordVisible ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                className="w-full"
+              />
+              <i
+                className={`absolute right-3 top-9 pi ${
+                  currentPasswordVisible ? "pi-eye-slash" : "pi-eye"
+                } cursor-pointer`}
+                onClick={() =>
+                  setCurrentPasswordVisible(!currentPasswordVisible)
+                }
+              />
+            </div>
+            <div className="p-field relative">
               <label
                 htmlFor="newPassword"
                 className="block text-gray-700 font-medium mb-2"
               >
                 New Password
               </label>
-              <Password
+              <InputText
                 id="newPassword"
+                type={newPasswordVisible ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
-                feedback={false}
-                toggleMask
                 className="w-full"
               />
+              <i
+                className={`absolute right-3 top-9 pi ${
+                  newPasswordVisible ? "pi-eye-slash" : "pi-eye"
+                } cursor-pointer`}
+                onClick={() => setNewPasswordVisible(!newPasswordVisible)}
+              />
             </div>
-            <div className="p-field">
+            <div className="p-field relative">
               <label
                 htmlFor="confirmPassword"
                 className="block text-gray-700 font-medium mb-2"
               >
                 Confirm New Password
               </label>
-              <Password
+              <InputText
                 id="confirmPassword"
+                type={confirmPasswordVisible ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
-                feedback={false}
-                toggleMask
                 className="w-full"
+              />
+              <i
+                className={`absolute right-3 top-9 pi ${
+                  confirmPasswordVisible ? "pi-eye-slash" : "pi-eye"
+                } cursor-pointer`}
+                onClick={() =>
+                  setConfirmPasswordVisible(!confirmPasswordVisible)
+                }
               />
             </div>
             <Button
-              label="Update Password"
-              icon="pi pi-key"
+              label="Save New Password"
+              icon="pi pi-check"
               onClick={handlePasswordUpdate}
-              className="w-full p-button mt-4"
+              className="w-full p-button-success mt-4"
             />
-          </TabPanel>
-        </TabView>
+          </div>
+        )}
       </div>
     </div>
   );
