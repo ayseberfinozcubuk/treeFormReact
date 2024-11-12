@@ -1,11 +1,11 @@
-// components/AppWithNavbar.jsx
+// AppWithNavbar.jsx
 import React from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import EntityListView from "./EntityListView";
 import AddNewEntity from "./AddNewEntity";
 import EntityDetails from "./EntityDetails";
 import { Menubar } from "primereact/menubar";
-import UserProfile from "./UserProfile";
+import { Button } from "primereact/button";
 
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
@@ -32,7 +32,13 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   ];
 
   const start = <span className="text-xl font-semibold">EHBB</span>;
-  const end = <UserProfile />;
+  const end = (
+    <Button
+      icon="pi pi-user"
+      className="p-button-text text-white"
+      onClick={() => navigate("/profile")}
+    />
+  );
 
   return (
     <>

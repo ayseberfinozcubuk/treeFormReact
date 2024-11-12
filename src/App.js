@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import AppWithNavbar from "./components/AppWithNavbar";
 import LoginPage from "./components/LoginPage";
+import UserProfile from "./components/UserProfile"; // Import UserProfile
 import { useFormStore } from "./store/useFormStore";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -49,12 +50,19 @@ const App = () => {
     <Router>
       <Routes>
         {isAuthenticated ? (
-          <Route
-            path="/*"
-            element={
-              <AppWithNavbar rootEntity={rootEntity} onLogout={handleLogout} />
-            }
-          />
+          <>
+            <Route
+              path="/*"
+              element={
+                <AppWithNavbar
+                  rootEntity={rootEntity}
+                  onLogout={handleLogout}
+                />
+              }
+            />
+            <Route path="/profile" element={<UserProfile />} />{" "}
+            {/* Profile route */}
+          </>
         ) : (
           <>
             <Route

@@ -1,4 +1,3 @@
-// components/LoginPage.jsx
 import React, { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
@@ -27,8 +26,9 @@ const LoginPage = ({ onLogin }) => {
           }
         );
 
-        const token = response.data.Token;
-        localStorage.setItem("token", token); // Save token for future use
+        const { Token, User } = response.data;
+        localStorage.setItem("token", Token); // Save token for future use
+        localStorage.setItem("user", JSON.stringify(User)); // Save user data
         onLogin(); // Update auth state
         navigate("/"); // Redirect to home page
       } catch (error) {
@@ -52,10 +52,10 @@ const LoginPage = ({ onLogin }) => {
           }
         );
 
-        const token = response.data.Token;
-        if (token) {
-          localStorage.setItem("token", token); // Save token after signup
-          // console.log("handle sign up token: ", token);
+        const { Token, User } = response.data;
+        if (Token) {
+          localStorage.setItem("token", Token); // Save token after signup
+          localStorage.setItem("user", JSON.stringify(User)); // Save user data
           onLogin(); // Update auth state
           navigate("/"); // Redirect to home page
         } else {
