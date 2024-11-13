@@ -14,7 +14,6 @@ const UserListView = () => {
   const [error, setError] = useState("");
   const [tempRole, setTempRole] = useState(null);
 
-  // Fetch users and roles on mount
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -53,7 +52,9 @@ const UserListView = () => {
       const response = await axios.post(
         "http://localhost:5000/api/users/add",
         newUser,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       setUsers([...users, response.data]);
       setIsDialogVisible(false);
@@ -86,19 +87,21 @@ const UserListView = () => {
   const handleSaveRoleChange = async (rowData) => {
     try {
       const token = localStorage.getItem("token");
-      const updatedUser = { ...rowData, Role: tempRole }; // Update the role in the rowData object
+      const updatedUser = { ...rowData, Role: tempRole };
 
       await axios.put(
         `http://localhost:5000/api/users/${rowData.Id}`,
         updatedUser,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       setUsers((prevUsers) =>
         prevUsers.map((user) => (user.Id === rowData.Id ? updatedUser : user))
       );
 
-      setEditableRow(null); // Exit edit mode
+      setEditableRow(null);
     } catch (error) {
       setError("Failed to update role.");
     }
@@ -117,7 +120,11 @@ const UserListView = () => {
           options={roles.map((role) => ({ label: role, value: role }))}
           onChange={(e) => handleRoleChange(e.value)}
           placeholder="Select Role"
-          style={{ width: "100%" }}
+          className="text-sm pl-2 text-left border-2 border-gray-300 rounded flex items-center"
+          style={{
+            width: "100%",
+            height: "2rem",
+          }}
         />
       );
     } else {
@@ -126,82 +133,101 @@ const UserListView = () => {
   };
 
   return (
-    <div className="p-4">
-      <h2>User Management</h2>
-      {error && <p className="text-red-600">{error}</p>}
-      <div className="mb-4">
+    <div className="p-4 flex justify-center">
+      <div className="w-full max-w-4xl">
+        <h2 className="mb-4 text-2xl font-semibold text-center">
+          User Management
+        </h2>
+        {error && <p className="text-red-600 mb-2">{error}</p>}
+
         <Button
           label="Add User"
           icon="pi pi-plus"
           onClick={handleOpenDialog}
-          className="mb-2"
+          className="mb-4"
+        />
+
+        <DataTable
+          value={users}
+          className="p-datatable-sm border rounded-lg shadow-md overflow-hidden"
+          style={{ maxWidth: "100%", tableLayout: "auto" }}
+        >
+          <Column
+            header=""
+            body={(rowData, { rowIndex }) => (
+              <Button
+                icon="pi pi-pencil"
+                className="p-button-text"
+                onClick={() => handleEditRole(rowIndex, rowData.Role)}
+                disabled={editableRow !== null}
+              />
+            )}
+            style={{ width: "4rem" }}
+          />
+
+          {users.length > 0 &&
+            Object.keys(users[0])
+              .filter((key) => key !== "Id")
+              .map((key) => (
+                <Column
+                  key={key}
+                  field={key}
+                  header={key}
+                  body={(rowData, { rowIndex }) =>
+                    renderField(rowData, key, rowIndex)
+                  }
+                  className="text-sm px-3 py-2 truncate"
+                  style={{
+                    flex: key === "Role" ? "none" : "1", // Flexible width for other columns, fixed for Role
+                    width: key === "Role" ? "8rem" : "auto",
+                    margin: "0.5rem", // Margin for spacing
+                  }}
+                />
+              ))}
+
+          <Column
+            body={(rowData) => (
+              <Button
+                icon="pi pi-trash"
+                className="p-button-danger p-button-text"
+                onClick={() => handleDeleteUser(rowData.Id)}
+              />
+            )}
+            style={{ width: "4rem" }}
+          />
+
+          <Column
+            body={(rowData, { rowIndex }) =>
+              editableRow === rowIndex ? (
+                <div className="flex gap-2">
+                  <Button
+                    icon="pi pi-check"
+                    className="p-button-success p-button-text text-sm"
+                    onClick={() => handleSaveRoleChange(rowData)}
+                    tooltip="Save"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  <Button
+                    icon="pi pi-times"
+                    className="p-button-secondary p-button-text text-sm"
+                    onClick={handleCancelRoleChange}
+                    tooltip="Cancel"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                </div>
+              ) : null
+            }
+            style={{ width: "8rem" }}
+          />
+        </DataTable>
+
+        <AddUserDialog
+          visible={isDialogVisible}
+          onHide={() => setIsDialogVisible(false)}
+          onSave={handleSaveNewUser}
+          roles={roles}
         />
       </div>
-
-      <DataTable value={users} className="p-datatable-sm">
-        <Column
-          body={(rowData, { rowIndex }) => (
-            <Button
-              icon="pi pi-pencil"
-              className="p-button-text"
-              onClick={() => handleEditRole(rowIndex, rowData.Role)}
-              disabled={editableRow !== null}
-              style={{ width: "2.5rem" }}
-            />
-          )}
-        />
-        {users.length > 0 &&
-          Object.keys(users[0])
-            .filter((key) => key !== "Id")
-            .map((key) => (
-              <Column
-                key={key}
-                field={key}
-                header={key}
-                body={(rowData, { rowIndex }) =>
-                  renderField(rowData, key, rowIndex)
-                }
-                style={{ width: "10rem" }}
-              />
-            ))}
-        <Column
-          body={(rowData) => (
-            <Button
-              icon="pi pi-trash"
-              className="p-button-danger p-button-text"
-              onClick={() => handleDeleteUser(rowData.Id)}
-              style={{ width: "2.5rem" }}
-            />
-          )}
-        />
-        <Column
-          body={(rowData, { rowIndex }) =>
-            editableRow === rowIndex ? (
-              <div className="flex gap-2" style={{ minWidth: "6rem" }}>
-                <Button
-                  label="Save"
-                  icon="pi pi-check"
-                  className="p-button-success p-button-text"
-                  onClick={() => handleSaveRoleChange(rowData)}
-                />
-                <Button
-                  label="Cancel"
-                  icon="pi pi-times"
-                  className="p-button-secondary p-button-text"
-                  onClick={handleCancelRoleChange}
-                />
-              </div>
-            ) : null
-          }
-        />
-      </DataTable>
-
-      <AddUserDialog
-        visible={isDialogVisible}
-        onHide={() => setIsDialogVisible(false)}
-        onSave={handleSaveNewUser}
-        roles={roles}
-      />
     </div>
   );
 };
