@@ -1,9 +1,9 @@
-// AppWithNavbar.jsx
 import React from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import EntityListView from "./EntityListView";
 import AddNewEntity from "./AddNewEntity";
 import EntityDetails from "./EntityDetails";
+import UserListView from "./UserListView"; // Import the new UserListView component
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
 
@@ -31,6 +31,12 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
       className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
     {
+      label: "User Settings",
+      icon: "pi pi-users",
+      command: () => navigate("/user-settings"),
+      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
+    },
+    {
       label: "Logout",
       icon: "pi pi-sign-out",
       command: handleLogout,
@@ -43,6 +49,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
       EHBB
     </span>
   );
+
   const end = (
     <Button
       icon="pi pi-user"
@@ -73,6 +80,10 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
           <Route
             path="/details/:id"
             element={<EntityDetails rootEntity={rootEntity} />}
+          />
+          <Route
+            path="/user-settings"
+            element={<UserListView />} // Add route for UserListView
           />
         </Routes>
       </div>
