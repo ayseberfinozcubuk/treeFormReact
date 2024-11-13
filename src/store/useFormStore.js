@@ -113,10 +113,13 @@ export const useFormStore = create((set) => ({
 
         if (Array.isArray(value)) {
           value.forEach((item, index) => {
-            Object.assign(
-              flattened,
-              flattenObject(item, `${fullKey}[${index}]`)
-            );
+            if (item !== null && item !== undefined) {
+              // Check for null or undefined
+              Object.assign(
+                flattened,
+                flattenObject(item, `${fullKey}[${index}]`)
+              );
+            }
           });
         } else if (typeof value === "object" && value !== null) {
           Object.assign(flattened, flattenObject(value, fullKey));

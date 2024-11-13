@@ -32,3 +32,43 @@ export const getLength = (formValues, keyPrefix) => {
   // console.log("COUNT: ", uniqueKeys.size, " OF ", keyPrefix);
   return uniqueKeys.size; // Return the count of unique numbers
 };
+
+export const convertToNestedJson = (formValues) => {
+  const result = {};
+  Object.keys(formValues).forEach((key) => {
+    const value = formValues[key];
+    const keys = key.split(".").filter(Boolean);
+
+    keys.reduce((acc, currKey, idx) => {
+      const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
+      if (arrayMatch) {
+        const arrayKey = arrayMatch[1];
+        const arrayIndex = parseInt(arrayMatch[2], 10);
+
+        acc[arrayKey] = acc[arrayKey] || [];
+        acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
+
+        if (idx === keys.length - 1) {
+          acc[arrayKey][arrayIndex] = value;
+        }
+        return acc[arrayKey][arrayIndex];
+      } else {
+        if (idx === keys.length - 1) {
+          acc[currKey] = value;
+        } else {
+          acc[currKey] = acc[currKey] || {};
+        }
+        return acc[currKey];
+      }
+    }, result);
+  });
+
+  // Remove null entries from arrays
+  Object.keys(result).forEach((key) => {
+    if (Array.isArray(result[key])) {
+      result[key] = result[key].filter((item) => item !== null);
+    }
+  });
+
+  return result;
+};

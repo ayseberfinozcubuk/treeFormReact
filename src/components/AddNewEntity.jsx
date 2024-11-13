@@ -6,7 +6,7 @@ import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
 import BackButton from "./BackButton";
 import { useNavigate } from "react-router-dom";
-import { getNestedValue } from "../utils/utils";
+import { getNestedValue, convertToNestedJson } from "../utils/utils";
 
 const AddNewEntity = ({ rootEntity }) => {
   const { formValues, resetFormValues, emptyMandatoryFields, notInRangeField } =
@@ -45,41 +45,6 @@ const AddNewEntity = ({ rootEntity }) => {
       alert("Please ensure all fields are within the allowed range.");
       return;
     }
-
-    const convertToNestedJson = (formValues) => {
-      const result = {};
-
-      Object.keys(formValues).forEach((key) => {
-        const value = formValues[key];
-        const keys = key.split(".").filter(Boolean);
-
-        keys.reduce((acc, currKey, idx) => {
-          const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
-          if (arrayMatch) {
-            const arrayKey = arrayMatch[1];
-            const arrayIndex = parseInt(arrayMatch[2], 10);
-
-            acc[arrayKey] = acc[arrayKey] || [];
-            acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
-
-            if (idx === keys.length - 1) {
-              acc[arrayKey][arrayIndex] = value;
-            }
-
-            return acc[arrayKey][arrayIndex];
-          } else {
-            if (idx === keys.length - 1) {
-              acc[currKey] = value;
-            } else {
-              acc[currKey] = acc[currKey] || {};
-            }
-            return acc[currKey];
-          }
-        }, result);
-      });
-
-      return result;
-    };
 
     const structuredJson = convertToNestedJson(formValues);
     // console.log("sending to back: ", structuredJson);

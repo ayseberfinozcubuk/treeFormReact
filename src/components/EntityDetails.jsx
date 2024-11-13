@@ -7,6 +7,7 @@ import { useFormStore } from "../store/useFormStore";
 import { useEntityStore } from "../store/useEntityStore";
 import { InputSwitch } from "primereact/inputswitch";
 import { useNavigate } from "react-router-dom";
+import { convertToNestedJson } from "../utils/utils";
 
 const EntityDetails = ({ rootEntity }) => {
   const { formValues, setFormValues, emptyMandatoryFields, notInRangeField } =
@@ -51,39 +52,6 @@ const EntityDetails = ({ rootEntity }) => {
     } catch (error) {
       console.error("Update error:", error);
     }
-  };
-
-  const convertToNestedJson = (formValues) => {
-    const result = {};
-    Object.keys(formValues).forEach((key) => {
-      const value = formValues[key];
-      const keys = key.split(".").filter(Boolean);
-
-      keys.reduce((acc, currKey, idx) => {
-        const arrayMatch = currKey.match(/(\w+)\[(\d+)\]/);
-        if (arrayMatch) {
-          const arrayKey = arrayMatch[1];
-          const arrayIndex = parseInt(arrayMatch[2], 10);
-
-          acc[arrayKey] = acc[arrayKey] || [];
-          acc[arrayKey][arrayIndex] = acc[arrayKey][arrayIndex] || {};
-
-          if (idx === keys.length - 1) {
-            acc[arrayKey][arrayIndex] = value;
-          }
-          return acc[arrayKey][arrayIndex];
-        } else {
-          if (idx === keys.length - 1) {
-            acc[currKey] = value;
-          } else {
-            acc[currKey] = acc[currKey] || {};
-          }
-          return acc[currKey];
-        }
-      }, result);
-    });
-
-    return result;
   };
 
   const handleCancelChanges = () => {
