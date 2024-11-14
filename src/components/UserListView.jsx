@@ -47,13 +47,17 @@ const UserListView = () => {
   };
 
   const handleSaveNewUser = async (newUser) => {
+    console.log("newUser: ", newUser);
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
         "http://localhost:5000/api/users/add",
         newUser,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
       setUsers([...users, response.data]);

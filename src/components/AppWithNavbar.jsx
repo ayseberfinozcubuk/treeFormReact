@@ -1,14 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import EntityListView from "./EntityListView";
 import AddNewEntity from "./AddNewEntity";
 import EntityDetails from "./EntityDetails";
-import UserListView from "./UserListView"; // Import the new UserListView component
+import UserListView from "./UserListView";
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
 
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
+  const [role, setRole] = useState("read");
+
+  useEffect(() => {
+    // Check if the user is an admin by accessing the stored user data
+    const user = JSON.parse(localStorage.getItem("user"));
+    console.log("user: ", user);
+    if (user && user.Role) {
+      setRole(user.Role);
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -17,6 +27,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
     navigate("/login");
   };
 
+  // Define menu items
   const menuItems = [
     {
       label: `${rootEntity} Listesini Görüntüle`,
@@ -24,18 +35,30 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
       command: () => navigate("/"),
       className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
-    {
-      label: `Yeni ${rootEntity} Ekle`,
-      icon: "pi pi-plus",
-      command: () => navigate("/add-entity"),
-      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
-    },
-    {
-      label: "User Settings",
-      icon: "pi pi-users",
-      command: () => navigate("/user-settings"),
-      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
-    },
+    ...(role !== "read"
+      ? [
+          {
+            label: `Yeni ${rootEntity} Ekle`,
+            icon: "pi pi-plus",
+            command: () => navigate("/add-entity"),
+            className:
+              "text-base text-gray-200 font-medium hover:text-white mx-3",
+          },
+        ]
+      : []),
+
+    // Only show User Settings if the user is an admin
+    ...(role === "admin"
+      ? [
+          {
+            label: "User Settings",
+            icon: "pi pi-users",
+            command: () => navigate("/user-settings"),
+            className:
+              "text-base text-gray-200 font-medium hover:text-white mx-3",
+          },
+        ]
+      : []),
     {
       label: "Logout",
       icon: "pi pi-sign-out",
@@ -81,10 +104,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
             path="/details/:id"
             element={<EntityDetails rootEntity={rootEntity} />}
           />
-          <Route
-            path="/user-settings"
-            element={<UserListView />} // Add route for UserListView
-          />
+          <Route path="/user-settings" element={<UserListView />} />
         </Routes>
       </div>
     </>
