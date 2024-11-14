@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
 import SubmitButton from "./SubmitButton";
-import CancelButton from "./CancelButton"; // Add CancelButton here
+import CancelButton from "./CancelButton";
 import axios from "axios";
 import { useFormStore } from "../store/useFormStore";
 import { useEntityStore } from "../store/useEntityStore";
@@ -14,9 +14,16 @@ const EntityDetails = ({ rootEntity }) => {
     useFormStore();
   const { selectedEntity } = useEntityStore();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [role, setRole] = useState("read");
   const navigate = useNavigate();
 
-  // Load selected entity into formValues when component mounts or selectedEntity changes
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.Role) {
+      setRole(user.Role);
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedEntity) {
       setFormValues(selectedEntity);
@@ -39,8 +46,6 @@ const EntityDetails = ({ rootEntity }) => {
     }
 
     const structuredJson = convertToNestedJson(formValues);
-
-    console.log("structured json: ", structuredJson);
 
     try {
       await axios.put(
@@ -69,14 +74,19 @@ const EntityDetails = ({ rootEntity }) => {
           <label className="form-label text-gray-700 font-medium">
             {rootEntity}
           </label>
-          <InputSwitch
-            checked={isEditMode}
-            onChange={(e) => setIsEditMode(e.value)}
-            className="ml-4"
-          />
-          <span className="ml-2">
-            {isEditMode ? "Düzenleme Modu" : "Görüntüleme Modu"}
-          </span>
+
+          {role !== "read" && (
+            <>
+              <InputSwitch
+                checked={isEditMode}
+                onChange={(e) => setIsEditMode(e.value)}
+                className="ml-4"
+              />
+              <span className="ml-2">
+                {isEditMode ? "Düzenleme Modu" : "Görüntüleme Modu"}
+              </span>
+            </>
+          )}
         </div>
 
         <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
@@ -89,9 +99,7 @@ const EntityDetails = ({ rootEntity }) => {
               onClick={handleSubmit}
               className="bg-blue-500 text-white"
             />
-            <CancelButton
-              onClick={handleCancelChanges} // Call handleCancelChanges when clicked
-            />
+            <CancelButton onClick={handleCancelChanges} />
           </>
         )}
       </div>

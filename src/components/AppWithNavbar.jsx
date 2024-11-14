@@ -14,7 +14,6 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   useEffect(() => {
     // Check if the user is an admin by accessing the stored user data
     const user = JSON.parse(localStorage.getItem("user"));
-    console.log("user: ", user);
     if (user && user.Role) {
       setRole(user.Role);
     }

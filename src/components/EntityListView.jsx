@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
@@ -13,16 +13,22 @@ const EntityListView = ({ rootEntity }) => {
   const { entities, entityIndexes, setEntities, selectEntity } =
     useEntityStore();
   const { setFormValues, formData } = useFormStore();
+  const [role, setRole] = useState("read");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchEntities = async () => {
-      const token = localStorage.getItem("token"); // Retrieve the JWT token from localStorage
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && user.Role) {
+      setRole(user.Role);
+    }
+  }, []);
 
-      // Log the token value for debugging
+  useEffect(() => {
+    const fetchEntities = async () => {
+      const token = localStorage.getItem("token");
+
       console.log("Token from localStorage:", token);
 
-      // If token is missing, redirect to login
       if (!token) {
         console.error("No token found, redirecting to login.");
         navigate("/login");
@@ -34,7 +40,7 @@ const EntityListView = ({ rootEntity }) => {
           `http://localhost:5000/api/${rootEntity}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Attach token to the Authorization header
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -43,10 +49,9 @@ const EntityListView = ({ rootEntity }) => {
       } catch (error) {
         console.error(`Error fetching ${rootEntity} list:`, error);
 
-        // If we get a 401 error, redirect to login
         if (error.response && error.response.status === 401) {
-          localStorage.removeItem("token"); // Clear token
-          navigate("/login"); // Redirect to login
+          localStorage.removeItem("token");
+          navigate("/login");
         }
       }
     };
@@ -70,11 +75,11 @@ const EntityListView = ({ rootEntity }) => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token"); // Retrieve the JWT token again for delete requests
+      const token = localStorage.getItem("token");
 
       await axios.delete(`http://localhost:5000/api/${rootEntity}/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Attach token to the Authorization header
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -85,8 +90,8 @@ const EntityListView = ({ rootEntity }) => {
     } catch (error) {
       console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token"); // Clear token
-        navigate("/login"); // Redirect to login
+        localStorage.removeItem("token");
+        navigate("/login");
       }
     }
   };
@@ -132,12 +137,14 @@ const EntityListView = ({ rootEntity }) => {
             <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
               {rootEntity} Listesi
             </h1>
-            <Button
-              label={`Yeni ${rootEntity} Ekle`}
-              icon="pi pi-plus"
-              className="p-button-success"
-              onClick={() => navigate("/add-entity")}
-            />
+            {role !== "read" && (
+              <Button
+                label={`Yeni ${rootEntity} Ekle`}
+                icon="pi pi-plus"
+                className="p-button-success"
+                onClick={() => navigate("/add-entity")}
+              />
+            )}
           </div>
           {entitiesList.length > 0 ? (
             <DataTable

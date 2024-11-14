@@ -93,16 +93,22 @@ const UserListView = () => {
       const token = localStorage.getItem("token");
       const updatedUser = { ...rowData, Role: tempRole };
 
+      console.log("updated user: ", updatedUser);
+
+      // Use the new endpoint to update only the role
       await axios.put(
-        `http://localhost:5000/api/users/${rowData.Id}`,
-        updatedUser,
+        `http://localhost:5000/api/users/${rowData.Id}/role`,
+        { Role: tempRole },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
+      // Update the local state with the new role
       setUsers((prevUsers) =>
-        prevUsers.map((user) => (user.Id === rowData.Id ? updatedUser : user))
+        prevUsers.map((user) =>
+          user.Id === rowData.Id ? { ...user, Role: tempRole } : user
+        )
       );
 
       setEditableRow(null);
