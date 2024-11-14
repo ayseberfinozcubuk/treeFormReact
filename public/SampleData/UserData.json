@@ -1,0 +1,74 @@
+{
+  "Name": "User",
+  "Properties": [
+    {
+      "Name": "Id",
+      "Label": "",
+      "Type": "Guid",
+      "IsMandatory": true,
+      "IsUnique": true
+    },
+    {
+      "Name": "UserName",
+      "Label": "Kullanıcı Adı",
+      "Type": "string",
+      "IsMandatory": true,
+      "ValidationRules": {
+        "isAlphanumeric": true,
+        "minLength": 3,
+        "maxLength": 20,
+        "noSpaces": true,
+        "startsWith": "",
+        "mustContain": [""]
+      }
+    },
+    {
+      "Name": "Email",
+      "Label": "Email",
+      "Type": "mail",
+      "IsMandatory": true,
+      "IsUnique": true
+    },
+    {
+      "Name": "Role",
+      "Label": "Yetki",
+      "Type": "enum",
+      "EnumType": "Role",
+      "EnumValues": [
+        {
+          "Value": "admin",
+          "Label": "Admin"
+        },
+        {
+          "Value": "read",
+          "Label": "Okuma"
+        },
+        {
+          "Value": "read-write",
+          "Label": "Düzenleme"
+        }
+      ],
+      "IsMandatory": true
+    },
+    {
+      "Name": "Password",
+      "Label": "Şifre",
+      "Type": "password",
+      "IsMandatory": true,
+      "ValidationRules": {
+        "isAlphanumeric": true,
+        "minLength": 3,
+        "maxLength": 20,
+        "noSpaces": true,
+        "startsWith": "",
+        "mustContain": [""]
+      }
+    },
+    {
+      "Name": "ConfirmPassword",
+      "Label": "Şifre Doğrulaması",
+      "Type": "password",
+      "IsMandatory": true
+    }
+  ]
+}

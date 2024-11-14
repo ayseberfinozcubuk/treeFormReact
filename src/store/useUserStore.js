@@ -1,21 +1,48 @@
 import { create } from "zustand";
+import axios from "axios";
 
 const useUserStore = create((set) => ({
-  role: "read", // Default role
-  isAuthenticated: false,
-  setRole: (newRole) => set({ role: newRole }),
-  setIsAuthenticated: (status) => set({ isAuthenticated: status }),
-  loadUserFromLocalStorage: () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.Role) {
-      set({ role: user.Role, isAuthenticated: true });
+  users: [],
+  roles: [],
+  userData: null,
+  error: "",
+
+  fetchUsers: async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/users", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      set({ users: response.data });
+    } catch (error) {
+      set({ error: "Failed to fetch users." });
     }
   },
-  logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    set({ role: "read", isAuthenticated: false });
+
+  fetchRoles: async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/users/roles");
+      set({ roles: response.data });
+    } catch (error) {
+      set({ error: "Failed to fetch roles." });
+    }
   },
+
+  fetchUserData: async () => {
+    try {
+      const response = await fetch("/SampleData/UserData.json");
+      const data = await response.json();
+      set({ userData: data });
+    } catch (error) {
+      set({ error: "Failed to fetch user data." });
+    }
+  },
+
+  addUser: (user) => set((state) => ({ users: [...state.users, user] })),
+  deleteUser: (userId) =>
+    set((state) => ({
+      users: state.users.filter((user) => user.Id !== userId),
+    })),
 }));
 
 export default useUserStore;

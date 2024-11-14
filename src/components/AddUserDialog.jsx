@@ -1,155 +1,112 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import { validateField } from "../utils/validationUtils";
+import useUserStore from "../store/useUserStore";
 
-const AddUserDialog = ({ visible, onHide, onSave, roles }) => {
-  const [newUser, setNewUser] = useState({
-    UserName: "",
-    Email: "",
-    Role: "read", // Default role
-    Password: "",
-  });
+const AddUserDialog = ({ visible, onHide, onSave }) => {
+  const { userData } = useUserStore();
+  const [newUser, setNewUser] = useState({ Role: "read" }); // default role "read"
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [error, setError] = useState({});
+  const [passwordVisible, setPasswordVisible] = useState({});
 
-  // Define the fields dynamically
-  const fields = [
-    {
-      name: "UserName",
-      label: "Username",
-      type: "text",
-      placeholder: "Enter username",
-    },
-    {
-      name: "Email",
-      label: "Email",
-      type: "email",
-      placeholder: "Enter email",
-    },
-    {
-      name: "Password",
-      label: "Password",
-      type: "password",
-      placeholder: "Enter password",
-    },
-    {
-      name: "ConfirmPassword",
-      label: "Confirm Password",
-      type: "password",
-      placeholder: "Confirm password",
-    },
-    {
-      name: "Role",
-      label: "Role",
-      type: "dropdown",
-      options: roles,
-      placeholder: "Select Role",
-    },
-  ];
-
-  const handleInputChange = (field, value) => {
-    if (field === "ConfirmPassword") {
-      setConfirmPassword(value);
-    } else {
-      setNewUser((prevUser) => ({
-        ...prevUser,
-        [field]: value,
-      }));
+  useEffect(() => {
+    if (userData && newUser.Role === "read") {
+      setNewUser((prevUser) => ({ ...prevUser, Role: "read" }));
     }
+  }, [userData]);
+
+  const handleInputChange = (fieldName, value) => {
+    setNewUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
   };
 
   const handleSave = () => {
-    if (newUser.Password !== confirmPassword) {
-      setError("Passwords do not match.");
-    } else {
+    const passwordError =
+      newUser.Password !== confirmPassword ? "Passwords do not match." : "";
+    const validationErrors = {};
+
+    userData?.Properties.forEach((field) => {
+      if (field.ValidationRules) {
+        const result = validateField(
+          newUser[field.Name] || "",
+          field.ValidationRules
+        );
+        if (!result.isValid) validationErrors[field.Name] = result.error;
+      }
+    });
+
+    setError({ ...validationErrors, ConfirmPassword: passwordError });
+
+    if (!passwordError && Object.keys(validationErrors).length === 0) {
       onSave(newUser);
-      setNewUser({
-        UserName: "",
-        Email: "",
-        Role: "read",
-        Password: "",
-      });
+      setNewUser({ Role: "read" });
       setConfirmPassword("");
-      setError("");
+      setError({});
     }
   };
 
   const renderInputField = (field) => {
-    if (field.type === "dropdown") {
+    const { Name, Label, Type, EnumValues, IsMandatory } = field;
+    const value =
+      Name === "ConfirmPassword" ? confirmPassword : newUser[Name] || "";
+
+    if (Type === "enum") {
       return (
         <Dropdown
-          id={field.name}
-          value={newUser[field.name]}
-          options={field.options.map((role) => ({ label: role, value: role }))}
-          onChange={(e) => handleInputChange(field.name, e.value)}
-          placeholder={field.placeholder}
+          id={Name}
+          value={newUser[Name]}
+          options={EnumValues.map((option) => ({
+            label: option.Label,
+            value: option.Value,
+          }))}
+          onChange={(e) => handleInputChange(Name, e.value)}
+          placeholder={Label}
           className="w-full"
         />
       );
-    } else if (field.type === "password") {
-      const isPasswordField = field.name === "Password";
-      const isConfirmPasswordField = field.name === "ConfirmPassword";
-
+    } else if (Type === "password") {
       return (
         <div className="relative">
           <InputText
-            id={field.name}
-            type={
-              isPasswordField
-                ? passwordVisible
-                  ? "text"
-                  : "password"
-                : confirmPasswordVisible
-                ? "text"
-                : "password"
-            }
-            value={
-              isConfirmPasswordField ? confirmPassword : newUser[field.name]
-            }
+            id={Name}
+            type={passwordVisible[Name] ? "text" : "password"}
+            value={value}
             onChange={(e) =>
-              handleInputChange(
-                field.name,
-                isConfirmPasswordField ? e.target.value : e.target.value
-              )
+              Name === "ConfirmPassword"
+                ? setConfirmPassword(e.target.value)
+                : handleInputChange(Name, e.target.value)
             }
-            placeholder={field.placeholder}
+            placeholder={Label}
             className="w-full"
           />
           <i
             className={`absolute right-3 top-2 pi ${
-              isPasswordField
-                ? passwordVisible
-                  ? "pi-eye-slash"
-                  : "pi-eye"
-                : confirmPasswordVisible
-                ? "pi-eye-slash"
-                : "pi-eye"
+              passwordVisible[Name] ? "pi-eye-slash" : "pi-eye"
             } cursor-pointer`}
-            onClick={() => {
-              if (isPasswordField) setPasswordVisible(!passwordVisible);
-              if (isConfirmPasswordField)
-                setConfirmPasswordVisible(!confirmPasswordVisible);
-            }}
+            onClick={() =>
+              setPasswordVisible((prev) => ({ ...prev, [Name]: !prev[Name] }))
+            }
           />
         </div>
       );
     } else {
       return (
         <InputText
-          id={field.name}
-          type={field.type}
-          value={newUser[field.name]}
-          onChange={(e) => handleInputChange(field.name, e.target.value)}
-          placeholder={field.placeholder}
+          id={Name}
+          type={Type === "mail" ? "email" : "text"}
+          value={value}
+          onChange={(e) => handleInputChange(Name, e.target.value)}
+          placeholder={Label}
           className="w-full"
         />
       );
     }
   };
+
+  if (!userData) return null;
 
   return (
     <Dialog
@@ -176,23 +133,31 @@ const AddUserDialog = ({ visible, onHide, onSave, roles }) => {
     >
       <div className="space-y-4">
         <h3 className="text-xl font-semibold text-center">
-          Enter User Information
+          Kullanıcı Bilgisi Giriniz
         </h3>
-        {error && (
-          <div className="p-2 mb-4 text-red-600 bg-red-100 rounded">
-            {error}
-          </div>
-        )}
-
-        {/* Dynamically render fields */}
-        {fields.map((field) => (
-          <div key={field.name} className="p-field">
-            <label htmlFor={field.name} className="block mb-1 text-gray-600">
-              {field.label}
-            </label>
-            {renderInputField(field)}
+        {Object.values(error).map((err, index) => (
+          <div key={index} className="p-2 mb-4 text-red-600 bg-red-100 rounded">
+            {err}
           </div>
         ))}
+        {userData.Properties.filter((field) => field.Type !== "Guid").map(
+          (field) => (
+            <div key={field.Name} className="p-field">
+              <label htmlFor={field.Name} className="block mb-1 text-gray-600">
+                {field.Label}
+                {field.IsMandatory && (
+                  <span className="text-red-500 ml-1">*</span>
+                )}
+              </label>
+              {renderInputField(field)}
+              {error[field.Name] && (
+                <small className="p-error text-red-500">
+                  {error[field.Name]}
+                </small>
+              )}
+            </div>
+          )
+        )}
       </div>
     </Dialog>
   );
