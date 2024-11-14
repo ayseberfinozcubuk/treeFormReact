@@ -10,10 +10,12 @@ const UserProfile = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState({});
   const [showPasswordFields, setShowPasswordFields] = useState(false);
 
-  // Toggle password visibility states
+  const [initialEmail, setInitialEmail] = useState("");
+  const [initialUserName, setInitialUserName] = useState("");
+
   const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -23,14 +25,58 @@ const UserProfile = () => {
     if (storedUser) {
       setEmail(storedUser.Email);
       setUserName(storedUser.UserName);
+      setInitialEmail(storedUser.Email);
+      setInitialUserName(storedUser.UserName);
     }
   }, []);
+
+  const validateField = (name, value) => {
+    let error = "";
+    if (name === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value)) error = "Invalid email format.";
+    }
+    if (name === "userName") {
+      if (value.length < 3 || value.length > 20)
+        error = "Username must be between 3 and 20 characters.";
+    }
+    if (name === "newPassword" || name === "confirmPassword") {
+      if (newPassword !== confirmPassword)
+        error = "New password and confirmation do not match.";
+    }
+    setError((prevErrors) => ({ ...prevErrors, [name]: error }));
+  };
+
+  const handleInputChange = (name, value) => {
+    switch (name) {
+      case "email":
+        setEmail(value);
+        validateField("email", value);
+        break;
+      case "userName":
+        setUserName(value);
+        validateField("userName", value);
+        break;
+      case "currentPassword":
+        setCurrentPassword(value);
+        break;
+      case "newPassword":
+        setNewPassword(value);
+        validateField("newPassword", value);
+        break;
+      case "confirmPassword":
+        setConfirmPassword(value);
+        validateField("confirmPassword", value);
+        break;
+      default:
+        break;
+    }
+  };
 
   const handleSave = async () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user"));
       const userId = storedUser?.Id;
-
       const response = await axios.put(
         `http://localhost:5000/api/users/${userId}`,
         {
@@ -45,19 +91,37 @@ const UserProfile = () => {
           JSON.stringify({ ...storedUser, Email: email, UserName: userName })
         );
         setIsEditing(false);
-        setError("");
+        setInitialEmail(email);
+        setInitialUserName(userName);
+        setError({});
       } else {
-        setError("Failed to update profile");
+        setError((prevErrors) => ({
+          ...prevErrors,
+          form: "Failed to update profile",
+        }));
       }
     } catch (error) {
-      setError("Error updating profile");
+      setError((prevErrors) => ({
+        ...prevErrors,
+        form: "Error updating profile",
+      }));
     }
   };
 
+  const handleCancelEdit = () => {
+    setEmail(initialEmail);
+    setUserName(initialUserName);
+    setError({});
+    setIsEditing(false);
+  };
+
   const handlePasswordUpdate = async () => {
-    setError("");
+    setError({});
     if (newPassword !== confirmPassword) {
-      setError("New password and confirmation do not match.");
+      setError((prevErrors) => ({
+        ...prevErrors,
+        confirmPassword: "Passwords do not match",
+      }));
       return;
     }
 
@@ -70,7 +134,6 @@ const UserProfile = () => {
         {
           currentPassword,
           newPassword,
-          confirmNewPassword: confirmPassword,
         }
       );
 
@@ -78,27 +141,40 @@ const UserProfile = () => {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        setError("Password updated successfully");
         setShowPasswordFields(false);
+        setError({});
       } else {
-        setError(response.data || "Failed to update password");
+        setError((prevErrors) => ({
+          ...prevErrors,
+          form: response.data || "Failed to update password",
+        }));
       }
     } catch (error) {
-      setError("Error updating password: " + error.response.data);
+      setError((prevErrors) => ({
+        ...prevErrors,
+        form: "Error updating password: " + error.response?.data,
+      }));
     }
+  };
+
+  const handleCancelPasswordUpdate = () => {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError({});
+    setShowPasswordFields(false);
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold text-center">User Profile</h2>
-        {error && (
+        {error.form && (
           <div className="p-2 mb-4 text-red-600 bg-red-100 rounded">
-            {error}
+            {error.form}
           </div>
         )}
 
-        {/* User Information */}
         <div className="p-field">
           <label
             htmlFor="userName"
@@ -109,12 +185,16 @@ const UserProfile = () => {
           <InputText
             id="userName"
             value={userName}
-            onChange={(e) => setUserName(e.target.value)}
+            onChange={(e) => handleInputChange("userName", e.target.value)}
             placeholder="Enter your username"
             className="w-full"
             disabled={!isEditing}
           />
+          {error.userName && (
+            <small className="p-error text-red-500">{error.userName}</small>
+          )}
         </div>
+
         <div className="p-field">
           <label
             htmlFor="email"
@@ -126,12 +206,16 @@ const UserProfile = () => {
             id="email"
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => handleInputChange("email", e.target.value)}
             placeholder="Enter your email"
             className="w-full"
             disabled={!isEditing}
           />
+          {error.email && (
+            <small className="p-error text-red-500">{error.email}</small>
+          )}
         </div>
+
         <div className="mt-6 flex justify-center space-x-4">
           {isEditing ? (
             <>
@@ -139,7 +223,7 @@ const UserProfile = () => {
                 label="Cancel"
                 icon="pi pi-times"
                 className="p-button-outlined p-button-secondary"
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancelEdit}
               />
               <Button
                 label="Save"
@@ -158,7 +242,6 @@ const UserProfile = () => {
           )}
         </div>
 
-        {/* Toggle Password Fields */}
         <div className="mt-4 flex justify-center">
           {!showPasswordFields ? (
             <Button
@@ -171,13 +254,12 @@ const UserProfile = () => {
             <Button
               icon="pi pi-times"
               className="p-button-text p-button-danger"
-              onClick={() => setShowPasswordFields(false)}
+              onClick={handleCancelPasswordUpdate}
               label="Cancel Password Update"
             />
           )}
         </div>
 
-        {/* Password Update Fields */}
         {showPasswordFields && (
           <div className="mt-6 space-y-4 border-t pt-4">
             <div className="p-field relative">
@@ -191,7 +273,9 @@ const UserProfile = () => {
                 id="currentPassword"
                 type={currentPasswordVisible ? "text" : "password"}
                 value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("currentPassword", e.target.value)
+                }
                 placeholder="Enter current password"
                 className="w-full"
               />
@@ -215,7 +299,9 @@ const UserProfile = () => {
                 id="newPassword"
                 type={newPasswordVisible ? "text" : "password"}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("newPassword", e.target.value)
+                }
                 placeholder="Enter new password"
                 className="w-full"
               />
@@ -225,6 +311,11 @@ const UserProfile = () => {
                 } cursor-pointer`}
                 onClick={() => setNewPasswordVisible(!newPasswordVisible)}
               />
+              {error.newPassword && (
+                <small className="p-error text-red-500">
+                  {error.newPassword}
+                </small>
+              )}
             </div>
             <div className="p-field relative">
               <label
@@ -237,7 +328,9 @@ const UserProfile = () => {
                 id="confirmPassword"
                 type={confirmPasswordVisible ? "text" : "password"}
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("confirmPassword", e.target.value)
+                }
                 placeholder="Confirm new password"
                 className="w-full"
               />
@@ -249,6 +342,11 @@ const UserProfile = () => {
                   setConfirmPasswordVisible(!confirmPasswordVisible)
                 }
               />
+              {error.confirmPassword && (
+                <small className="p-error text-red-500">
+                  {error.confirmPassword}
+                </small>
+              )}
             </div>
             <Button
               label="Save New Password"

@@ -27,7 +27,14 @@
       "Label": "Email",
       "Type": "mail",
       "IsMandatory": true,
-      "IsUnique": true
+      "IsUnique": true,
+      "ValidationRules": {
+        "regexPattern": "^[\\w.%+-]+@[\\w.-]+\\.[a-zA-Z]{2,}$",
+        "customMessage": "Please enter a valid email address.",
+        "minLength": 5,
+        "maxLength": 50,
+        "noSpaces": true
+      }
     },
     {
       "Name": "Role",

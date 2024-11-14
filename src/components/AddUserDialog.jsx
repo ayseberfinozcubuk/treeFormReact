@@ -8,7 +8,8 @@ import useUserStore from "../store/useUserStore";
 
 const AddUserDialog = ({ visible, onHide, onSave }) => {
   const { userData } = useUserStore();
-  const [newUser, setNewUser] = useState({ Role: "read" }); // default role "read"
+  const initialUserState = { Role: "read" }; // Default state for new user
+  const [newUser, setNewUser] = useState(initialUserState);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState({});
   const [passwordVisible, setPasswordVisible] = useState({});
@@ -19,8 +20,33 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
     }
   }, [userData]);
 
+  const resetFields = () => {
+    setNewUser(initialUserState);
+    setConfirmPassword("");
+    setError({});
+    setPasswordVisible({});
+  };
+
   const handleInputChange = (fieldName, value) => {
     setNewUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
+
+    const field = userData.Properties.find((prop) => prop.Name === fieldName);
+    if (field?.ValidationRules) {
+      const result = validateField(value, field.ValidationRules);
+      setError((prevError) => ({
+        ...prevError,
+        [fieldName]: result.isValid ? "" : result.error,
+      }));
+    }
+
+    if (fieldName === "ConfirmPassword" || fieldName === "Password") {
+      const passwordError =
+        newUser.Password !== confirmPassword ? "Passwords do not match." : "";
+      setError((prevError) => ({
+        ...prevError,
+        ConfirmPassword: passwordError,
+      }));
+    }
   };
 
   const handleSave = () => {
@@ -42,9 +68,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
 
     if (!passwordError && Object.keys(validationErrors).length === 0) {
       onSave(newUser);
-      setNewUser({ Role: "read" });
-      setConfirmPassword("");
-      setError({});
+      resetFields(); // Reset fields after save
     }
   };
 
@@ -113,13 +137,19 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
       header="Add New User"
       visible={visible}
       style={{ width: "400px" }}
-      onHide={onHide}
+      onHide={() => {
+        resetFields(); // Reset fields on cancel
+        onHide();
+      }}
       footer={
         <div className="flex justify-end gap-2">
           <Button
             label="Cancel"
             icon="pi pi-times"
-            onClick={onHide}
+            onClick={() => {
+              resetFields(); // Reset fields on cancel
+              onHide();
+            }}
             className="p-button-text"
           />
           <Button
@@ -135,11 +165,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
         <h3 className="text-xl font-semibold text-center">
           Kullanıcı Bilgisi Giriniz
         </h3>
-        {Object.values(error).map((err, index) => (
-          <div key={index} className="p-2 mb-4 text-red-600 bg-red-100 rounded">
-            {err}
-          </div>
-        ))}
+
         {userData.Properties.filter((field) => field.Type !== "Guid").map(
           (field) => (
             <div key={field.Name} className="p-field">
