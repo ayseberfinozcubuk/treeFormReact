@@ -8,6 +8,7 @@ const DeleteButton = ({
   style,
   emitterName = "",
   rootEntity = "",
+  disabled = false,
 }) => {
   const handleDeleteClick = () => {
     const confirmMessage =
@@ -29,6 +30,7 @@ const DeleteButton = ({
       style={style}
       tooltip="Sil"
       tooltipOptions={{ position: "top" }}
+      disabled={disabled}
     />
   );
 };

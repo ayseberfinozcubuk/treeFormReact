@@ -87,9 +87,12 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         model={menuItems}
         start={start}
         end={end}
-        className="bg-gray-800 text-white"
+        className="bg-gray-800 text-white fixed top-0 w-full z-10" // Fixed position
+        style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }} // Optional shadow for styling
       />
-      <div className="p-6">
+      <div className="p-6 pt-16">
+        {" "}
+        {/* Add top padding to avoid overlap */}
         <Routes>
           <Route
             path="/"

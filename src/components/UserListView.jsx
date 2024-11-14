@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import axios from "axios";
 import AddUserDialog from "./AddUserDialog";
+import DeleteButton from "./DeleteButton"; // Import DeleteButton
 
 const UserListView = () => {
   const [users, setUsers] = useState([]);
@@ -80,8 +81,10 @@ const UserListView = () => {
   };
 
   const handleEditRole = (rowIndex, initialRole) => {
-    setEditableRow(rowIndex);
-    setTempRole(initialRole);
+    if (rowIndex !== editableRow) {
+      setEditableRow(rowIndex);
+      setTempRole(initialRole);
+    }
   };
 
   const handleRoleChange = (newRole) => {
@@ -155,6 +158,7 @@ const UserListView = () => {
           icon="pi pi-plus"
           onClick={handleOpenDialog}
           className="mb-4"
+          disabled={editableRow !== null}
         />
 
         <DataTable
@@ -169,7 +173,7 @@ const UserListView = () => {
                 icon="pi pi-pencil"
                 className="p-button-text"
                 onClick={() => handleEditRole(rowIndex, rowData.Role)}
-                disabled={editableRow !== null}
+                disabled={editableRow !== null && editableRow !== rowIndex}
               />
             )}
             style={{ width: "4rem" }}
@@ -188,19 +192,21 @@ const UserListView = () => {
                   }
                   className="text-sm px-3 py-2 truncate"
                   style={{
-                    flex: key === "Role" ? "none" : "1", // Flexible width for other columns, fixed for Role
+                    flex: key === "Role" ? "none" : "1",
                     width: key === "Role" ? "8rem" : "auto",
-                    margin: "0.5rem", // Margin for spacing
+                    margin: "0.5rem",
                   }}
                 />
               ))}
 
           <Column
-            body={(rowData) => (
-              <Button
-                icon="pi pi-trash"
-                className="p-button-danger p-button-text"
+            body={(rowData, { rowIndex }) => (
+              <DeleteButton
                 onClick={() => handleDeleteUser(rowData.Id)}
+                className="p-button-danger p-button-text"
+                emitterName={rowData.UserName}
+                rootEntity="user"
+                disabled={editableRow !== null && editableRow !== rowIndex} // Disable delete button for all rows except the editable row
               />
             )}
             style={{ width: "4rem" }}
