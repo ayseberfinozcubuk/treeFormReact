@@ -9,7 +9,6 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     formValues,
     formData, // Added this line to access formData
     addEmptyMandatoryField,
-    removeEmptyMandatoryField,
     addNotInRangeField,
     removeNotInRangeField,
   } = useFormStore();

@@ -1,360 +1,250 @@
 import React, { useState, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import axios from "axios";
+import { validateField } from "../utils/validationUtils";
+import useUserStore from "../store/useUserStore";
 
 const UserProfile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [email, setEmail] = useState("");
-  const [userName, setUserName] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
+  const { userData, fetchUserData } = useUserStore();
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const [updatedUser, setUpdatedUser] = useState(storedUser);
+  const [currentPasswords, setCurrentPasswords] = useState({});
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState({});
+  const [passwordVisible, setPasswordVisible] = useState({});
   const [showPasswordFields, setShowPasswordFields] = useState(false);
-
-  const [initialEmail, setInitialEmail] = useState("");
-  const [initialUserName, setInitialUserName] = useState("");
-
-  const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
-  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [passwordFields, setPasswordFields] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isPasswordChanging, setIsPasswordChanging] = useState(false);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setEmail(storedUser.Email);
-      setUserName(storedUser.UserName);
-      setInitialEmail(storedUser.Email);
-      setInitialUserName(storedUser.UserName);
-    }
-  }, []);
-
-  const validateField = (name, value) => {
-    let error = "";
-    if (name === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(value)) error = "Invalid email format.";
-    }
-    if (name === "userName") {
-      if (value.length < 3 || value.length > 20)
-        error = "Username must be between 3 and 20 characters.";
-    }
-    if (name === "newPassword" || name === "confirmPassword") {
-      if (newPassword !== confirmPassword)
-        error = "New password and confirmation do not match.";
-    }
-    setError((prevErrors) => ({ ...prevErrors, [name]: error }));
-  };
-
-  const handleInputChange = (name, value) => {
-    switch (name) {
-      case "email":
-        setEmail(value);
-        validateField("email", value);
-        break;
-      case "userName":
-        setUserName(value);
-        validateField("userName", value);
-        break;
-      case "currentPassword":
-        setCurrentPassword(value);
-        break;
-      case "newPassword":
-        setNewPassword(value);
-        validateField("newPassword", value);
-        break;
-      case "confirmPassword":
-        setConfirmPassword(value);
-        validateField("confirmPassword", value);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const userId = storedUser?.Id;
-      const response = await axios.put(
-        `http://localhost:5000/api/users/${userId}`,
-        {
-          email,
-          userName,
-        }
+    if (userData) {
+      const passwords = userData.Properties.filter(
+        (field) => field.Type === "password"
       );
-
-      if (response.status === 200) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ ...storedUser, Email: email, UserName: userName })
-        );
-        setIsEditing(false);
-        setInitialEmail(email);
-        setInitialUserName(userName);
-        setError({});
-      } else {
-        setError((prevErrors) => ({
-          ...prevErrors,
-          form: "Failed to update profile",
-        }));
-      }
-    } catch (error) {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        form: "Error updating profile",
-      }));
+      setPasswordFields(passwords);
     }
-  };
+  }, [userData]);
 
-  const handleCancelEdit = () => {
-    setEmail(initialEmail);
-    setUserName(initialUserName);
-    setError({});
-    setIsEditing(false);
-  };
-
-  const handlePasswordUpdate = async () => {
-    setError({});
-    if (newPassword !== confirmPassword) {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        confirmPassword: "Passwords do not match",
-      }));
-      return;
+  useEffect(() => {
+    if (!userData) {
+      fetchUserData();
     }
+  }, [userData, fetchUserData]);
 
-    try {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      const userId = storedUser?.Id;
-
-      const response = await axios.put(
-        `http://localhost:5000/api/users/${userId}/change-password`,
-        {
-          currentPassword,
-          newPassword,
-        }
-      );
-
-      if (response.status === 200) {
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setShowPasswordFields(false);
-        setError({});
-      } else {
-        setError((prevErrors) => ({
-          ...prevErrors,
-          form: response.data || "Failed to update password",
-        }));
-      }
-    } catch (error) {
-      setError((prevErrors) => ({
-        ...prevErrors,
-        form: "Error updating password: " + error.response?.data,
-      }));
-    }
-  };
-
-  const handleCancelPasswordUpdate = () => {
-    setCurrentPassword("");
-    setNewPassword("");
+  const resetFields = () => {
+    setUpdatedUser(storedUser);
+    setCurrentPasswords({});
     setConfirmPassword("");
     setError({});
+    setPasswordVisible({});
     setShowPasswordFields(false);
+    setIsEditing(false);
+    setIsPasswordChanging(false);
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center">User Profile</h2>
-        {error.form && (
-          <div className="p-2 mb-4 text-red-600 bg-red-100 rounded">
-            {error.form}
+  const handleInputChange = (fieldName, value) => {
+    setUpdatedUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
+
+    const field = userData.Properties.find((prop) => prop.Name === fieldName);
+    if (field?.ValidationRules) {
+      const result = validateField(value, field.ValidationRules);
+      setError((prevError) => ({
+        ...prevError,
+        [fieldName]: result.isValid ? "" : result.error,
+      }));
+    }
+  };
+
+  const handleCurrentPasswordChange = (value) => {
+    setCurrentPasswords((prev) => ({ ...prev, Password: value }));
+  };
+
+  const handleSave = () => {
+    const passwordError =
+      updatedUser.Password !== confirmPassword ? "Passwords do not match." : "";
+    const validationErrors = {};
+
+    userData?.Properties.forEach((field) => {
+      if (field.ValidationRules) {
+        const result = validateField(
+          updatedUser[field.Name] || "",
+          field.ValidationRules
+        );
+        if (!result.isValid) validationErrors[field.Name] = result.error;
+      }
+    });
+
+    setError({ ...validationErrors, ConfirmPassword: passwordError });
+
+    if (!passwordError && Object.keys(validationErrors).length === 0) {
+      alert("User profile updated successfully!");
+      resetFields();
+    }
+  };
+
+  const handleChangePasswordButtonClick = () => {
+    setShowPasswordFields(true);
+    setIsPasswordChanging(true);
+  };
+
+  const renderField = (field) => {
+    const { Name, Label, Type, EnumValues, IsMandatory } = field;
+    const value = updatedUser[Name] || "";
+
+    if (Type === "enum") {
+      return (
+        <div className="text-gray-800 p-2 bg-gray-100 rounded-md">
+          {EnumValues.find((option) => option.Value === value)?.Label || "-"}
+        </div>
+      );
+    }
+
+    if (!isEditing) {
+      return (
+        <div className="text-gray-800 p-2 bg-gray-100 rounded-md">
+          {value || "-"}
+        </div>
+      );
+    }
+
+    return (
+      <InputText
+        id={Name}
+        type={Type === "mail" ? "email" : "text"}
+        value={value}
+        onChange={(e) => handleInputChange(Name, e.target.value)}
+        placeholder={Label}
+        className="w-full"
+      />
+    );
+  };
+
+  const renderPasswordFields = () => {
+    return passwordFields.map((field) => (
+      <div key={field.Name} className="mb-6">
+        {field.Name === "Password" && (
+          <div className="p-field mb-4">
+            <label
+              htmlFor="current-Password"
+              className="block mb-2 text-gray-700"
+            >
+              Şimdiki {field.Label}
+            </label>
+            <InputText
+              id="current-Password"
+              type={passwordVisible["current-Password"] ? "text" : "password"}
+              value={currentPasswords.Password || ""}
+              onChange={(e) => handleCurrentPasswordChange(e.target.value)}
+              placeholder={`Şimdiki ${field.Label}`}
+              className="w-full"
+            />
+            <i
+              className={`absolute right-3 top-2 pi ${
+                passwordVisible["current-Password"] ? "pi-eye-slash" : "pi-eye"
+              } cursor-pointer`}
+              onClick={() =>
+                setPasswordVisible((prev) => ({
+                  ...prev,
+                  "current-Password": !prev["current-Password"],
+                }))
+              }
+            />
           </div>
         )}
-
-        <div className="p-field">
-          <label
-            htmlFor="userName"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Username
+        <div className="p-field mb-4">
+          <label htmlFor={field.Name} className="block mb-2 text-gray-700">
+            Yeni {field.Label}
+            {field.IsMandatory && <span className="text-red-500 ml-1">*</span>}
           </label>
-          <InputText
-            id="userName"
-            value={userName}
-            onChange={(e) => handleInputChange("userName", e.target.value)}
-            placeholder="Enter your username"
-            className="w-full"
-            disabled={!isEditing}
-          />
-          {error.userName && (
-            <small className="p-error text-red-500">{error.userName}</small>
-          )}
-        </div>
-
-        <div className="p-field">
-          <label
-            htmlFor="email"
-            className="block text-gray-700 font-medium mb-2"
-          >
-            Email
-          </label>
-          <InputText
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            placeholder="Enter your email"
-            className="w-full"
-            disabled={!isEditing}
-          />
-          {error.email && (
-            <small className="p-error text-red-500">{error.email}</small>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-center space-x-4">
-          {isEditing ? (
-            <>
-              <Button
-                label="Cancel"
-                icon="pi pi-times"
-                className="p-button-outlined p-button-secondary"
-                onClick={handleCancelEdit}
-              />
-              <Button
-                label="Save"
-                icon="pi pi-check"
-                className="p-button p-button-success"
-                onClick={handleSave}
-              />
-            </>
-          ) : (
-            <Button
-              label="Edit Profile"
-              icon="pi pi-pencil"
-              className="p-button p-button-primary"
-              onClick={() => setIsEditing(true)}
+          <div className="relative">
+            <InputText
+              id={field.Name}
+              type={passwordVisible[field.Name] ? "text" : "password"}
+              value={updatedUser[field.Name] || ""}
+              onChange={(e) => handleInputChange(field.Name, e.target.value)}
+              placeholder={`Yeni ${field.Label}`}
+              className="w-full"
             />
-          )}
-        </div>
-
-        <div className="mt-4 flex justify-center">
-          {!showPasswordFields ? (
-            <Button
-              label="Update Password"
-              icon="pi pi-key"
-              onClick={() => setShowPasswordFields(true)}
-              className="p-button-warning"
-            />
-          ) : (
-            <Button
-              icon="pi pi-times"
-              className="p-button-text p-button-danger"
-              onClick={handleCancelPasswordUpdate}
-              label="Cancel Password Update"
-            />
-          )}
-        </div>
-
-        {showPasswordFields && (
-          <div className="mt-6 space-y-4 border-t pt-4">
-            <div className="p-field relative">
-              <label
-                htmlFor="currentPassword"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                Current Password
-              </label>
-              <InputText
-                id="currentPassword"
-                type={currentPasswordVisible ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) =>
-                  handleInputChange("currentPassword", e.target.value)
-                }
-                placeholder="Enter current password"
-                className="w-full"
-              />
-              <i
-                className={`absolute right-3 top-9 pi ${
-                  currentPasswordVisible ? "pi-eye-slash" : "pi-eye"
-                } cursor-pointer`}
-                onClick={() =>
-                  setCurrentPasswordVisible(!currentPasswordVisible)
-                }
-              />
-            </div>
-            <div className="p-field relative">
-              <label
-                htmlFor="newPassword"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                New Password
-              </label>
-              <InputText
-                id="newPassword"
-                type={newPasswordVisible ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) =>
-                  handleInputChange("newPassword", e.target.value)
-                }
-                placeholder="Enter new password"
-                className="w-full"
-              />
-              <i
-                className={`absolute right-3 top-9 pi ${
-                  newPasswordVisible ? "pi-eye-slash" : "pi-eye"
-                } cursor-pointer`}
-                onClick={() => setNewPasswordVisible(!newPasswordVisible)}
-              />
-              {error.newPassword && (
-                <small className="p-error text-red-500">
-                  {error.newPassword}
-                </small>
-              )}
-            </div>
-            <div className="p-field relative">
-              <label
-                htmlFor="confirmPassword"
-                className="block text-gray-700 font-medium mb-2"
-              >
-                Confirm New Password
-              </label>
-              <InputText
-                id="confirmPassword"
-                type={confirmPasswordVisible ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) =>
-                  handleInputChange("confirmPassword", e.target.value)
-                }
-                placeholder="Confirm new password"
-                className="w-full"
-              />
-              <i
-                className={`absolute right-3 top-9 pi ${
-                  confirmPasswordVisible ? "pi-eye-slash" : "pi-eye"
-                } cursor-pointer`}
-                onClick={() =>
-                  setConfirmPasswordVisible(!confirmPasswordVisible)
-                }
-              />
-              {error.confirmPassword && (
-                <small className="p-error text-red-500">
-                  {error.confirmPassword}
-                </small>
-              )}
-            </div>
-            <Button
-              label="Save New Password"
-              icon="pi pi-check"
-              onClick={handlePasswordUpdate}
-              className="w-full p-button-success mt-4"
+            <i
+              className={`absolute right-3 top-2 pi ${
+                passwordVisible[field.Name] ? "pi-eye-slash" : "pi-eye"
+              } cursor-pointer`}
+              onClick={() =>
+                setPasswordVisible((prev) => ({
+                  ...prev,
+                  [field.Name]: !prev[field.Name],
+                }))
+              }
             />
           </div>
+        </div>
+      </div>
+    ));
+  };
+
+  if (!userData) {
+    console.log("User data is missing:", userData);
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="container mx-auto p-6 max-w-md bg-white rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-center mb-6">User Profile</h2>
+      {userData.Properties.filter(
+        (field) => field.Type !== "Guid" && field.Type !== "password"
+      ).map((field) => (
+        <div key={field.Name} className="p-field mb-4">
+          <label htmlFor={field.Name} className="block mb-2 text-gray-700">
+            {field.Label}
+            {field.IsMandatory && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          {renderField(field)}
+          {error[field.Name] && (
+            <small className="p-error text-red-500">{error[field.Name]}</small>
+          )}
+        </div>
+      ))}
+      {!showPasswordFields && (
+        <Button
+          label="Change Password"
+          icon="pi pi-lock"
+          className="p-button-secondary mt-4"
+          onClick={handleChangePasswordButtonClick}
+        />
+      )}
+      {showPasswordFields && renderPasswordFields()}
+      <div className="flex justify-between mt-6">
+        {isPasswordChanging || isEditing ? (
+          <>
+            {!isEditing && (
+              <Button
+                label="Düzenle"
+                icon="pi pi-pencil"
+                className="p-button-primary"
+                onClick={() => setIsEditing(true)}
+              />
+            )}
+            <Button
+              label="İptal Et"
+              icon="pi pi-times"
+              className="p-button-secondary"
+              onClick={resetFields}
+            />
+            <Button
+              label="Kaydet"
+              icon="pi pi-check"
+              className="p-button-primary"
+              onClick={handleSave}
+            />
+          </>
+        ) : (
+          <Button
+            label="Edit"
+            icon="pi pi-pencil"
+            className="p-button-primary"
+            onClick={() => setIsEditing(true)}
+          />
         )}
       </div>
     </div>

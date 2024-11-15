@@ -4,6 +4,7 @@ import EntityListView from "./EntityListView";
 import AddNewEntity from "./AddNewEntity";
 import EntityDetails from "./EntityDetails";
 import UserListView from "./UserListView";
+import UserProfile from "./UserProfile"; // Import UserProfile
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
 
@@ -12,7 +13,6 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const [role, setRole] = useState("read");
 
   useEffect(() => {
-    // Check if the user is an admin by accessing the stored user data
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.Role) {
       setRole(user.Role);
@@ -26,7 +26,6 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
     navigate("/login");
   };
 
-  // Define menu items
   const menuItems = [
     {
       label: `${rootEntity} Listesini Görüntüle`,
@@ -45,8 +44,6 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
           },
         ]
       : []),
-
-    // Only show User Settings if the user is an admin
     ...(role === "admin"
       ? [
           {
@@ -76,7 +73,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
     <Button
       icon="pi pi-user"
       className="p-button-text text-gray-200 font-medium hover:text-white mx-3"
-      onClick={() => navigate("/profile")}
+      onClick={() => navigate("/profile")} // Navigate to UserProfile
       style={{ fontSize: "0.95rem" }}
     />
   );
@@ -87,12 +84,12 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         model={menuItems}
         start={start}
         end={end}
-        className="bg-gray-800 text-white fixed top-0 w-full z-10" // Fixed position
-        style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }} // Optional shadow for styling
+        className="bg-gray-800 text-white fixed top-0 w-full z-10"
+        style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}
       />
       <div className="p-6 pt-16">
         {" "}
-        {/* Add top padding to avoid overlap */}
+        {/* Adjust padding to prevent overlap */}
         <Routes>
           <Route
             path="/"
@@ -107,6 +104,8 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
             element={<EntityDetails rootEntity={rootEntity} />}
           />
           <Route path="/user-settings" element={<UserListView />} />
+          <Route path="/profile" element={<UserProfile />} />{" "}
+          {/* UserProfile Route */}
         </Routes>
       </div>
     </>
