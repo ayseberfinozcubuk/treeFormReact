@@ -1,7 +1,7 @@
 import React from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
 const ProfileDetails = ({
   userData,
@@ -28,13 +28,8 @@ const ProfileDetails = ({
         Email: updatedUser.Email,
       };
 
-      // Ensure the base URL is correctly configured
-      const response = await axios.put(`/api/users/${userId}`, updatePayload, {
-        baseURL: "http://localhost:5000", // Update this if your backend is hosted elsewhere
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Include the JWT token
-        },
-      });
+      // Send updated profile to the server
+      await axiosInstance.put(`/api/users/${userId}`, updatePayload);
 
       alert("Profile updated successfully!");
       setIsEditing(false);
@@ -42,7 +37,9 @@ const ProfileDetails = ({
       if (error.response) {
         console.error("Error updating user profile:", error.response.data);
         alert(
-          `Failed to update profile: ${error.response.statusText} (${error.response.status})`
+          `Failed to update profile: ${
+            error.response.data.message || error.response.statusText
+          }`
         );
       } else {
         console.error("Error updating user profile:", error);
@@ -99,7 +96,7 @@ const ProfileDetails = ({
       <div className="flex flex-col gap-2 mt-4">
         {!isEditing ? (
           <Button
-            label="Düzenle"
+            label="Edit"
             icon="pi pi-pencil"
             className="p-button-primary"
             onClick={() => setIsEditing(true)}
@@ -108,14 +105,14 @@ const ProfileDetails = ({
         ) : (
           <div className="flex justify-between mt-4">
             <Button
-              label="İptal Et"
+              label="Cancel"
               icon="pi pi-times"
               className="p-button-secondary"
               onClick={resetFields}
               style={{ width: "150px" }}
             />
             <Button
-              label="Kaydet"
+              label="Save"
               icon="pi pi-check"
               className="p-button-primary"
               onClick={handleSave}

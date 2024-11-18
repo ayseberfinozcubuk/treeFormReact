@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
 import SubmitButton from "./SubmitButton";
 import CancelButton from "./CancelButton";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
 import { useEntityStore } from "../store/useEntityStore";
 import { InputSwitch } from "primereact/inputswitch";
@@ -48,7 +48,7 @@ const EntityDetails = ({ rootEntity }) => {
     const structuredJson = convertToNestedJson(formValues);
 
     try {
-      await axios.put(
+      await axiosInstance.put(
         `http://localhost:5000/api/${rootEntity}/${selectedEntity?.Id}`,
         structuredJson
       );

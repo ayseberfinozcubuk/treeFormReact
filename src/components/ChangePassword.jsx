@@ -3,7 +3,7 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { validateField } from "../utils/validationUtils";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
 const ChangePassword = ({ userData, updatedUser, resetFields }) => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -16,7 +16,7 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
     setError({});
 
     try {
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `http://localhost:5000/api/users/${updatedUser.Id}/change-password`,
         {
           CurrentPassword: currentPassword,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -17,40 +17,35 @@ const EntityListView = ({ rootEntity }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.Role) {
-      setRole(user.Role);
-    }
-  }, []);
+    const fetchUserRole = async () => {
+      try {
+        // Fetch user role from the server
+        const response = await axiosInstance.get("/api/users/get-role");
+        setRole(response.data.role);
+      } catch (error) {
+        console.error("Failed to fetch user role:", error);
+
+        // Redirect to login if not authenticated
+        if (error.response && error.response.status === 401) {
+          navigate("/login");
+        }
+      }
+    };
+
+    fetchUserRole();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchEntities = async () => {
-      const token = localStorage.getItem("token");
-
-      console.log("Token from localStorage:", token);
-
-      if (!token) {
-        console.error("No token found, redirecting to login.");
-        navigate("/login");
-        return;
-      }
-
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/${rootEntity}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
+        // Fetch entities
+        const response = await axiosInstance.get(`/api/${rootEntity}`);
         setEntities(rootEntity, response.data);
       } catch (error) {
         console.error(`Error fetching ${rootEntity} list:`, error);
 
+        // Redirect to login if not authenticated
         if (error.response && error.response.status === 401) {
-          localStorage.removeItem("token");
           navigate("/login");
         }
       }
@@ -66,7 +61,6 @@ const EntityListView = ({ rootEntity }) => {
 
   const handleRowSelect = (e) => {
     const selected = e.value;
-    console.log("selected: ", selected);
     const index = indexesList[entitiesList.indexOf(selected)];
     selectEntity(rootEntity, index);
     setFormValues(selected);
@@ -75,22 +69,16 @@ const EntityListView = ({ rootEntity }) => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.delete(`http://localhost:5000/api/${rootEntity}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
+      await axiosInstance.delete(`/api/${rootEntity}/${id}`);
       setEntities(
         rootEntity,
         entitiesList.filter((entity) => entity.Id !== id)
       );
     } catch (error) {
       console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
+
+      // Redirect to login if not authenticated
       if (error.response && error.response.status === 401) {
-        localStorage.removeItem("token");
         navigate("/login");
       }
     }

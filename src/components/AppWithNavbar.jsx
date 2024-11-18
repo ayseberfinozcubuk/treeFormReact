@@ -7,23 +7,41 @@ import UserListView from "./UserListView";
 import UserProfile from "./UserProfile"; // Import UserProfile
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
+import axiosInstance from "../api/axiosInstance";
 
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
-  const [role, setRole] = useState("read");
+  const [role, setRole] = useState(null);
 
+  // Fetch user role on component mount
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && user.Role) {
-      setRole(user.Role);
-    }
-  }, []);
+    const fetchUserRole = async () => {
+      try {
+        const response = await axiosInstance.get("/api/users/get-role", {
+          withCredentials: true, // Send cookies with the request
+        });
+        setRole(response.data.role); // Assume backend responds with { role: "admin" }
+      } catch (error) {
+        console.error("Failed to fetch user role:", error);
+        navigate("/login"); // Redirect if fetching role fails
+      }
+    };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    onLogout();
-    navigate("/login");
+    fetchUserRole();
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    try {
+      await axiosInstance.post(
+        "/api/users/logout",
+        {},
+        { withCredentials: true }
+      );
+      onLogout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const menuItems = [
@@ -78,6 +96,10 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
     />
   );
 
+  if (role === null) {
+    return <div>Loading...</div>; // Show a loading indicator while role is being fetched
+  }
+
   return (
     <>
       <Menubar
@@ -88,7 +110,6 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}
       />
       <div className="p-6 pt-16">
-        {" "}
         {/* Adjust padding to prevent overlap */}
         <Routes>
           <Route

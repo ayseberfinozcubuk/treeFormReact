@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
 import SubmitButton from "./SubmitButton";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
 import BackButton from "./BackButton";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +49,7 @@ const AddNewEntity = ({ rootEntity }) => {
     const structuredJson = convertToNestedJson(formValues);
     // console.log("sending to back: ", structuredJson);
 
-    axios
+    axiosInstance
       .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)
       .then((response) => {
         console.log("Entity created successfully:", response.data);

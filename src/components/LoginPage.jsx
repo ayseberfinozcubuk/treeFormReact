@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
 const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState("");
@@ -14,14 +14,16 @@ const LoginPage = ({ onLogin }) => {
   const handleSignIn = async () => {
     if (email && password) {
       try {
-        const response = await axios.post(
-          "http://localhost:5000/api/users/signin",
-          { email, password }
-        );
-        const { Token, User } = response.data;
-        localStorage.setItem("token", Token);
-        localStorage.setItem("user", JSON.stringify(User));
-        onLogin();
+        const response = await axiosInstance.post("/api/users/signin", {
+          email,
+          password,
+        });
+        const { User } = response.data;
+
+        // Authentication successful
+        onLogin(); // Set isAuthenticated to true in App.jsx
+        localStorage.setItem("user", JSON.stringify(User)); // Optional: Store user info (non-sensitive)
+
         navigate("/");
       } catch (error) {
         console.error("Error during sign-in:", error);

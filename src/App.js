@@ -13,12 +13,13 @@ import { useFormStore } from "./store/useFormStore";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import axiosInstance from "./api/axiosInstance";
 
 const App = () => {
   const { setFormData } = useFormStore();
   const [rootEntity, setRootEntity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Auth state without persistence
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Start as not authenticated
 
   const handleLogin = () => {
     setIsAuthenticated(true);
@@ -27,6 +28,15 @@ const App = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Skip the Axios request on the first mount
+      setIsAuthenticated(false); // Set to false directly on the first load
+    };
+
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     fetch("/SampleData/sampleDataNew.json")

@@ -3,7 +3,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 import AddUserDialog from "./AddUserDialog";
 import DeleteButton from "./DeleteButton";
 import useUserStore from "../store/useUserStore";
@@ -22,7 +22,7 @@ const UserListView = () => {
   } = useUserStore();
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [editableRow, setEditableRow] = useState(null);
-  const [tempRole, setTempRole] = useState("read");
+  const [tempRole, setTempRole] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -36,37 +36,24 @@ const UserListView = () => {
 
   const handleSaveNewUser = async (newUser) => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "http://localhost:5000/api/users/add",
-        newUser,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axiosInstance.post("/api/users/add", newUser);
       addUser(response.data);
       setIsDialogVisible(false);
     } catch (error) {
-      console.error("Failed to add user.");
+      console.error("Failed to add user:", error.response?.data || error);
     }
   };
 
   const handleDeleteUser = async (userId) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axiosInstance.delete(`/api/users/${userId}`);
       deleteUser(userId);
     } catch (error) {
-      console.error("Failed to delete user.");
+      console.error("Failed to delete user:", error.response?.data || error);
     }
   };
 
-  const handleEditRole = (rowIndex, initialRole = "read") => {
+  const handleEditRole = (rowIndex, initialRole) => {
     setEditableRow(rowIndex);
     setTempRole(initialRole);
   };
@@ -77,41 +64,35 @@ const UserListView = () => {
 
   const handleSaveRoleChange = async (rowData) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:5000/api/users/${rowData.Id}/role`,
-        { Role: tempRole },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
+      await axiosInstance.put(`/api/users/${rowData.Id}/role`, {
+        Role: tempRole,
+      });
       fetchUsers(); // Refresh the list
       setEditableRow(null);
     } catch (error) {
-      console.error("Failed to update role.");
+      console.error("Failed to update role:", error.response?.data || error);
     }
   };
 
   const handleCancelRoleChange = () => {
     setEditableRow(null);
-    setTempRole("read");
+    setTempRole(null);
   };
 
-  // Retrieve the labels for the dropdown options from userData
   const getRoleOptions = () => {
-    const roleField = userData?.Properties.find((prop) => prop.Name === "Role");
     return (
-      roleField?.EnumValues.map((enumVal) => ({
-        label: enumVal.Label,
-        value: enumVal.Value,
-      })) || []
+      userData?.Properties.find((prop) => prop.Name === "Role")?.EnumValues.map(
+        (enumVal) => ({
+          label: enumVal.Label,
+          value: enumVal.Value,
+        })
+      ) || []
     );
   };
 
-  // Function to render Role field with dropdown when in edit mode
   const renderRoleField = (rowData, rowIndex) => {
     const roleOptions = getRoleOptions();
+
     if (editableRow === rowIndex) {
       return (
         <Dropdown
@@ -122,18 +103,20 @@ const UserListView = () => {
           className="text-sm w-full"
         />
       );
-    } else {
-      // Display the label for the current role instead of value
-      return (
-        roleOptions.find((role) => role.value === rowData.Role)?.label ||
-        rowData.Role
-      );
     }
+
+    const roleLabel =
+      roleOptions.find((role) => role.value === rowData.Role)?.label ||
+      rowData.Role;
+
+    return <span>{roleLabel}</span>;
   };
 
   const getColumnHeader = (fieldKey) => {
-    const field = userData?.Properties.find((prop) => prop.Name === fieldKey);
-    return field?.Label || fieldKey;
+    return (
+      userData?.Properties.find((prop) => prop.Name === fieldKey)?.Label ||
+      fieldKey
+    );
   };
 
   return (
@@ -142,6 +125,7 @@ const UserListView = () => {
         <h2 className="mb-4 text-2xl font-semibold text-center">
           Kullanıcı Yönetimi
         </h2>
+
         {error && <p className="text-red-600 mb-2">{error}</p>}
 
         <Button
@@ -157,16 +141,34 @@ const UserListView = () => {
           className="p-datatable-sm border rounded-lg shadow-md overflow-hidden"
         >
           <Column
-            header=""
-            body={(rowData, { rowIndex }) => (
-              <Button
-                icon="pi pi-pencil"
-                className="p-button-text"
-                onClick={() => handleEditRole(rowIndex, rowData.Role)}
-                disabled={editableRow !== null && editableRow !== rowIndex}
-              />
-            )}
-            style={{ width: "4rem" }}
+            header="Actions"
+            body={(rowData, { rowIndex }) =>
+              editableRow === rowIndex ? (
+                <div className="flex gap-2">
+                  <Button
+                    icon="pi pi-check"
+                    className="p-button-success p-button-text"
+                    onClick={() => handleSaveRoleChange(rowData)}
+                    tooltip="Kaydet"
+                  />
+                  <Button
+                    icon="pi pi-times"
+                    className="p-button-secondary p-button-text"
+                    onClick={handleCancelRoleChange}
+                    tooltip="İptal Et"
+                  />
+                </div>
+              ) : (
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text"
+                  onClick={() => handleEditRole(rowIndex, rowData.Role)}
+                  tooltip="Düzenle"
+                  disabled={editableRow !== null}
+                />
+              )
+            }
+            style={{ width: "8rem" }}
           />
 
           {users.length > 0 &&
@@ -183,48 +185,19 @@ const UserListView = () => {
                       : rowData[key]
                   }
                   className="text-sm px-3 py-2 truncate"
-                  style={{
-                    flex: key === "Role" ? "none" : "1",
-                    width: key === "Role" ? "8rem" : "auto",
-                  }}
                 />
               ))}
 
           <Column
-            body={(rowData, { rowIndex }) => (
+            body={(rowData) => (
               <DeleteButton
                 onClick={() => handleDeleteUser(rowData.Id)}
                 className="p-button-danger p-button-text"
                 emitterName={rowData.UserName}
                 rootEntity="kullanıcı"
-                disabled={editableRow !== null && editableRow !== rowIndex}
               />
             )}
             style={{ width: "4rem" }}
-          />
-
-          <Column
-            body={(rowData, { rowIndex }) =>
-              editableRow === rowIndex ? (
-                <div className="flex gap-2">
-                  <Button
-                    icon="pi pi-check"
-                    className="p-button-success p-button-text text-sm"
-                    onClick={() => handleSaveRoleChange(rowData)}
-                    tooltip="Kaydet"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-times"
-                    className="p-button-secondary p-button-text text-sm"
-                    onClick={handleCancelRoleChange}
-                    tooltip="İptal Et"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                </div>
-              ) : null
-            }
-            style={{ width: "8rem" }}
           />
         </DataTable>
 
