@@ -3,29 +3,56 @@ import { Button } from "primereact/button";
 import useUserStore from "../store/useUserStore";
 import ProfileDetails from "./ProfileDetails";
 import ChangePassword from "./ChangePassword";
+import axiosInstance from "../api/axiosInstance";
 
 const UserProfile = () => {
   const { userData, fetchUserData } = useUserStore();
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-  const [updatedUser, setUpdatedUser] = useState(storedUser || {});
+  const [updatedUser, setUpdatedUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isPasswordChanging, setIsPasswordChanging] = useState(false);
 
+  // Fetch and sync user data from backend or localStorage
   useEffect(() => {
-    console.log("storedUser: ", storedUser);
-    if (!userData) {
-      fetchUserData();
-    }
+    const fetchAndUpdateUserData = async () => {
+      try {
+        const storedUser = JSON.parse(localStorage.getItem("user"));
+        if (!storedUser?.Id) {
+          throw new Error("User ID not found in localStorage.");
+        }
+
+        // Fetch user data by ID
+        const response = await axiosInstance.get(`/api/users/${storedUser.Id}`);
+        const fetchedUser = response.data;
+
+        // Update localStorage and state
+        localStorage.setItem("user", JSON.stringify(fetchedUser));
+        setUpdatedUser(fetchedUser);
+
+        // Fetch additional user data if needed
+        if (!userData) {
+          fetchUserData();
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+
+        // Fallback to localStorage if backend fetch fails
+        const storedUser = JSON.parse(localStorage.getItem("user")) || null;
+        setUpdatedUser(storedUser);
+      }
+    };
+
+    fetchAndUpdateUserData();
   }, [userData, fetchUserData]);
 
+  // Reset fields to the latest user data
   const resetFields = () => {
-    setUpdatedUser(storedUser || {});
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setUpdatedUser(storedUser || null);
     setIsEditing(false);
     setIsPasswordChanging(false);
   };
 
-  if (!userData) {
-    console.log("User data is missing:", userData);
+  if (!updatedUser) {
     return <div>Loading...</div>;
   }
 
