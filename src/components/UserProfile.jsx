@@ -68,7 +68,6 @@ const UserProfile = () => {
         <ChangePassword
           userData={userData}
           updatedUser={updatedUser}
-          setUpdatedUser={setUpdatedUser}
           resetFields={resetFields}
         />
       )}
