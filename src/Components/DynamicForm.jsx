@@ -30,7 +30,8 @@ const DynamicForm = ({
   } = useFormStore();
 
   useEffect(() => {
-    if (!entityId) {
+    if (!entityId || entityId === null) {
+      console.log("AAAAA");
       const newId = uuidv4();
       setEntityId(newId);
       addIdToFormValues(path, newId); // Add ID to formValues after setting it in local state
