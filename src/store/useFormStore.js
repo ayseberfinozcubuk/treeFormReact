@@ -7,8 +7,6 @@ export const useFormStore = create((set) => ({
   emptyMandatoryFields: [],
   notInRangeField: [],
 
-  setInitialFormValues: (values) => set(() => ({ initialFormValues: values })),
-
   setFormData: (dataArray) => {
     const dataDict = dataArray.reduce((acc, item) => {
       acc[item.EntityName] = item;
@@ -46,12 +44,21 @@ export const useFormStore = create((set) => ({
     }),
 
   addIdToFormValues: (path, id) =>
-    set((state) => ({
-      formValues: {
-        ...state.formValues,
-        [path !== "" ? `${path}.Id` : "Id"]: id,
-      },
-    })),
+    set((state) => {
+      const idKey = path !== "" ? `${path}.Id` : "Id";
+      // Check if the ID already exists and is not null
+      if (state.formValues[idKey] !== null) {
+        return state; // Return current state without changes
+      }
+
+      // Add the ID to formValues
+      return {
+        formValues: {
+          ...state.formValues,
+          [idKey]: id,
+        },
+      };
+    }),
 
   addEmptyMandatoryField: (key) => {
     set((state) => {
@@ -134,7 +141,7 @@ export const useFormStore = create((set) => ({
     const flattenedValues = flattenObject(values);
     set((state) => ({
       formValues: flattenedValues,
-      initialFormValues: { ...state.initialFormValues, ...flattenedValues },
+      initialFormValues: flattenedValues,
     }));
   },
 

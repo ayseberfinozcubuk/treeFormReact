@@ -4,8 +4,6 @@ export const getNestedValue = (formValues, fullPath) => {
 
 export const getLength = (formValues, keyPrefix) => {
   const uniqueKeys = new Set();
-  // console.log("formValues: ", formValues);
-  // console.log("keyPrefix: ", keyPrefix);
 
   // Escape `keyPrefix` so dots and other characters are interpreted literally
   const escapedPrefix = keyPrefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -13,23 +11,14 @@ export const getLength = (formValues, keyPrefix) => {
   // Regex to match escaped keyPrefix followed by an index in square brackets, allowing any additional properties
   const regex = new RegExp(`^${escapedPrefix}\\[(\\d+)\\](\\..*)?$`);
 
-  // Debug: List all keys in formValues to confirm structure
-  // console.log("All keys in formValues:");
-  // Object.keys(formValues).forEach((key) => console.log("key: ", key));
-
   // Loop through the keys in formValues
   Object.keys(formValues).forEach((key) => {
     const match = key.match(regex);
     if (match) {
-      // console.log(`Match found: ${key}, index: ${match[1]}`);
       uniqueKeys.add(parseInt(match[1], 10));
-    } else {
-      // console.log(`No match for key: ${key} with prefix: ${keyPrefix}`);
     }
   });
 
-  // console.log("Unique indices found:", Array.from(uniqueKeys));
-  // console.log("COUNT: ", uniqueKeys.size, " OF ", keyPrefix);
   return uniqueKeys.size; // Return the count of unique numbers
 };
 
@@ -71,4 +60,38 @@ export const convertToNestedJson = (formValues) => {
   });
 
   return result;
+};
+
+export const areObjectsEqual = (obj1, obj2) => {
+  if (obj1 === obj2) return true; // Quick check for identical references
+
+  if (
+    typeof obj1 !== "object" ||
+    typeof obj2 !== "object" ||
+    obj1 === null ||
+    obj2 === null
+  ) {
+    return false; // If not objects or if null, not equal
+  }
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false; // Different number of keys
+
+  for (const key of keys1) {
+    if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
+      console.log(
+        "obj1[key]: ",
+        obj1[key],
+        " obj2[key]: ",
+        obj2[key],
+        " key: ",
+        key
+      );
+      return false; // Key mismatch or values not equal
+    }
+  }
+
+  return true; // All keys and values match
 };

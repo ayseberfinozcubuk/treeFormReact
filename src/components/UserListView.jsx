@@ -63,12 +63,21 @@ const UserListView = () => {
   };
 
   const handleSaveRoleChange = async (rowData) => {
+    if (tempRole === rowData.Role) {
+      // Inform the user and skip the API call
+      alert("The role is already set to the selected value. No changes made.");
+      setEditableRow(null);
+      setTempRole(null);
+      return;
+    }
+
     try {
       await axiosInstance.put(`/api/users/${rowData.Id}/role`, {
         Role: tempRole,
       });
       fetchUsers(); // Refresh the list
       setEditableRow(null);
+      setTempRole(null);
     } catch (error) {
       console.error("Failed to update role:", error.response?.data || error);
     }
@@ -140,6 +149,23 @@ const UserListView = () => {
           value={users}
           className="p-datatable-sm border rounded-lg shadow-md overflow-hidden"
         >
+          {users.length > 0 &&
+            Object.keys(users[0])
+              .filter((key) => key !== "Id")
+              .map((key) => (
+                <Column
+                  key={key}
+                  field={key}
+                  header={getColumnHeader(key)}
+                  body={(rowData, { rowIndex }) =>
+                    key === "Role"
+                      ? renderRoleField(rowData, rowIndex)
+                      : rowData[key]
+                  }
+                  className="text-sm px-3 py-2 truncate"
+                />
+              ))}
+
           <Column
             header="Actions"
             body={(rowData, { rowIndex }) =>
@@ -159,45 +185,27 @@ const UserListView = () => {
                   />
                 </div>
               ) : (
-                <Button
-                  icon="pi pi-pencil"
-                  className="p-button-text"
-                  onClick={() => handleEditRole(rowIndex, rowData.Role)}
-                  tooltip="Düzenle"
-                  disabled={editableRow !== null}
-                />
+                <div className="flex gap-2">
+                  {/* Delete Button */}
+                  <DeleteButton
+                    onClick={() => handleDeleteUser(rowData.Id)}
+                    className="p-button-danger p-button-text"
+                    emitterName={rowData.UserName}
+                    rootEntity="kullanıcı"
+                    tooltip="Sil"
+                  />
+                  {/* Edit Button */}
+                  <Button
+                    icon="pi pi-pencil"
+                    className="p-button-text"
+                    onClick={() => handleEditRole(rowIndex, rowData.Role)}
+                    tooltip="Düzenle"
+                    disabled={editableRow !== null}
+                  />
+                </div>
               )
             }
             style={{ width: "8rem" }}
-          />
-
-          {users.length > 0 &&
-            Object.keys(users[0])
-              .filter((key) => key !== "Id")
-              .map((key) => (
-                <Column
-                  key={key}
-                  field={key}
-                  header={getColumnHeader(key)}
-                  body={(rowData, { rowIndex }) =>
-                    key === "Role"
-                      ? renderRoleField(rowData, rowIndex)
-                      : rowData[key]
-                  }
-                  className="text-sm px-3 py-2 truncate"
-                />
-              ))}
-
-          <Column
-            body={(rowData) => (
-              <DeleteButton
-                onClick={() => handleDeleteUser(rowData.Id)}
-                className="p-button-danger p-button-text"
-                emitterName={rowData.UserName}
-                rootEntity="kullanıcı"
-              />
-            )}
-            style={{ width: "4rem" }}
           />
         </DataTable>
 

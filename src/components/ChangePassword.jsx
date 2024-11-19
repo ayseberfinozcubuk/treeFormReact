@@ -20,6 +20,7 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
   const handleSave = async () => {
     setError({});
     try {
+      // Proceed with updating the password
       const response = await axiosInstance.put(
         `http://localhost:5000/api/users/${updatedUser.Id}/change-password`,
         {
@@ -60,19 +61,12 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
     const field = userData.Properties.find((prop) => prop.Name === "Password");
     const validationErrors = [];
 
-    // Validate new password
+    // Validate new password against defined rules
     if (field?.ValidationRules) {
       const result = validateField(newPassword, field.ValidationRules);
       if (!result.isValid) {
         validationErrors.push(result.error);
       }
-    }
-
-    // Validate new password and confirmation password match
-    if (newPassword !== confirmPassword) {
-      validationErrors.push(
-        "Confirmation password does not match the new password."
-      );
     }
 
     return validationErrors;

@@ -7,11 +7,17 @@ import { useFormStore } from "../store/useFormStore";
 import { useEntityStore } from "../store/useEntityStore";
 import { InputSwitch } from "primereact/inputswitch";
 import { useNavigate } from "react-router-dom";
-import { convertToNestedJson } from "../utils/utils";
+import { convertToNestedJson, areObjectsEqual } from "../utils/utils";
 
 const EntityDetails = ({ rootEntity }) => {
-  const { formValues, setFormValues, emptyMandatoryFields, notInRangeField } =
-    useFormStore();
+  const {
+    formValues,
+    setFormValues,
+    emptyMandatoryFields,
+    notInRangeField,
+    resetFormValues,
+    initialFormValues,
+  } = useFormStore();
   const { selectedEntity } = useEntityStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [role, setRole] = useState("read");
@@ -27,10 +33,12 @@ const EntityDetails = ({ rootEntity }) => {
   useEffect(() => {
     if (selectedEntity) {
       setFormValues(selectedEntity);
+      //setInitialFormValues(selectedEntity);
     }
   }, [selectedEntity, setFormValues]);
 
   const handleSubmit = async () => {
+    // Check for missing required fields
     const missingRequiredFields = emptyMandatoryFields.filter(
       (field) => formValues[field] === "" || formValues[field] === null
     );
@@ -40,8 +48,21 @@ const EntityDetails = ({ rootEntity }) => {
       return;
     }
 
+    // Check for fields out of range
     if (notInRangeField.length > 0) {
       alert("Lütfen tüm alanların izin verilen aralıkta olduğundan emin olun.");
+      return;
+    }
+
+    console.log(
+      "initialFormValues: ",
+      initialFormValues,
+      " formValues: ",
+      formValues
+    );
+
+    if (areObjectsEqual(initialFormValues, formValues)) {
+      alert("Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı.");
       return;
     }
 
@@ -53,7 +74,7 @@ const EntityDetails = ({ rootEntity }) => {
         structuredJson
       );
       alert("Entity başarıyla güncellendi!");
-      navigate("/"); // Redirect back to main list view after update
+      navigate("/"); // Redirect back to the main list view after update
     } catch (error) {
       console.error("Update error:", error);
     }
@@ -61,6 +82,7 @@ const EntityDetails = ({ rootEntity }) => {
 
   const handleCancelChanges = () => {
     alert("Değişiklikler iptal edilecek!");
+    resetFormValues();
     navigate("/"); // Redirect back to main list view after update
   };
 

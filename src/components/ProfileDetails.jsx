@@ -23,6 +23,17 @@ const ProfileDetails = ({
         return;
       }
 
+      // Retrieve stored user data from localStorage
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+      if (
+        storedUser &&
+        storedUser.UserName === updatedUser.UserName &&
+        storedUser.Email === updatedUser.Email
+      ) {
+        alert("Inputs are the same as the already existing data.");
+        return;
+      }
+
       const updatePayload = {
         UserName: updatedUser.UserName,
         Email: updatedUser.Email,
