@@ -10,11 +10,15 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState({});
-  const toastRef = useRef(null); // Toast reference for notifications
+  const [passwordVisible, setPasswordVisible] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
+  }); // Visibility states for passwords
+  const toastRef = useRef(null);
 
   const handleSave = async () => {
     setError({});
-
     try {
       const response = await axiosInstance.put(
         `http://localhost:5000/api/users/${updatedUser.Id}/change-password`,
@@ -30,16 +34,15 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
         severity: "success",
         summary: "Success",
         detail: "Your password has been updated successfully!",
-        life: 3000, // Duration in milliseconds
-        closable: true, // Allow the user to close the toast manually
+        life: 3000,
+        closable: true,
       });
 
       // Delay navigation to reset fields
       setTimeout(() => {
         resetFields();
-      }, 3000); // Wait for the toast to disappear
+      }, 3000);
     } catch (err) {
-      // Handle errors from the backend
       const { response } = err;
       if (response && response.data) {
         setError({ server: response.data });
@@ -50,7 +53,6 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
   };
 
   const handleToastHide = () => {
-    // Reset fields when the toast is manually closed
     resetFields();
   };
 
@@ -85,54 +87,62 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
     }
   };
 
+  const renderPasswordField = (id, label, value, onChange, fieldName) => (
+    <div className="p-field relative">
+      <label htmlFor={id} className="block mb-2">
+        {label}
+      </label>
+      <InputText
+        id={id}
+        type={passwordVisible[fieldName] ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={`Enter ${label.toLowerCase()}`}
+        className="w-full"
+      />
+      <i
+        className={`absolute right-3 top-8 pi ${
+          passwordVisible[fieldName] ? "pi-eye-slash" : "pi-eye"
+        } cursor-pointer`}
+        onClick={() =>
+          setPasswordVisible((prev) => ({
+            ...prev,
+            [fieldName]: !prev[fieldName],
+          }))
+        }
+      />
+    </div>
+  );
+
   return (
     <div className="space-y-4">
-      <Toast ref={toastRef} onHide={handleToastHide} />{" "}
-      {/* Toast with onHide */}
+      <Toast ref={toastRef} onHide={handleToastHide} />
       {error.server && (
         <div className="p-2 mb-4 text-red-600 bg-red-100 rounded">
           {error.server}
         </div>
       )}
-      <div className="p-field">
-        <label htmlFor="currentPassword" className="block mb-2">
-          Current Password
-        </label>
-        <InputText
-          id="currentPassword"
-          type="password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          placeholder="Enter current password"
-          className="w-full"
-        />
-      </div>
-      <div className="p-field">
-        <label htmlFor="newPassword" className="block mb-2">
-          New Password
-        </label>
-        <InputText
-          id="newPassword"
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          placeholder="Enter new password"
-          className="w-full"
-        />
-      </div>
-      <div className="p-field">
-        <label htmlFor="confirmPassword" className="block mb-2">
-          Confirm New Password
-        </label>
-        <InputText
-          id="confirmPassword"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm new password"
-          className="w-full"
-        />
-      </div>
+      {renderPasswordField(
+        "currentPassword",
+        "Current Password",
+        currentPassword,
+        (e) => setCurrentPassword(e.target.value),
+        "currentPassword"
+      )}
+      {renderPasswordField(
+        "newPassword",
+        "New Password",
+        newPassword,
+        (e) => setNewPassword(e.target.value),
+        "newPassword"
+      )}
+      {renderPasswordField(
+        "confirmPassword",
+        "Confirm New Password",
+        confirmPassword,
+        (e) => setConfirmPassword(e.target.value),
+        "confirmPassword"
+      )}
       {error.validation && (
         <small className="p-error text-red-500">{error.validation}</small>
       )}

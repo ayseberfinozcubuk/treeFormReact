@@ -28,8 +28,15 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
   };
 
   const handleInputChange = (fieldName, value) => {
-    setNewUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
+    if (fieldName === "ConfirmPassword") {
+      // Update ConfirmPassword state directly
+      setConfirmPassword(value);
+    } else {
+      // Update other fields in the newUser state
+      setNewUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
+    }
 
+    // Find validation rules for the field
     const field = userData.Properties.find((prop) => prop.Name === fieldName);
     if (field?.ValidationRules) {
       const result = validateField(value, field.ValidationRules);
@@ -39,9 +46,13 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
       }));
     }
 
-    if (fieldName === "ConfirmPassword" || fieldName === "Password") {
+    // Handle password mismatch validation
+    if (fieldName === "Password" || fieldName === "ConfirmPassword") {
       const passwordError =
-        newUser.Password !== confirmPassword ? "Passwords do not match." : "";
+        (fieldName === "Password" ? value : newUser.Password) !==
+        (fieldName === "ConfirmPassword" ? value : confirmPassword)
+          ? "Passwords do not match."
+          : "";
       setError((prevError) => ({
         ...prevError,
         ConfirmPassword: passwordError,
@@ -73,7 +84,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
   };
 
   const renderInputField = (field) => {
-    const { Name, Label, Type, EnumValues, IsMandatory } = field;
+    const { Name, Label, Type, EnumValues } = field;
     const value =
       Name === "ConfirmPassword" ? confirmPassword : newUser[Name] || "";
 
@@ -98,11 +109,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
             id={Name}
             type={passwordVisible[Name] ? "text" : "password"}
             value={value}
-            onChange={(e) =>
-              Name === "ConfirmPassword"
-                ? setConfirmPassword(e.target.value)
-                : handleInputChange(Name, e.target.value)
-            }
+            onChange={(e) => handleInputChange(Name, e.target.value)}
             placeholder={Label}
             className="w-full"
           />
