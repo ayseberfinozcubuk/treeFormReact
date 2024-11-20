@@ -30,12 +30,13 @@ const EntityDetails = ({ rootEntity }) => {
     }
   }, []);
 
+  /*
   useEffect(() => {
     if (selectedEntity) {
       setFormValues(selectedEntity);
-      //setInitialFormValues(selectedEntity);
     }
   }, [selectedEntity, setFormValues]);
+*/
 
   const handleSubmit = async () => {
     // Check for missing required fields

@@ -64,6 +64,7 @@ const EntityListView = ({ rootEntity }) => {
     const index = indexesList[entitiesList.indexOf(selected)];
     selectEntity(rootEntity, index);
     setFormValues(selected);
+    // console.log("selected: ", selected);
     navigate(`/details/${index}`);
   };
 

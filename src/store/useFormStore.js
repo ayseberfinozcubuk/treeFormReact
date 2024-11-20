@@ -45,13 +45,18 @@ export const useFormStore = create((set) => ({
 
   addIdToFormValues: (path, id) =>
     set((state) => {
+      // console.log("in addIdFormValues BUM");
       const idKey = path !== "" ? `${path}.Id` : "Id";
       // Check if the ID already exists and is not null
-      if (state.formValues[idKey] !== null) {
+      if (
+        state.formValues[idKey] !== null &&
+        state.formValues[idKey] !== undefined
+      ) {
         return state; // Return current state without changes
       }
 
       // Add the ID to formValues
+      // console.log("add id to form values on path: ", path);
       return {
         formValues: {
           ...state.formValues,
@@ -139,6 +144,7 @@ export const useFormStore = create((set) => ({
     };
 
     const flattenedValues = flattenObject(values);
+    // console.log("flattened values: ", flattenedValues);
     set((state) => ({
       formValues: flattenedValues,
       initialFormValues: flattenedValues,

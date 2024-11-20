@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import InputForm from "./InputForm";
 import ListForm from "./ListForm";
 import DeleteButton from "./DeleteButton";
@@ -20,6 +20,7 @@ const DynamicForm = ({
   const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
   const [entityId, setEntityId] = useState(null);
+  const entityIdSet = useRef(false); // Ref to track if entityId has been set
 
   const {
     formData,
@@ -30,13 +31,30 @@ const DynamicForm = ({
   } = useFormStore();
 
   useEffect(() => {
-    if (!entityId || entityId === null) {
-      console.log("AAAAA");
+    if (
+      !entityIdSet.current &&
+      (formValues[path === "" ? `${path}` : `${path}.Id`] === null ||
+        formValues[path === "" ? `${path}` : `${path}.Id`] === undefined)
+    ) {
       const newId = uuidv4();
       setEntityId(newId);
+
+      console.log(
+        "entityId: ",
+        newId,
+        " for ",
+        entityName,
+        " with path: ",
+        path,
+        " entityIdSet.current: ",
+        entityIdSet.current
+      );
+
+      entityIdSet.current = true;
+
       addIdToFormValues(path, newId); // Add ID to formValues after setting it in local state
     }
-  }, [entityId, path, addIdToFormValues]);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -53,6 +71,7 @@ const DynamicForm = ({
   useEffect(() => {
     // console.log("data: ", data);
     if (data && parentId) {
+      // console.log("parentName: ", parentName); // Emitter
       const parentProperty = data.Properties.find(
         (property) => property.Name === `${parentName}Id`
       );
@@ -62,12 +81,24 @@ const DynamicForm = ({
           path !== "" ? `${path}.${parentProperty.Name}` : parentProperty.Name;
         const currentValue = getNestedValue(formValues, currentPath);
 
-        if (
-          currentValue !== null &&
-          currentValue !== parentId &&
-          getNestedValue(formValues, `${path}.Id`) !== undefined
-        ) {
-          // console.log("added parentId to: ", currentPath);
+        console.log(
+          "current path: ",
+          currentPath, // Modes[0].EmitterId
+          " current value: ",
+          currentValue
+        );
+
+        if (currentValue === undefined || currentValue === null) {
+          /*
+          console.log(
+            "added parentId to: ",
+            currentPath,
+            " parent: ",
+            parentName,
+            " parentId: ",
+            parentId
+          );
+          */
           updateFormValues(currentPath, parentId);
         }
       }
