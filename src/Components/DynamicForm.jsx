@@ -39,6 +39,7 @@ const DynamicForm = ({
       const newId = uuidv4();
       setEntityId(newId);
 
+      /*
       console.log(
         "entityId: ",
         newId,
@@ -49,6 +50,7 @@ const DynamicForm = ({
         " entityIdSet.current: ",
         entityIdSet.current
       );
+      */
 
       entityIdSet.current = true;
 
@@ -81,12 +83,14 @@ const DynamicForm = ({
           path !== "" ? `${path}.${parentProperty.Name}` : parentProperty.Name;
         const currentValue = getNestedValue(formValues, currentPath);
 
+        /*
         console.log(
           "current path: ",
           currentPath, // Modes[0].EmitterId
           " current value: ",
           currentValue
         );
+        */
 
         if (currentValue === undefined || currentValue === null) {
           /*
@@ -99,6 +103,7 @@ const DynamicForm = ({
             parentId
           );
           */
+
           updateFormValues(currentPath, parentId);
         }
       }

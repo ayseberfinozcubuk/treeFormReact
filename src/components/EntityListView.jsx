@@ -52,7 +52,7 @@ const EntityListView = ({ rootEntity }) => {
     };
 
     fetchEntities();
-  }, [rootEntity, setEntities, navigate]);
+  }, [rootEntity]);
 
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
@@ -62,10 +62,9 @@ const EntityListView = ({ rootEntity }) => {
   const handleRowSelect = (e) => {
     const selected = e.value;
     const index = indexesList[entitiesList.indexOf(selected)];
-    selectEntity(rootEntity, index);
-    setFormValues(selected);
-    // console.log("selected: ", selected);
-    navigate(`/details/${index}`);
+    const id = selected.Id; // Get the ID of the selected entity
+    // Navigate to the details page and pass the ID in the URL
+    navigate(`/details/${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -90,7 +89,7 @@ const EntityListView = ({ rootEntity }) => {
       <DeleteButton
         icon="pi pi-trash"
         className="p-button-danger p-button-text"
-        onClick={() => handleDelete(rowData.Id, rowData.EmitterName)}
+        onClick={() => handleDelete(rowData.Id)}
         emitterName={rowData.EmitterName}
         rootEntity={rootEntity}
       />

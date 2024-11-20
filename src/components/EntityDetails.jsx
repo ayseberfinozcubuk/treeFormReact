@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axiosInstance from "../api/axiosInstance";
+import { useFormStore } from "../store/useFormStore";
+import { InputSwitch } from "primereact/inputswitch";
 import DynamicForm from "./DynamicForm";
 import SubmitButton from "./SubmitButton";
 import CancelButton from "./CancelButton";
-import axiosInstance from "../api/axiosInstance";
-import { useFormStore } from "../store/useFormStore";
-import { useEntityStore } from "../store/useEntityStore";
-import { InputSwitch } from "primereact/inputswitch";
-import { useNavigate } from "react-router-dom";
+import { Toast } from "primereact/toast";
 import { convertToNestedJson, areObjectsEqual } from "../utils/utils";
 
 const EntityDetails = ({ rootEntity }) => {
   const {
     formValues,
-    setFormValues,
     emptyMandatoryFields,
-    notInRangeField,
+    setFormValues,
     resetFormValues,
     initialFormValues,
+    notInRangeField,
   } = useFormStore();
-  const { selectedEntity } = useEntityStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [role, setRole] = useState("read");
+  const [entityData, setEntityData] = useState(null);
+  const toast = useRef(null); // Toast reference
+  const { id } = useParams(); // Get id from the URL
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,59 +32,90 @@ const EntityDetails = ({ rootEntity }) => {
     }
   }, []);
 
-  /*
   useEffect(() => {
-    if (selectedEntity) {
-      setFormValues(selectedEntity);
-    }
-  }, [selectedEntity, setFormValues]);
-*/
+    // Fetch the entity by ID
+    const fetchEntityById = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
+        //setEntityData(response.data);
+        setFormValues(response.data); // Set form values in the store
+      } catch (error) {
+        console.error(`Error fetching ${rootEntity} by ID:`, error);
+        if (error.response && error.response.status === 401) {
+          navigate("/login");
+        }
+      }
+    };
+
+    fetchEntityById();
+  }, [rootEntity, id, setFormValues, navigate]);
+
+  const showToast = (severity, summary, detail) => {
+    toast.current.show({ severity, summary, detail, life: 3000 });
+  };
 
   const handleSubmit = async () => {
     // Check for missing required fields
-    const missingRequiredFields = emptyMandatoryFields.filter(
-      (field) => formValues[field] === "" || formValues[field] === null
-    );
+    if (!formValues) return; // Ensure data is fetched
+
+    const missingRequiredFields = emptyMandatoryFields.filter((field) => {
+      const value = formValues[field];
+      console.log(`Checking field ${field}:`, value);
+      return value === "" || value === null;
+    });
 
     if (missingRequiredFields.length > 0) {
+      console.log("missingRequiredFields: ", missingRequiredFields);
       alert("Lütfen göndermeden önce tüm gerekli alanları doldurun.");
       return;
     }
 
-    // Check for fields out of range
     if (notInRangeField.length > 0) {
-      alert("Lütfen tüm alanların izin verilen aralıkta olduğundan emin olun.");
+      alert("Please ensure all fields are within the allowed range.");
       return;
     }
 
-    console.log(
-      "initialFormValues: ",
-      initialFormValues,
-      " formValues: ",
-      formValues
-    );
-
-    if (areObjectsEqual(initialFormValues, formValues)) {
-      alert("Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı.");
+    if (areObjectsEqual(initialFormValues, entityData)) {
+      showToast(
+        "info",
+        "Değişiklik Yok",
+        "Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı."
+      );
       return;
     }
 
-    const structuredJson = convertToNestedJson(formValues);
+    console.log("formValues before nestedJson: ", formValues);
+
+    const structuredJson = convertToNestedJson(entityData);
 
     try {
       await axiosInstance.put(
-        `http://localhost:5000/api/${rootEntity}/${selectedEntity?.Id}`,
+        `http://localhost:5000/api/${rootEntity}/${id}`,
         structuredJson
       );
-      alert("Entity başarıyla güncellendi!");
+      showToast(
+        "success",
+        "Başarıyla Güncellendi",
+        `${rootEntity} başarıyla güncellendi!`
+      );
+      resetFormValues();
       navigate("/"); // Redirect back to the main list view after update
     } catch (error) {
       console.error("Update error:", error);
+      showToast(
+        "error",
+        "Güncelleme Hatası",
+        "Bir hata oluştu. Lütfen tekrar deneyin."
+      );
     }
   };
 
   const handleCancelChanges = () => {
-    alert("Değişiklikler iptal edilecek!");
+    showToast(
+      "info",
+      "Değişiklik İptal Edildi",
+      "Değişiklikler iptal edilecek!"
+    );
     resetFormValues();
     navigate("/"); // Redirect back to main list view after update
   };
@@ -112,20 +145,26 @@ const EntityDetails = ({ rootEntity }) => {
           )}
         </div>
 
-        <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
-
-        {isEditMode && (
+        {entityData && (
           <>
-            <SubmitButton
-              label="Güncelle"
-              icon="pi pi-check"
-              onClick={handleSubmit}
-              className="bg-blue-500 text-white"
-            />
-            <CancelButton onClick={handleCancelChanges} />
+            <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
+            {isEditMode && (
+              <>
+                <SubmitButton
+                  label="Güncelle"
+                  icon="pi pi-check"
+                  onClick={handleSubmit}
+                  className="bg-blue-500 text-white"
+                />
+                <CancelButton onClick={handleCancelChanges} />
+              </>
+            )}
           </>
         )}
       </div>
+
+      {/* Toast container */}
+      <Toast ref={toast} />
     </div>
   );
 };

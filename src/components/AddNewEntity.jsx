@@ -33,7 +33,7 @@ const AddNewEntity = ({ rootEntity }) => {
       console.log(`Checking field ${field}:`, value);
       return value === "" || value === null;
     });
-    console.log("missingRequiredFields: ", missingRequiredFields);
+    // console.log("missingRequiredFields: ", missingRequiredFields);
 
     if (missingRequiredFields.length > 0) {
       console.log("missingRequiredFields: ", missingRequiredFields);
