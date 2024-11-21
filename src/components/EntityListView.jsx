@@ -10,8 +10,7 @@ import { useFormStore } from "../store/useFormStore";
 import DeleteButton from "./DeleteButton";
 
 const EntityListView = ({ rootEntity }) => {
-  const { entities, entityIndexes, setEntities, selectEntity } =
-    useEntityStore();
+  const { entities, setEntities } = useEntityStore();
   const { setFormValues, formData } = useFormStore();
   const [role, setRole] = useState("read");
   const navigate = useNavigate();
@@ -57,11 +56,9 @@ const EntityListView = ({ rootEntity }) => {
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
     : [];
-  const indexesList = entityIndexes[rootEntity] || [];
 
   const handleRowSelect = (e) => {
     const selected = e.value;
-    const index = indexesList[entitiesList.indexOf(selected)];
     const id = selected.Id; // Get the ID of the selected entity
     // Navigate to the details page and pass the ID in the URL
     navigate(`/details/${id}`);

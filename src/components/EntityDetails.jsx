@@ -20,7 +20,7 @@ const EntityDetails = ({ rootEntity }) => {
   } = useFormStore();
   const [isEditMode, setIsEditMode] = useState(false);
   const [role, setRole] = useState("read");
-  const [entityData, setEntityData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const toast = useRef(null); // Toast reference
   const { id } = useParams(); // Get id from the URL
   const navigate = useNavigate();
@@ -37,10 +37,12 @@ const EntityDetails = ({ rootEntity }) => {
     const fetchEntityById = async () => {
       try {
         const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
-        //setEntityData(response.data);
+        // setEntityData(response.data);
         setFormValues(response.data); // Set form values in the store
+        setIsLoading(false); // Data is loaded
       } catch (error) {
         console.error(`Error fetching ${rootEntity} by ID:`, error);
+        setIsLoading(false); // End loading even if there's an error
         if (error.response && error.response.status === 401) {
           navigate("/login");
         }
@@ -55,8 +57,11 @@ const EntityDetails = ({ rootEntity }) => {
   };
 
   const handleSubmit = async () => {
-    // Check for missing required fields
-    if (!formValues) return; // Ensure data is fetched
+    if (!formValues || typeof formValues !== "object") {
+      console.error("formValues is invalid or undefined.");
+      alert("Form data is missing or invalid. Please refresh the page.");
+      return;
+    }
 
     const missingRequiredFields = emptyMandatoryFields.filter((field) => {
       const value = formValues[field];
@@ -75,7 +80,7 @@ const EntityDetails = ({ rootEntity }) => {
       return;
     }
 
-    if (areObjectsEqual(initialFormValues, entityData)) {
+    if (areObjectsEqual(initialFormValues, formValues)) {
       showToast(
         "info",
         "Değişiklik Yok",
@@ -84,11 +89,9 @@ const EntityDetails = ({ rootEntity }) => {
       return;
     }
 
-    console.log("formValues before nestedJson: ", formValues);
-
-    const structuredJson = convertToNestedJson(entityData);
-
     try {
+      console.log("formValues before nestedJson: ", formValues);
+      const structuredJson = convertToNestedJson(formValues); // Pass valid formValues
       await axiosInstance.put(
         `http://localhost:5000/api/${rootEntity}/${id}`,
         structuredJson
@@ -120,6 +123,15 @@ const EntityDetails = ({ rootEntity }) => {
     navigate("/"); // Redirect back to main list view after update
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p>Loading...</p>{" "}
+        {/* Replace with a spinner or any loading indicator */}
+      </div>
+    );
+  }
+
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
       <h1 className="text-xl font-semibold text-gray-800 mb-8">
@@ -145,7 +157,7 @@ const EntityDetails = ({ rootEntity }) => {
           )}
         </div>
 
-        {entityData && (
+        {formValues && (
           <>
             <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
             {isEditMode && (

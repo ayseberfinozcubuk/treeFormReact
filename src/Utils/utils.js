@@ -23,6 +23,10 @@ export const getLength = (formValues, keyPrefix) => {
 };
 
 export const convertToNestedJson = (formValues) => {
+  if (!formValues || typeof formValues !== "object") {
+    throw new Error("Invalid formValues: Expected an object.");
+  }
+
   const result = {};
   Object.keys(formValues).forEach((key) => {
     const value = formValues[key];

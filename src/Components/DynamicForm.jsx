@@ -72,8 +72,20 @@ const DynamicForm = ({
   // New useEffect to handle updating parent ID if needed
   useEffect(() => {
     // console.log("data: ", data);
-    if (data && parentId) {
-      // console.log("parentName: ", parentName); // Emitter
+    if (
+      data &&
+      parentId &&
+      formValues[path === "" ? `${path}` : `${path}.Id`] !== null &&
+      formValues[path === "" ? `${path}` : `${path}.Id`] !== undefined
+    ) {
+      console.log(
+        "parentName: ",
+        parentName,
+        " for: ",
+        entityName,
+        " path: ",
+        path
+      );
       const parentProperty = data.Properties.find(
         (property) => property.Name === `${parentName}Id`
       );
