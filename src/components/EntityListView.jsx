@@ -11,8 +11,9 @@ import DeleteButton from "./DeleteButton";
 
 const EntityListView = ({ rootEntity }) => {
   const { entities, setEntities } = useEntityStore();
-  const { setFormValues, formData } = useFormStore();
+  const { formData } = useFormStore();
   const [role, setRole] = useState("read");
+  const [refreshEntites, setRefreshEntities] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,7 +52,7 @@ const EntityListView = ({ rootEntity }) => {
     };
 
     fetchEntities();
-  }, [rootEntity]);
+  }, [refreshEntites]);
 
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
@@ -67,10 +68,7 @@ const EntityListView = ({ rootEntity }) => {
   const handleDelete = async (id) => {
     try {
       await axiosInstance.delete(`/api/${rootEntity}/${id}`);
-      setEntities(
-        rootEntity,
-        entitiesList.filter((entity) => entity.Id !== id)
-      );
+      setRefreshEntities((prev) => !prev);
     } catch (error) {
       console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
 

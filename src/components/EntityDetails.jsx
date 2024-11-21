@@ -7,7 +7,12 @@ import DynamicForm from "./DynamicForm";
 import SubmitButton from "./SubmitButton";
 import CancelButton from "./CancelButton";
 import { Toast } from "primereact/toast";
-import { convertToNestedJson, areObjectsEqual } from "../utils/utils";
+import {
+  convertToNestedJson,
+  areObjectsEqual,
+  showToast,
+  onToastClose,
+} from "../utils/utils";
 
 const EntityDetails = ({ rootEntity }) => {
   const {
@@ -21,7 +26,10 @@ const EntityDetails = ({ rootEntity }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [role, setRole] = useState("read");
   const [isLoading, setIsLoading] = useState(true);
+
   const toast = useRef(null); // Toast reference
+  const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
+
   const { id } = useParams(); // Get id from the URL
   const navigate = useNavigate();
 
@@ -52,36 +60,46 @@ const EntityDetails = ({ rootEntity }) => {
     fetchEntityById();
   }, [rootEntity, id, setFormValues, navigate]);
 
-  const showToast = (severity, summary, detail) => {
-    toast.current.show({ severity, summary, detail, life: 3000 });
-  };
-
   const handleSubmit = async () => {
     if (!formValues || typeof formValues !== "object") {
       console.error("formValues is invalid or undefined.");
-      alert("Form data is missing or invalid. Please refresh the page.");
+      showToast(
+        toast.current,
+        "error",
+        "Form Hatası",
+        "Form verileri eksik veya geçersiz."
+      );
       return;
     }
 
     const missingRequiredFields = emptyMandatoryFields.filter((field) => {
       const value = formValues[field];
-      console.log(`Checking field ${field}:`, value);
       return value === "" || value === null;
     });
 
     if (missingRequiredFields.length > 0) {
-      console.log("missingRequiredFields: ", missingRequiredFields);
-      alert("Lütfen göndermeden önce tüm gerekli alanları doldurun.");
+      showToast(
+        toast.current,
+        "error",
+        "Eksik Alanlar",
+        "Lütfen tüm gerekli alanları doldurun."
+      );
       return;
     }
 
     if (notInRangeField.length > 0) {
-      alert("Please ensure all fields are within the allowed range.");
+      showToast(
+        toast.current,
+        "error",
+        "Geçersiz Değerler",
+        "Bazı alanlar izin verilen aralığın dışında."
+      );
       return;
     }
 
     if (areObjectsEqual(initialFormValues, formValues)) {
       showToast(
+        toast.current,
         "info",
         "Değişiklik Yok",
         "Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı."
@@ -90,22 +108,33 @@ const EntityDetails = ({ rootEntity }) => {
     }
 
     try {
-      console.log("formValues before nestedJson: ", formValues);
-      const structuredJson = convertToNestedJson(formValues); // Pass valid formValues
+      const structuredJson = convertToNestedJson(formValues);
       await axiosInstance.put(
         `http://localhost:5000/api/${rootEntity}/${id}`,
         structuredJson
       );
+
+      // Show success toast and set timeout
       showToast(
+        toast.current,
         "success",
         "Başarıyla Güncellendi",
         `${rootEntity} başarıyla güncellendi!`
       );
-      resetFormValues();
-      navigate("/"); // Redirect back to the main list view after update
+
+      const timeoutFunction = () => {
+        resetFormValues();
+        navigate("/");
+      };
+
+      toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
+
+      // Store the function for immediate execution if the toast is dismissed
+      toastTimeoutRef.current = timeoutFunction;
     } catch (error) {
       console.error("Update error:", error);
       showToast(
+        toast.current,
         "error",
         "Güncelleme Hatası",
         "Bir hata oluştu. Lütfen tekrar deneyin."
@@ -113,14 +142,24 @@ const EntityDetails = ({ rootEntity }) => {
     }
   };
 
+  // Cancel changes handler
   const handleCancelChanges = () => {
     showToast(
+      toast.current,
       "info",
       "Değişiklik İptal Edildi",
       "Değişiklikler iptal edilecek!"
     );
-    resetFormValues();
-    navigate("/"); // Redirect back to main list view after update
+
+    const timeoutFunction = () => {
+      resetFormValues();
+      navigate("/");
+    };
+
+    toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
+
+    // Store the function for immediate execution if the toast is dismissed
+    toastTimeoutRef.current = timeoutFunction;
   };
 
   if (isLoading) {
@@ -176,7 +215,7 @@ const EntityDetails = ({ rootEntity }) => {
       </div>
 
       {/* Toast container */}
-      <Toast ref={toast} />
+      <Toast ref={toast} onHide={() => onToastClose(toastTimeoutRef.current)} />
     </div>
   );
 };

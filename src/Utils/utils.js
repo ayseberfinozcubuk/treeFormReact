@@ -23,10 +23,6 @@ export const getLength = (formValues, keyPrefix) => {
 };
 
 export const convertToNestedJson = (formValues) => {
-  if (!formValues || typeof formValues !== "object") {
-    throw new Error("Invalid formValues: Expected an object.");
-  }
-
   const result = {};
   Object.keys(formValues).forEach((key) => {
     const value = formValues[key];
@@ -98,4 +94,23 @@ export const areObjectsEqual = (obj1, obj2) => {
   }
 
   return true; // All keys and values match
+};
+
+export const showToast = (currentToast, severity, summary, detail) => {
+  currentToast.show({ severity, summary, detail, life: 3000 });
+};
+
+// Function to clear timeout and execute its logic when toast is dismissed
+export const onToastClose = (currentTimeoutRef) => {
+  if (currentTimeoutRef) {
+    // Clear the timeout if it exists
+    clearTimeout(currentTimeoutRef);
+
+    // Execute the logic immediately
+    if (typeof currentTimeoutRef === "function") {
+      currentTimeoutRef(); // Execute the stored function
+    }
+    // Reset the timeout reference
+    currentTimeoutRef = null;
+  }
 };
