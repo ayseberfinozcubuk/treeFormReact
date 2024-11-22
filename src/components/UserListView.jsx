@@ -46,7 +46,12 @@ const UserListView = () => {
       addUser(response.data);
       setIsDialogVisible(false);
     } catch (error) {
-      console.error("Failed to add user:", error.response?.data || error);
+      showToast(
+        toast.current,
+        "error",
+        "İşlem gerçekleşemedi",
+        "Hata: İşlem gerçekleştirilemedi."
+      );
     }
   };
 
@@ -55,7 +60,12 @@ const UserListView = () => {
       await axiosInstance.delete(`/api/users/${userId}`);
       deleteUser(userId);
     } catch (error) {
-      console.error("Failed to delete user:", error.response?.data || error);
+      showToast(
+        toast.current,
+        "error",
+        "İşlem gerçekleşemedi",
+        "Hata: İşlem gerçekleştirilemedi."
+      );
     }
   };
 
@@ -96,7 +106,12 @@ const UserListView = () => {
       setEditableRow(null);
       setTempRole(null);
     } catch (error) {
-      console.error("Failed to update role:", error.response?.data || error);
+      showToast(
+        toast.current,
+        "error",
+        "İşlem gerçekleşemedi",
+        "Hata: İşlem gerçekleştirilemedi."
+      );
     }
   };
 

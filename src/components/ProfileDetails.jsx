@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import axiosInstance from "../api/axiosInstance";
+import { showToast } from "../utils/utils";
+import { Toast } from "primereact/toast";
 
 const ProfileDetails = ({
   userData,
@@ -11,6 +13,8 @@ const ProfileDetails = ({
   setIsEditing,
   resetFields,
 }) => {
+  const toast = useRef(null); // Toast reference
+
   const handleInputChange = (fieldName, value) => {
     setUpdatedUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
   };
@@ -30,7 +34,12 @@ const ProfileDetails = ({
         storedUser.UserName === updatedUser.UserName &&
         storedUser.Email === updatedUser.Email
       ) {
-        alert("Inputs are the same as the already existing data.");
+        showToast(
+          toast.current,
+          "info",
+          "Değişiklik Yok",
+          "Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı."
+        );
         return;
       }
 
@@ -42,20 +51,20 @@ const ProfileDetails = ({
       // Send updated profile to the server
       await axiosInstance.put(`/api/users/${userId}`, updatePayload);
 
-      alert("Profile updated successfully!");
+      showToast(
+        toast.current,
+        "success",
+        "Başarıyla Güncellendi",
+        `${updatePayload.UserName} Başarıyla güncellendi!`
+      );
       setIsEditing(false);
     } catch (error) {
-      if (error.response) {
-        console.error("Error updating user profile:", error.response.data);
-        alert(
-          `Failed to update profile: ${
-            error.response.data.message || error.response.statusText
-          }`
-        );
-      } else {
-        console.error("Error updating user profile:", error);
-        alert("An unknown error occurred. Please try again.");
-      }
+      showToast(
+        toast.current,
+        "error",
+        "İşlem gerçekleşemedi",
+        "Hata: İşlem gerçekleştirilemedi."
+      );
     }
   };
 
@@ -93,6 +102,7 @@ const ProfileDetails = ({
 
   return (
     <>
+      <Toast ref={toast} />
       {userData?.Properties?.filter(
         (field) => field.Type !== "Guid" && field.Type !== "password"
       ).map((field) => (
