@@ -109,6 +109,7 @@ const EntityDetails = ({ rootEntity }) => {
 
     try {
       const structuredJson = convertToNestedJson(formValues);
+      console.log("updated data sent to back: ", structuredJson);
       await axiosInstance.put(
         `http://localhost:5000/api/${rootEntity}/${id}`,
         structuredJson

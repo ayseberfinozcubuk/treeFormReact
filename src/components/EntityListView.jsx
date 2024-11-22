@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
@@ -8,6 +8,7 @@ import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore";
 import { useFormStore } from "../store/useFormStore";
 import DeleteButton from "./DeleteButton";
+import { showToast } from "../utils/utils";
 
 const EntityListView = ({ rootEntity }) => {
   const { entities, setEntities } = useEntityStore();
@@ -15,6 +16,9 @@ const EntityListView = ({ rootEntity }) => {
   const [role, setRole] = useState("read");
   const [refreshEntites, setRefreshEntities] = useState(false);
   const navigate = useNavigate();
+
+  const toast = useRef(null); // Toast reference
+  const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -71,6 +75,12 @@ const EntityListView = ({ rootEntity }) => {
       setRefreshEntities((prev) => !prev);
     } catch (error) {
       console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
+      showToast(
+        toast.current,
+        "error",
+        "Silme Hatası",
+        "Silme işlemi esnasında bir hata oluştu. Lütfen tekrar deneyin."
+      );
 
       // Redirect to login if not authenticated
       if (error.response && error.response.status === 401) {

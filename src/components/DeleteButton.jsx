@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import { Button } from "primereact/button";
+import { Toast } from "primereact/toast";
+import { showConfirmationToast } from "../utils/utils";
 
 const DeleteButton = ({
   onClick,
@@ -10,28 +12,27 @@ const DeleteButton = ({
   rootEntity = "",
   disabled = false,
 }) => {
-  const handleDeleteClick = () => {
-    const confirmMessage =
-      emitterName && rootEntity
-        ? `${emitterName} adlı ${rootEntity} öğesini silmek istediğinizden emin misiniz?`
-        : "Bu öğeyi silmek istediğinizden emin misiniz?";
-
-    const isConfirmed = window.confirm(confirmMessage);
-    if (isConfirmed) {
-      onClick(); // Proceed with the delete action if confirmed
-    }
-  };
+  const toast = useRef(null);
+  const confirmMessage =
+    emitterName && rootEntity
+      ? `${emitterName} adlı ${rootEntity} öğesini silmek istediğinizden emin misiniz?`
+      : "Bu öğeyi silmek istediğinizden emin misiniz?";
 
   return (
-    <Button
-      icon="pi pi-trash"
-      className={`p-button-danger p-button-text ${className}`}
-      onClick={handleDeleteClick} // Call the confirmation handler
-      style={style}
-      tooltip="Sil"
-      tooltipOptions={{ position: "top" }}
-      disabled={disabled}
-    />
+    <>
+      <Toast ref={toast} />
+      <Button
+        icon="pi pi-trash"
+        className={`p-button-danger p-button-text ${className}`}
+        onClick={() =>
+          showConfirmationToast(toast.current, confirmMessage, onClick)
+        }
+        style={style}
+        tooltip="Sil"
+        tooltipOptions={{ position: "top" }}
+        disabled={disabled}
+      />
+    </>
   );
 };
 

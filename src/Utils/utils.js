@@ -1,3 +1,5 @@
+import { Button } from "primereact/button";
+
 export const getNestedValue = (formValues, fullPath) => {
   return formValues.hasOwnProperty(fullPath) ? formValues[fullPath] : undefined;
 };
@@ -63,6 +65,7 @@ export const convertToNestedJson = (formValues) => {
 };
 
 export const areObjectsEqual = (obj1, obj2) => {
+  // console.log("obj1: ", obj1, "obj2", obj2);
   if (obj1 === obj2) return true; // Quick check for identical references
 
   if (
@@ -113,4 +116,69 @@ export const onToastClose = (currentTimeoutRef) => {
     // Reset the timeout reference
     currentTimeoutRef = null;
   }
+};
+
+export const showConfirmationToast = (
+  currentToast,
+  confirmMessage,
+  onClick
+) => {
+  currentToast.show({
+    severity: "warn",
+    sticky: true,
+    content: (
+      <div
+        className="p-d-flex p-flex-column p-ai-center"
+        style={{
+          padding: "1rem",
+          maxWidth: "280px", // Balanced width for content
+          margin: "0 auto", // Center content horizontally
+          textAlign: "center", // Center the text
+        }}
+      >
+        {/* Message Content */}
+        <div
+          className="font-medium"
+          style={{
+            fontSize: "0.85rem", // Smaller font size for compactness
+            marginBottom: "0.75rem", // Space between message and buttons
+          }}
+        >
+          {confirmMessage}
+        </div>
+
+        {/* Action Buttons */}
+        <div
+          className="p-d-flex p-jc-center"
+          style={{
+            gap: "0.75rem", // Space between buttons
+          }}
+        >
+          <Button
+            label="Evet"
+            icon="pi pi-check"
+            className="p-button-success"
+            onClick={() => {
+              onClick();
+              currentToast.clear(); // Clear the toast after confirming
+            }}
+            style={{
+              padding: "0.4rem 1rem", // Compact button size
+              fontSize: "0.8rem",
+            }}
+          />
+          <Button
+            label="Hayır"
+            icon="pi pi-times"
+            className="p-button-danger"
+            onClick={() => currentToast.clear()} // Clear the toast without taking action
+            style={{
+              padding: "0.4rem 1rem", // Compact button size
+              fontSize: "0.8rem",
+            }}
+          />
+        </div>
+      </div>
+    ),
+  });
 };
