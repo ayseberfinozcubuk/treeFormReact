@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -7,6 +7,8 @@ import axiosInstance from "../api/axiosInstance";
 import AddUserDialog from "./AddUserDialog";
 import DeleteButton from "./DeleteButton";
 import useUserStore from "../store/useUserStore";
+import { Toast } from "primereact/toast";
+import { showToast, showConfirmationToast } from "../utils/utils";
 
 const UserListView = () => {
   const {
@@ -23,6 +25,10 @@ const UserListView = () => {
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [editableRow, setEditableRow] = useState(null);
   const [tempRole, setTempRole] = useState(null);
+
+  const toast = useRef(null); // Toast reference
+  const confirmCancelMessage =
+    "İşlemi iptal etmek istediğinizden emin misiniz?";
 
   useEffect(() => {
     fetchUsers();
@@ -65,7 +71,12 @@ const UserListView = () => {
   const handleSaveRoleChange = async (rowData) => {
     if (tempRole === rowData.Role) {
       // Inform the user and skip the API call
-      alert("The role is already set to the selected value. No changes made.");
+      showToast(
+        toast.current,
+        "info",
+        "Değişiklik Yok",
+        "Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı."
+      );
       setEditableRow(null);
       setTempRole(null);
       return;
@@ -76,6 +87,12 @@ const UserListView = () => {
         Role: tempRole,
       });
       fetchUsers(); // Refresh the list
+      showToast(
+        toast.current,
+        "success",
+        "Başarıyla Güncellendi",
+        `${rowData.Name} başarıyla güncellendi!`
+      );
       setEditableRow(null);
       setTempRole(null);
     } catch (error) {
@@ -130,6 +147,9 @@ const UserListView = () => {
 
   return (
     <div className="p-4 flex justify-center">
+      {/* Add Toast */}
+      <Toast ref={toast} />
+
       <div className="w-full max-w-4xl">
         <h2 className="mb-4 text-2xl font-semibold text-center">
           Kullanıcı Yönetimi
@@ -180,7 +200,13 @@ const UserListView = () => {
                   <Button
                     icon="pi pi-times"
                     className="p-button-secondary p-button-text"
-                    onClick={handleCancelRoleChange}
+                    onClick={() =>
+                      showConfirmationToast(
+                        toast.current,
+                        confirmCancelMessage,
+                        handleCancelRoleChange
+                      )
+                    }
                     tooltip="İptal Et"
                   />
                 </div>

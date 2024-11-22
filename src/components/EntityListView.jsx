@@ -18,7 +18,6 @@ const EntityListView = ({ rootEntity }) => {
   const navigate = useNavigate();
 
   const toast = useRef(null); // Toast reference
-  const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
 
   useEffect(() => {
     const fetchUserRole = async () => {
