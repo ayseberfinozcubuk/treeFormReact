@@ -41,11 +41,9 @@ const EntityDetails = ({ rootEntity }) => {
   }, []);
 
   useEffect(() => {
-    // Fetch the entity by ID
     const fetchEntityById = async () => {
       try {
         const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
-        // setEntityData(response.data);
         setFormValues(response.data); // Set form values in the store
         setIsLoading(false); // Data is loaded
       } catch (error) {
@@ -59,6 +57,57 @@ const EntityDetails = ({ rootEntity }) => {
 
     fetchEntityById();
   }, [rootEntity, id, setFormValues, navigate]);
+
+  const handleModeSwitch = async (checked) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.Id) {
+      showToast(
+        toast.current,
+        "error",
+        "Kullanıcı Hatası",
+        "Geçersiz kullanıcı."
+      );
+      return;
+    }
+
+    if (formValues?.UpdatedBy && formValues.UpdatedBy !== user.Id) {
+      console.log("UpdatedBy: ", formValues.UpdatedBy, " user id: ", user.Id);
+      showToast(
+        toast.current,
+        "warn",
+        "Erişim Engellendi",
+        "Bu kayıt başka bir kullanıcı tarafından güncelleniyor."
+      );
+      return;
+    }
+
+    if (formValues?.UpdatedBy === null || formValues?.UpdatedBy === undefined) {
+      try {
+        await axiosInstance.patch(
+          `/api/${rootEntity}/${rootEntity}-updatedby`,
+          {
+            id: formValues.Id,
+            updatedBy: user.Id,
+          }
+        );
+
+        // Fetch updated data
+        const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
+        setFormValues(response.data); // Update the store with the new data
+      } catch (error) {
+        console.error("Error updating UpdatedBy property:", error);
+        showToast(
+          toast.current,
+          "error",
+          "Güncelleme Hatası",
+          "Düzenleme moduna geçerken bir hata oluştu."
+        );
+        return;
+      }
+    }
+
+    setIsEditMode(checked); // Toggle edit mode
+  };
 
   const handleSubmit = async () => {
     if (!formValues || typeof formValues !== "object") {
@@ -115,6 +164,12 @@ const EntityDetails = ({ rootEntity }) => {
         structuredJson
       );
 
+      // Reset the UpdatedBy property to null
+      await axiosInstance.patch(`/api/${rootEntity}/${rootEntity}-updatedby`, {
+        id: formValues.Id,
+        updatedBy: null,
+      });
+
       // Show success toast and set timeout
       showToast(
         toast.current,
@@ -129,7 +184,6 @@ const EntityDetails = ({ rootEntity }) => {
       };
 
       toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
-
       // Store the function for immediate execution if the toast is dismissed
       toastTimeoutRef.current = timeoutFunction;
     } catch (error) {
@@ -143,31 +197,43 @@ const EntityDetails = ({ rootEntity }) => {
     }
   };
 
-  // Cancel changes handler
-  const handleCancelChanges = () => {
-    showToast(
-      toast.current,
-      "info",
-      "Değişiklik İptal Edildi",
-      "Değişiklikler iptal edilecek!"
-    );
+  const handleCancelChanges = async () => {
+    try {
+      // Reset the UpdatedBy property to null
+      await axiosInstance.patch(`/api/${rootEntity}/${rootEntity}-updatedby`, {
+        id: formValues.Id,
+        updatedBy: null,
+      });
 
-    const timeoutFunction = () => {
-      resetFormValues();
-      navigate("/");
-    };
+      showToast(
+        toast.current,
+        "info",
+        "Değişiklik İptal Edildi",
+        "Değişiklikler iptal edilecek!"
+      );
 
-    toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
+      const timeoutFunction = () => {
+        resetFormValues();
+        navigate("/");
+      };
 
-    // Store the function for immediate execution if the toast is dismissed
-    toastTimeoutRef.current = timeoutFunction;
+      toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
+      toastTimeoutRef.current = timeoutFunction;
+    } catch (error) {
+      console.error("Error resetting UpdatedBy property:", error);
+      showToast(
+        toast.current,
+        "error",
+        "İptal Hatası",
+        "Bir hata oluştu. Lütfen tekrar deneyin."
+      );
+    }
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p>Loading...</p>{" "}
-        {/* Replace with a spinner or any loading indicator */}
+        <p>Loading...</p>
       </div>
     );
   }
@@ -187,7 +253,7 @@ const EntityDetails = ({ rootEntity }) => {
             <>
               <InputSwitch
                 checked={isEditMode}
-                onChange={(e) => setIsEditMode(e.value)}
+                onChange={(e) => handleModeSwitch(e.value)}
                 className="ml-4"
               />
               <span className="ml-2">
