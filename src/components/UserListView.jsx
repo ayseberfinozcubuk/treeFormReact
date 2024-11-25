@@ -22,6 +22,8 @@ const UserListView = () => {
     deleteUser,
     error,
   } = useUserStore();
+
+  const [currentUser, setCurrentUser] = useState(null); // State for the current user
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [editableRow, setEditableRow] = useState(null);
   const [tempRole, setTempRole] = useState(null);
@@ -31,10 +33,27 @@ const UserListView = () => {
     "İşlemi iptal etmek istediğinizden emin misiniz?";
 
   useEffect(() => {
+    // Fetch users, roles, and user data
     fetchUsers();
     fetchRoles();
     fetchUserData();
+
+    // Fetch current user from localStorage
+    const userFromStorage = localStorage.getItem("user");
+    if (userFromStorage) {
+      setCurrentUser(JSON.parse(userFromStorage));
+    }
   }, [fetchUsers, fetchRoles, fetchUserData]);
+
+  // Helper function to check if the user exists
+  const checkUserExists = async (userId) => {
+    try {
+      const response = await axiosInstance.get(`/api/users/${userId}`);
+      return !!response.data; // Return true if user exists, false otherwise
+    } catch (error) {
+      return false; // Treat error as user not existing
+    }
+  };
 
   const handleOpenDialog = () => {
     setIsDialogVisible(true);
@@ -57,9 +76,33 @@ const UserListView = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
+      const userExists = await checkUserExists(userId);
+      if (!userExists) {
+        showToast(
+          toast.current,
+          "error",
+          "Kullanıcı Mevcut Değil",
+          "Bu kullanıcı artık mevcut değil."
+        );
+        fetchUsers(); // Refresh the latest user list
+        return;
+      }
+
+      // Proceed with deletion if the user exists
       await axiosInstance.delete(`/api/users/${userId}`);
       deleteUser(userId);
+
+      showToast(
+        toast.current,
+        "success",
+        "Başarıyla Silindi",
+        "Kullanıcı başarıyla silindi."
+      );
+
+      // Fetch the latest user list after deletion
+      fetchUsers();
     } catch (error) {
+      console.error("Error while deleting user:", error);
       showToast(
         toast.current,
         "error",
@@ -69,9 +112,60 @@ const UserListView = () => {
     }
   };
 
-  const handleEditRole = (rowIndex, initialRole) => {
-    setEditableRow(rowIndex);
-    setTempRole(initialRole);
+  const handleEditRole = async (rowIndex, initialRole, userId) => {
+    if (!currentUser) {
+      showToast(
+        toast.current,
+        "error",
+        "Kullanıcı Hatası",
+        "Giriş yapmış kullanıcı bulunamadı."
+      );
+      return;
+    }
+
+    try {
+      // Fetch user information from the backend
+      const response = await axiosInstance.get(`/api/users/${userId}`);
+      const selectedUser = response.data;
+
+      // Check the UpdatedBy property
+      if (selectedUser.UpdatedBy && selectedUser.UpdatedBy !== currentUser.Id) {
+        showToast(
+          toast.current,
+          "warn",
+          "Erişim Engellendi",
+          "Bu kullanıcı başka bir admin tarafından düzenleniyor."
+        );
+        return;
+      }
+
+      // If UpdatedBy is null or undefined, update it with the current user's ID
+      if (!selectedUser.UpdatedBy) {
+        await axiosInstance.patch(`/api/users/user-updatedby`, {
+          id: userId,
+          updatedBy: currentUser.Id,
+        });
+
+        fetchUsers(); // Refresh the user list
+      }
+
+      // Set up for role editing
+      setEditableRow(rowIndex);
+      setTempRole(initialRole);
+    } catch (error) {
+      // console.error("Error while editing role:", error);
+      showToast(
+        toast.current,
+        "error",
+        "Kullanıcı Mevcut Değil",
+        "Bu kullanıcı artık mevcut değil."
+      );
+
+      // Fetch the latest user list
+      fetchUsers();
+
+      return;
+    }
   };
 
   const handleRoleChange = (newRole) => {
@@ -80,7 +174,6 @@ const UserListView = () => {
 
   const handleSaveRoleChange = async (rowData) => {
     if (tempRole === rowData.Role) {
-      // Inform the user and skip the API call
       showToast(
         toast.current,
         "info",
@@ -93,9 +186,29 @@ const UserListView = () => {
     }
 
     try {
+      const userExists = await checkUserExists(rowData.Id);
+      if (!userExists) {
+        showToast(
+          toast.current,
+          "error",
+          "Kullanıcı Mevcut Değil",
+          "Bu kullanıcı artık mevcut değil."
+        );
+        fetchUsers(); // Refresh the user list
+        return;
+      }
+
+      // Update the user's role
       await axiosInstance.put(`/api/users/${rowData.Id}/role`, {
         Role: tempRole,
       });
+
+      // Reset the UpdatedBy property
+      await axiosInstance.patch(`/api/users/user-updatedby`, {
+        id: rowData.Id,
+        updatedBy: null,
+      });
+
       fetchUsers(); // Refresh the list
       showToast(
         toast.current,
@@ -106,6 +219,7 @@ const UserListView = () => {
       setEditableRow(null);
       setTempRole(null);
     } catch (error) {
+      console.error("Error while saving role change:", error);
       showToast(
         toast.current,
         "error",
@@ -115,9 +229,57 @@ const UserListView = () => {
     }
   };
 
-  const handleCancelRoleChange = () => {
-    setEditableRow(null);
-    setTempRole(null);
+  const handleCancelRoleChange = async (rowData) => {
+    try {
+      const userExists = await checkUserExists(rowData.Id);
+      if (!userExists) {
+        showToast(
+          toast.current,
+          "error",
+          "Kullanıcı Mevcut Değil",
+          "Bu kullanıcı artık mevcut değil."
+        );
+        fetchUsers(); // Refresh the user list
+        return;
+      }
+
+      // Show confirmation toast before resetting the UpdatedBy property
+      showConfirmationToast(toast.current, confirmCancelMessage, async () => {
+        try {
+          // Reset the UpdatedBy property
+          await axiosInstance.patch(`/api/users/user-updatedby`, {
+            id: rowData.Id,
+            updatedBy: null,
+          });
+
+          setEditableRow(null);
+          setTempRole(null);
+
+          showToast(
+            toast.current,
+            "info",
+            "İşlem İptal Edildi",
+            "Değişiklikler başarıyla iptal edildi."
+          );
+        } catch (error) {
+          console.error("Error while resetting UpdatedBy property:", error);
+          showToast(
+            toast.current,
+            "error",
+            "İşlem gerçekleşemedi",
+            "Hata: İşlem gerçekleştirilemedi."
+          );
+        }
+      });
+    } catch (error) {
+      console.error("Error while canceling role change:", error);
+      showToast(
+        toast.current,
+        "error",
+        "İşlem gerçekleşemedi",
+        "Hata: İşlem gerçekleştirilemedi."
+      );
+    }
   };
 
   const getRoleOptions = () => {
@@ -162,7 +324,6 @@ const UserListView = () => {
 
   return (
     <div className="p-4 flex justify-center">
-      {/* Add Toast */}
       <Toast ref={toast} />
 
       <div className="w-full max-w-4xl">
@@ -186,7 +347,7 @@ const UserListView = () => {
         >
           {users.length > 0 &&
             Object.keys(users[0])
-              .filter((key) => key !== "Id")
+              .filter((key) => key !== "Id" && key !== "UpdatedBy") // Exclude UpdatedBy
               .map((key) => (
                 <Column
                   key={key}
@@ -215,19 +376,12 @@ const UserListView = () => {
                   <Button
                     icon="pi pi-times"
                     className="p-button-secondary p-button-text"
-                    onClick={() =>
-                      showConfirmationToast(
-                        toast.current,
-                        confirmCancelMessage,
-                        handleCancelRoleChange
-                      )
-                    }
+                    onClick={() => handleCancelRoleChange(rowData)}
                     tooltip="İptal Et"
                   />
                 </div>
               ) : (
                 <div className="flex gap-2">
-                  {/* Delete Button */}
                   <DeleteButton
                     onClick={() => handleDeleteUser(rowData.Id)}
                     className="p-button-danger p-button-text"
@@ -235,18 +389,18 @@ const UserListView = () => {
                     rootEntity="kullanıcı"
                     tooltip="Sil"
                   />
-                  {/* Edit Button */}
                   <Button
                     icon="pi pi-pencil"
                     className="p-button-text"
-                    onClick={() => handleEditRole(rowIndex, rowData.Role)}
+                    onClick={() =>
+                      handleEditRole(rowIndex, rowData.Role, rowData.Id)
+                    }
                     tooltip="Düzenle"
                     disabled={editableRow !== null}
                   />
                 </div>
               )
             }
-            style={{ width: "8rem" }}
           />
         </DataTable>
 
