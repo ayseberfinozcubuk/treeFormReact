@@ -8,7 +8,8 @@ import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore";
 import { useFormStore } from "../store/useFormStore";
 import DeleteButton from "./DeleteButton";
-import { showToast } from "../utils/utils";
+import { showToast, onToastClose } from "../utils/utils";
+import { Toast } from "primereact/toast";
 
 const EntityListView = ({ rootEntity }) => {
   const { entities, setEntities } = useEntityStore();
@@ -18,6 +19,7 @@ const EntityListView = ({ rootEntity }) => {
   const navigate = useNavigate();
 
   const toast = useRef(null); // Toast reference
+  const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -73,43 +75,49 @@ const EntityListView = ({ rootEntity }) => {
       // Check if the entity is being updated by another user
       const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
       const selectedEntity = response.data;
+      console.log("a");
 
-      if (
-        selectedEntity?.UpdatedBy &&
-        selectedEntity.UpdatedBy !== currentUser?.Id
-      ) {
-        showToast(
-          toast.current,
-          "warn",
-          "Silme Engellendi",
-          `Bu kayıt şu anda başka bir kullanıcı (${selectedEntity.UpdatedBy}) tarafından güncelleniyor.`
-        );
+      if (selectedEntity?.UpdatedBy && selectedEntity.UpdatedBy !== id) {
+        console.log("b");
+        if (toast.current) {
+          showToast(
+            toast.current,
+            "warn",
+            "Silme Engellendi",
+            `Bu kayıt şu anda başka bir kullanıcı tarafından güncelleniyor.`
+          );
+        }
+        console.log("bb");
         return;
       }
+      console.log("c");
 
       // Proceed with deletion
       await axiosInstance.delete(`/api/${rootEntity}/${id}`);
+      console.log("d");
       setRefreshEntities((prev) => !prev);
+      console.log("e");
 
-      showToast(
-        toast.current,
-        "success",
-        "Başarıyla Silindi",
-        "Kayıt başarıyla silindi."
-      );
+      if (toast.current) {
+        showToast(
+          toast.current,
+          "success",
+          "Başarıyla Silindi",
+          "Kayıt başarıyla silindi."
+        );
+      }
+      console.log("f");
     } catch (error) {
       console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
+      console.log("g");
 
-      showToast(
-        toast.current,
-        "error",
-        "Silme Hatası",
-        "Silme işlemi esnasında bir hata oluştu. Lütfen tekrar deneyin."
-      );
-
-      // Redirect to login if not authenticated
-      if (error.response && error.response.status === 401) {
-        navigate("/login");
+      if (toast.current) {
+        showToast(
+          toast.current,
+          "error",
+          "Silme Hatası",
+          "Silme işlemi esnasında bir hata oluştu. Lütfen tekrar deneyin."
+        );
       }
     }
   };
@@ -195,6 +203,7 @@ const EntityListView = ({ rootEntity }) => {
           )}
         </Card>
       </div>
+      <Toast ref={toast} onHide={() => onToastClose(toastTimeoutRef.current)} />
     </div>
   );
 };
