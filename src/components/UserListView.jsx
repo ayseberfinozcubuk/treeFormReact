@@ -135,6 +135,16 @@ const UserListView = () => {
         return;
       }
 
+      if (currentUser && userId === currentUser.Id) {
+        showToast(
+          toast.current,
+          "error",
+          "Silme İşlemi Engellendi",
+          "Kendinizi silemezsiniz."
+        );
+        return;
+      }
+
       // Proceed with deletion if the user exists
       await axiosInstance.delete(`/api/users/${userId}`);
       deleteUser(userId);
@@ -171,14 +181,24 @@ const UserListView = () => {
     }
 
     try {
+      // Fetch user information from the backend
+      const response = await axiosInstance.get(`/api/users/${userId}`);
+      const selectedUser = response.data;
+
+      if (currentUser && selectedUser.Id === currentUser.Id) {
+        showToast(
+          toast.current,
+          "error",
+          "Düzenleme İşlemi Engellendi",
+          "Kendi rolünüzü değiştiremezsiniz."
+        );
+        return;
+      }
+
       // Set up for role editing
       console.log("handle edit role (editable row)");
       setEditableRow(rowIndex);
       setTempRole(initialRole);
-
-      // Fetch user information from the backend
-      const response = await axiosInstance.get(`/api/users/${userId}`);
-      const selectedUser = response.data;
 
       // Check the UpdatedBy property
       if (selectedUser.UpdatedBy && selectedUser.UpdatedBy !== currentUser.Id) {
