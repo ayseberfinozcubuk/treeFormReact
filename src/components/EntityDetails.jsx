@@ -34,6 +34,42 @@ const EntityDetails = ({ rootEntity }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const resetUpdatedBy = async () => {
+      console.log("RESET");
+      try {
+        if (formValues?.Id && formValues?.UpdatedBy) {
+          await axiosInstance.patch(
+            `/api/${rootEntity}/${rootEntity}-updatedby`,
+            {
+              id: formValues.Id,
+              updatedBy: null,
+            }
+          );
+        }
+      } catch (error) {
+        console.error("Error resetting UpdatedBy property:", error);
+      }
+    };
+
+    // Function to handle browser navigation or refresh
+    const handleBeforeUnload = (event) => {
+      resetUpdatedBy(); // Reset UpdatedBy to null
+      // Show a confirmation dialog (optional for unsaved changes)
+      event.preventDefault();
+      event.returnValue = ""; // Required for some browsers
+    };
+
+    // Add event listener for browser unload
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup function when the component unmounts or on navigation
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      resetUpdatedBy();
+    };
+  }, []);
+
+  useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.Role) {
       setRole(user.Role);

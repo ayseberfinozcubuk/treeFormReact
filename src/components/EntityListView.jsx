@@ -75,10 +75,8 @@ const EntityListView = ({ rootEntity }) => {
       // Check if the entity is being updated by another user
       const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
       const selectedEntity = response.data;
-      console.log("a");
 
       if (selectedEntity?.UpdatedBy && selectedEntity.UpdatedBy !== id) {
-        console.log("b");
         if (toast.current) {
           showToast(
             toast.current,
@@ -87,16 +85,12 @@ const EntityListView = ({ rootEntity }) => {
             `Bu kayıt şu anda başka bir kullanıcı tarafından güncelleniyor.`
           );
         }
-        console.log("bb");
         return;
       }
-      console.log("c");
 
       // Proceed with deletion
       await axiosInstance.delete(`/api/${rootEntity}/${id}`);
-      console.log("d");
       setRefreshEntities((prev) => !prev);
-      console.log("e");
 
       if (toast.current) {
         showToast(
@@ -106,10 +100,8 @@ const EntityListView = ({ rootEntity }) => {
           "Kayıt başarıyla silindi."
         );
       }
-      console.log("f");
     } catch (error) {
       console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
-      console.log("g");
 
       if (toast.current) {
         showToast(

@@ -26,7 +26,7 @@ const LoginPage = ({ onLogin }) => {
 
         navigate("/");
       } catch (error) {
-        console.error("Error during sign-in:", error);
+        // console.error("Error during sign-in:", error);
         setError("Invalid login credentials");
       }
     } else {
