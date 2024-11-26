@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -26,11 +26,16 @@ const UserListView = () => {
   const [currentUser, setCurrentUser] = useState(null); // State for the current user
   const [isDialogVisible, setIsDialogVisible] = useState(false);
   const [editableRow, setEditableRow] = useState(null);
+  // console.log("(editable row): ", editableRow);
   const [tempRole, setTempRole] = useState(null);
 
   const toast = useRef(null); // Toast reference
   const confirmCancelMessage =
     "İşlemi iptal etmek istediğinizden emin misiniz?";
+
+  useEffect(() => {
+    console.log("editable row: ", editableRow);
+  }, [editableRow]);
 
   useEffect(() => {
     // Fetch users, roles, and user data
@@ -44,6 +49,47 @@ const UserListView = () => {
       setCurrentUser(JSON.parse(userFromStorage));
     }
   }, [fetchUsers, fetchRoles, fetchUserData]);
+
+  const resetUpdatedBy = useCallback(async () => {
+    try {
+      console.log("RESET UpdatedBy for UserListView");
+      if (editableRow !== null) {
+        const rowData = users[editableRow];
+        if (rowData?.Id && rowData?.UpdatedBy) {
+          await axiosInstance.patch(`/api/users/user-updatedby`, {
+            id: rowData.Id,
+            updatedBy: null,
+          });
+          console.log("Reset UpdatedBy for row:", rowData.Id);
+        }
+      }
+    } catch (error) {
+      console.error("Error resetting UpdatedBy property:", error);
+    }
+  }, [editableRow, users]);
+
+  // Stable handleBeforeUnload defined with useCallback
+  const handleBeforeUnload = useCallback(
+    (event) => {
+      console.log("D - beforeunload triggered");
+      resetUpdatedBy();
+      event.preventDefault();
+      event.returnValue = ""; // Required for some browsers to show a confirmation dialog
+    },
+    [resetUpdatedBy]
+  );
+
+  // useEffect to manage the event listener lifecycle
+  useEffect(() => {
+    console.log("Adding beforeunload listener");
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      console.log("Removing beforeunload listener");
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      resetUpdatedBy();
+    };
+  }, [handleBeforeUnload, resetUpdatedBy]);
 
   // Helper function to check if the user exists
   const checkUserExists = async (userId) => {
@@ -76,6 +122,7 @@ const UserListView = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
+      //setEditableRow(rowIndex);
       const userExists = await checkUserExists(userId);
       if (!userExists) {
         showToast(
@@ -124,6 +171,11 @@ const UserListView = () => {
     }
 
     try {
+      // Set up for role editing
+      console.log("handle edit role (editable row)");
+      setEditableRow(rowIndex);
+      setTempRole(initialRole);
+
       // Fetch user information from the backend
       const response = await axiosInstance.get(`/api/users/${userId}`);
       const selectedUser = response.data;
@@ -148,10 +200,6 @@ const UserListView = () => {
 
         fetchUsers(); // Refresh the user list
       }
-
-      // Set up for role editing
-      setEditableRow(rowIndex);
-      setTempRole(initialRole);
     } catch (error) {
       // console.error("Error while editing role:", error);
       showToast(
@@ -180,6 +228,12 @@ const UserListView = () => {
         "Değişiklik Yok",
         "Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı."
       );
+      await axiosInstance.patch(`/api/users/user-updatedby`, {
+        id: rowData.Id,
+        updatedBy: null,
+      });
+      console.log("handle save role (editable row)");
+
       setEditableRow(null);
       setTempRole(null);
       return;
@@ -216,6 +270,8 @@ const UserListView = () => {
         "Başarıyla Güncellendi",
         `${rowData.Name} başarıyla güncellendi!`
       );
+      console.log("handle edit role 2 (editable row)");
+
       setEditableRow(null);
       setTempRole(null);
     } catch (error) {
@@ -251,6 +307,7 @@ const UserListView = () => {
             id: rowData.Id,
             updatedBy: null,
           });
+          console.log("handle cancel role (editable row)");
 
           setEditableRow(null);
           setTempRole(null);
