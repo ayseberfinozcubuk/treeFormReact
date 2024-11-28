@@ -5,10 +5,13 @@ import SubmitButton from "./SubmitButton";
 import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
 import BackButton from "./BackButton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { getNestedValue, convertToNestedJson } from "../utils/utils";
 
-const AddNewEntity = ({ rootEntity }) => {
+const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
+  const location = useLocation();
+  const rootEntity = location.state?.rootEntity || defaultRootEntity;
+
   const { formValues, resetFormValues, emptyMandatoryFields, notInRangeField } =
     useFormStore();
 
@@ -52,13 +55,19 @@ const AddNewEntity = ({ rootEntity }) => {
     console.log("sending to back: ", structuredJson);
 
     axiosInstance
-      .post(`http://localhost:5000/api/${rootEntity}`, structuredJson)
+      .post(`/api/${rootEntity}`, structuredJson) // Base URL is already set
       .then((response) => {
         console.log("Entity created successfully:", response.data);
         resetForm();
       })
       .catch((error) => {
-        console.error("Error submitting entity:", error);
+        if (error.response && error.response.status === 401) {
+          alert("Unauthorized. Please log in again.");
+          navigate("/login");
+        } else {
+          console.error("Error submitting entity:", error);
+          alert("An error occurred. Please try again.");
+        }
       });
 
     resetForm();

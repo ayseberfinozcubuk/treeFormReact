@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useFormStore } from "../store/useFormStore";
 import { validateField } from "../utils/validationUtils"; // Import the validation utility
 import { getLength, getNestedValue } from "../utils/utils"; // Import the validation utility
+import axiosInstance from "../api/axiosInstance";
 
 const InputForm = ({ entityName, property, path, isEditMode }) => {
   const {
@@ -25,12 +26,36 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     DependsOn,
     ValidationRules,
     Note,
+    SelectFrom,
   } = property;
 
   const [error, setError] = useState(""); // Track validation errors
+  const [options, setOptions] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const formValueKey = path !== "" ? `${path}.${Name}` : Name;
-  var formValue = getNestedValue(formValues, formValueKey);
+  var formValue = formValues[formValueKey];
+
+  // Fetch the options for SelectFrom
+  useEffect(() => {
+    if (Type === "Guid" && SelectFrom) {
+      const fetchOptions = async () => {
+        try {
+          const response = await axiosInstance.get(`/api/${SelectFrom}`);
+          setOptions(response.data);
+          if (!isEditMode && formValue) {
+            const existingEntity = response.data.find(
+              (item) => item.Id === formValue
+            );
+            setSelectedOption(existingEntity);
+          }
+        } catch (error) {
+          console.error(`Error fetching options for ${SelectFrom}:`, error);
+        }
+      };
+      fetchOptions();
+    }
+  }, [Type, SelectFrom, formValue, isEditMode]);
 
   useEffect(() => {
     if (formValue === undefined) {
@@ -179,6 +204,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     }
     validateAndSetError(value);
     updateFormValues(formValueKey, value);
+    setSelectedOption(options.find((option) => option.Id === value));
   };
 
   const selectedLabel = EnumValues?.find(
@@ -203,7 +229,38 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
         </label>
 
         <div className="flex flex-col">
-          {IsCalculated !== true && isEditMode ? (
+          {Type === "Guid" && SelectFrom ? (
+            isEditMode ? (
+              <select
+                value={formValue ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  updateFormValues(formValueKey, value);
+                }}
+                className={`border ${
+                  error ? "border-red-500" : "border-gray-300"
+                } rounded-md p-1 w-48 text-sm ml-2`}
+              >
+                <option value="">Select {Label}</option>
+                {options.map((option) => (
+                  <option key={option.Id} value={option.Id}>
+                    {option.PlatformName || option.Name || option.Id}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div
+                className={`border ${
+                  error ? "border-red-500" : "border-gray-300"
+                } rounded-md p-1 w-48 text-gray-900 bg-gray-100 text-sm ml-2`}
+                style={{ pointerEvents: "none" }}
+              >
+                {selectedOption
+                  ? selectedOption.PlatformName || selectedOption.Name
+                  : "No data"}
+              </div>
+            )
+          ) : IsCalculated !== true && isEditMode ? (
             Type === "enum" && EnumValues ? (
               <select
                 value={formValue ?? ""}

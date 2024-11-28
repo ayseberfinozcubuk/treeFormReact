@@ -12,6 +12,7 @@ export const useFormStore = create((set) => ({
       acc[item.EntityName] = item;
       return acc;
     }, {});
+    // console.log(dataDict);
     set(() => ({ formData: dataDict }));
   },
 

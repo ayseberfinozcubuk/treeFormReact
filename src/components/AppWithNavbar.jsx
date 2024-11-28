@@ -12,7 +12,6 @@ import axiosInstance from "../api/axiosInstance";
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
 
   // Fetch user role on component mount
   useEffect(() => {
@@ -47,22 +46,18 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
 
   const menuItems = [
     {
-      label: `${rootEntity} Listesini Görüntüle`,
+      label: `${rootEntity} Ekranı`,
       icon: "pi pi-list",
       command: () => navigate("/"),
       className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
-    ...(role !== "read"
-      ? [
-          {
-            label: `Yeni ${rootEntity} Ekle`,
-            icon: "pi pi-plus",
-            command: () => navigate("/add-entity"),
-            className:
-              "text-base text-gray-200 font-medium hover:text-white mx-3",
-          },
-        ]
-      : []),
+    {
+      label: "Platform Ekranı",
+      icon: "pi pi-list",
+      command: () =>
+        navigate("/entity-page", { state: { rootEntity: "Platform" } }),
+      className: "text-base text-gray-200 font-medium hover:text-white mx-3",
+    },
     ...(role === "admin"
       ? [
           {
@@ -122,12 +117,15 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
             element={<AddNewEntity rootEntity={rootEntity} />}
           />
           <Route
+            path="/entity-page"
+            element={<EntityListView rootEntity="Platform" />}
+          />
+          <Route
             path="/details/:id"
             element={<EntityDetails rootEntity={rootEntity} />}
           />
           <Route path="/user-settings" element={<UserListView />} />
-          <Route path="/profile" element={<UserProfile />} />{" "}
-          {/* UserProfile Route */}
+          <Route path="/profile" element={<UserProfile />} />
         </Routes>
       </div>
     </>

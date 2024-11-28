@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../api/axiosInstance";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -8,15 +8,19 @@ import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore";
 import { useFormStore } from "../store/useFormStore";
 import DeleteButton from "./DeleteButton";
-import { showToast, onToastClose, checkUserExists } from "../utils/utils";
+import { showToast, onToastClose } from "../utils/utils";
 import { Toast } from "primereact/toast";
 
-const EntityListView = ({ rootEntity }) => {
+const EntityListView = ({ rootEntity: defaultRootEntity }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const rootEntity = location.state?.rootEntity || defaultRootEntity;
+
   const { entities, setEntities } = useEntityStore();
   const { formData } = useFormStore();
   const [role, setRole] = useState("read");
   const [refreshEntites, setRefreshEntities] = useState(false);
-  const navigate = useNavigate();
 
   const toast = useRef(null); // Toast reference
   const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
@@ -162,7 +166,9 @@ const EntityListView = ({ rootEntity }) => {
                 label={`Yeni ${rootEntity} Ekle`}
                 icon="pi pi-plus"
                 className="p-button-success"
-                onClick={() => navigate("/add-entity")}
+                onClick={() =>
+                  navigate("/add-entity", { state: { rootEntity } })
+                }
               />
             )}
           </div>

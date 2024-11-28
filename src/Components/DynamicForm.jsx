@@ -147,7 +147,10 @@ const DynamicForm = ({
       );
     }
 
-    if (property.Type !== "Guid") {
+    if (
+      property.Type !== "Guid" ||
+      (property.Type === "Guid" && property.SelectFrom)
+    ) {
       return (
         <InputForm
           entityName={entityName}
