@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
 import { InputSwitch } from "primereact/inputswitch";
@@ -14,7 +14,10 @@ import {
   onToastClose,
 } from "../utils/utils";
 
-const EntityDetails = ({ rootEntity }) => {
+const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
+  const location = useLocation();
+  const rootEntity = location.state?.rootEntity || defaultRootEntity;
+
   const {
     formValues,
     emptyMandatoryFields,
@@ -106,6 +109,7 @@ const EntityDetails = ({ rootEntity }) => {
       return;
     }
 
+    console.log("formValues: ", formValues);
     if (formValues?.UpdatedBy && formValues.UpdatedBy !== user.Id) {
       console.log("UpdatedBy: ", formValues.UpdatedBy, " user id: ", user.Id);
       showToast(

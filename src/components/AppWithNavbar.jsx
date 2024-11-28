@@ -8,8 +8,11 @@ import UserProfile from "./UserProfile"; // Import UserProfile
 import { Menubar } from "primereact/menubar";
 import { Button } from "primereact/button";
 import axiosInstance from "../api/axiosInstance";
+import { useFormStore } from "../store/useFormStore";
 
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
+  const { selectFromData } = useFormStore();
+
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
 
@@ -51,13 +54,12 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
       command: () => navigate("/"),
       className: "text-base text-gray-200 font-medium hover:text-white mx-3",
     },
-    {
-      label: "Platform Ekranı",
+    ...selectFromData.map((item) => ({
+      label: `${item} Ekranı`,
       icon: "pi pi-list",
-      command: () =>
-        navigate("/entity-page", { state: { rootEntity: "Platform" } }),
+      command: () => navigate("/entity-page", { state: { rootEntity: item } }),
       className: "text-base text-gray-200 font-medium hover:text-white mx-3",
-    },
+    })),
     ...(role === "admin"
       ? [
           {
@@ -116,10 +118,13 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
             path="/add-entity"
             element={<AddNewEntity rootEntity={rootEntity} />}
           />
-          <Route
-            path="/entity-page"
-            element={<EntityListView rootEntity="Platform" />}
-          />
+          {selectFromData.map((item) => (
+            <Route
+              key={item}
+              path={`/entity-page`}
+              element={<EntityListView rootEntity={item} />}
+            />
+          ))}
           <Route
             path="/details/:id"
             element={<EntityDetails rootEntity={rootEntity} />}

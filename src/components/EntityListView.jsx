@@ -63,8 +63,6 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
     fetchEntities();
   }, [refreshEntites]);
 
-  useEffect(() => {}, []);
-
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
     : [];
@@ -73,7 +71,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
     const selected = e.value;
     const id = selected.Id; // Get the ID of the selected entity
     // Navigate to the details page and pass the ID in the URL
-    navigate(`/details/${id}`);
+    navigate(`/details/${id}`, { state: { rootEntity } }); // Pass rootEntity
   };
 
   const handleDelete = async (id) => {

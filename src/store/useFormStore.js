@@ -6,14 +6,21 @@ export const useFormStore = create((set) => ({
   formData: {},
   emptyMandatoryFields: [],
   notInRangeField: [],
+  selectFromData: [],
 
   setFormData: (dataArray) => {
     const dataDict = dataArray.reduce((acc, item) => {
       acc[item.EntityName] = item;
       return acc;
     }, {});
+
+    // Collect all SelectFrom values into a single array
+    const selectFromData = dataArray.flatMap(
+      (item) =>
+        item.Properties?.flatMap((property) => property.SelectFrom || []) || []
+    );
     // console.log(dataDict);
-    set(() => ({ formData: dataDict }));
+    set(() => ({ formData: dataDict, selectFromData: selectFromData }));
   },
 
   updateFormValues: (key, value) =>
