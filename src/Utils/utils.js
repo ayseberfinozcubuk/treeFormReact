@@ -1,4 +1,5 @@
 import { Button } from "primereact/button";
+import axiosInstance from "../api/axiosInstance"; // Import axiosInstance
 
 export const getNestedValue = (formValues, fullPath) => {
   return formValues.hasOwnProperty(fullPath) ? formValues[fullPath] : undefined;
@@ -181,4 +182,13 @@ export const showConfirmationToast = (
       </div>
     ),
   });
+};
+
+export const checkUserExists = async (userId) => {
+  try {
+    const response = await axiosInstance.get(`/api/users/${userId}`);
+    return !!response.data; // Return true if user exists, false otherwise
+  } catch (error) {
+    return false; // Treat error as user not existing
+  }
 };

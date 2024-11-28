@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import AppWithNavbar from "./components/AppWithNavbar";
+//import AuthWrapper from "./components/AuthWrapper";
 import LoginPage from "./components/LoginPage";
 import UserProfile from "./components/UserProfile"; // Import UserProfile
 import { useFormStore } from "./store/useFormStore";
@@ -56,6 +57,7 @@ const App = () => {
   }
 
   return (
+    //<AuthWrapper>
     <Router>
       <Routes>
         {isAuthenticated ? (
@@ -83,6 +85,7 @@ const App = () => {
         )}
       </Routes>
     </Router>
+    //</AuthWrapper>
   );
 };
 

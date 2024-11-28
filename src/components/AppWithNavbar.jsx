@@ -12,6 +12,7 @@ import axiosInstance from "../api/axiosInstance";
 const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Fetch user role on component mount
   useEffect(() => {

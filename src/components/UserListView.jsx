@@ -8,7 +8,11 @@ import AddUserDialog from "./AddUserDialog";
 import DeleteButton from "./DeleteButton";
 import useUserStore from "../store/useUserStore";
 import { Toast } from "primereact/toast";
-import { showToast, showConfirmationToast } from "../utils/utils";
+import {
+  showToast,
+  showConfirmationToast,
+  checkUserExists,
+} from "../utils/utils";
 
 const UserListView = () => {
   const {
@@ -90,16 +94,6 @@ const UserListView = () => {
       resetUpdatedBy();
     };
   }, [handleBeforeUnload, resetUpdatedBy]);
-
-  // Helper function to check if the user exists
-  const checkUserExists = async (userId) => {
-    try {
-      const response = await axiosInstance.get(`/api/users/${userId}`);
-      return !!response.data; // Return true if user exists, false otherwise
-    } catch (error) {
-      return false; // Treat error as user not existing
-    }
-  };
 
   const handleOpenDialog = () => {
     setIsDialogVisible(true);

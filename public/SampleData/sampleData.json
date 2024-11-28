@@ -12,7 +12,18 @@
         "Name": "Notation",
         "Label": "Notasyon",
         "Type": "string",
-        "IsMandatory": true
+        "IsMandatory": true,
+        "ValidationRules": {
+          "isAlphanumeric": true,
+          "minLength": 3,
+          "maxLength": 20,
+          "noSpaces": true,
+          "startsWith": "",
+          "mustContain": [""],
+          "prohibitedCharacters": ["~"],
+          "regexPattern": "^[a-zA-Z0-9]*$"
+        },
+        "IsUnique": true
       },
       {
         "Name": "EmitterName",
@@ -36,7 +47,10 @@
         "Name": "NumberOfModes",
         "Label": "Mod Sayısı",
         "Type": "int",
-        "IsMandatory": false
+        "DependsOn": "Modes",
+        "IsMandatory": false,
+        "IsCalculated": true,
+        "Note": "Modes.length"
       },
       {
         "Name": "Modes",
@@ -52,7 +66,8 @@
       {
         "Name": "Id",
         "Label": "",
-        "Type": "Guid"
+        "Type": "Guid",
+        "IsMandatory": true
       },
       {
         "Name": "EmitterId",
@@ -66,8 +81,8 @@
         "IsMandatory": true
       },
       {
-        "Name": "Amplitude",
-        "Label": "Genlik",
+        "Name": "AmplitudeMin",
+        "Label": "Genlik Min",
         "Type": "double",
         "Unit": "minivolt",
         "MinMax": {
@@ -77,8 +92,30 @@
         "IsMandatory": false
       },
       {
-        "Name": "TheoricalRange",
-        "Label": "Teorik Menzil",
+        "Name": "AmplitudeMax",
+        "Label": "Genlik Max",
+        "Type": "double",
+        "Unit": "minivolt",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "TheoricalRangeMin",
+        "Label": "Teorik Menzil Min",
+        "Type": "double",
+        "Unit": "km",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "TheoricalRangeMax",
+        "Label": "Teorik Menzil Max",
         "Type": "double",
         "Unit": "km",
         "MinMax": {
@@ -92,6 +129,490 @@
         "Label": "Emiter Mod Hüzme Listesi",
         "Type": "list",
         "ListType": "EmitterModeBeam"
+      },
+      {
+        "Name": "Pris",
+        "Label": "Emiter Mod PRI Listesi",
+        "Type": "list",
+        "ListType": "EmitterModePri"
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterModePri",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterModeId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "PriName",
+        "Label": "Pri Adı",
+        "Type": "string",
+        "IsMandatory": true
+      },
+      {
+        "Name": "PriLimitMin",
+        "Label": "Pri Limitleri Min",
+        "Type": "double",
+        "Unit": "us",
+        "MinMax": {
+          "Min": 0,
+          "Max": 100000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "PriLimitMax",
+        "Label": "Pri Limitleri Max",
+        "Type": "double",
+        "Unit": "us",
+        "MinMax": {
+          "Min": 0,
+          "Max": 100000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "PrfLimitMin",
+        "Label": "Prf Limitleri Min",
+        "Type": "double",
+        "Unit": "us",
+        "MinMax": {
+          "Min": 0,
+          "Max": 100000
+        },
+        "DependsOn": "PriLimitMin",
+        "IsMandatory": false,
+        "IsCalculated": true,
+        "Note": "1 / PriLimitMin"
+      },
+      {
+        "Name": "PrfLimitMax",
+        "Label": "Prf Limitleri Max",
+        "Type": "double",
+        "Unit": "us",
+        "MinMax": {
+          "Min": 0,
+          "Max": 100000
+        },
+        "DependsOn": "PriLimitMax",
+        "IsMandatory": false,
+        "IsCalculated": true,
+        "Note": "1 / PriLimitMax"
+      },
+      {
+        "Name": "NominalPri",
+        "Label": "Nominal Pri Değeri",
+        "Type": "double",
+        "Unit": "microsecond",
+        "IsMandatory": false
+      },
+      {
+        "Name": "PriMeanMin",
+        "Label": "Ortalama Pri Değeri Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "PriMeanMax",
+        "Label": "Ortalama Pri Değeri Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "StandartDeviation",
+        "Label": "Standart Sapma",
+        "Type": "double",
+        "Unit": "microsecond",
+        "IsMandatory": false
+      },
+      {
+        "Name": "PrfMeanMin",
+        "Label": "Ortalama Prf Değeri Min",
+        "Type": "double",
+        "Unit": "Hz",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "DependsOn": "PriMeanMin",
+        "IsMandatory": false,
+        "IsCalculated": true,
+        "Note": "1 / PriMeanMin"
+      },
+      {
+        "Name": "PrfMeanMax",
+        "Label": "Ortalama Prf Değeri Max",
+        "Type": "double",
+        "Unit": "Hz",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "DependsOn": "PriMeanMax",
+        "IsMandatory": false,
+        "IsCalculated": true,
+        "Note": "1 / PriMeanMax"
+      },
+      {
+        "Name": "PulseToPulseMean",
+        "Label": "Palstan Palsa Standart Sapma",
+        "Type": "double",
+        "Unit": "microsecond",
+        "IsMandatory": false
+      },
+      {
+        "Name": "Continuity",
+        "Label": "Süreklilik",
+        "Type": "enum",
+        "EnumType": "Continuity",
+        "EnumValues": [
+          {
+            "Value": "Unknown",
+            "Label": "Bilinmiyor"
+          },
+          {
+            "Value": "Discrete",
+            "Label": "Ayrık"
+          },
+          {
+            "Value": "Continuous",
+            "Label": "Sürekli"
+          }
+        ],
+        "IsMandatory": false
+      },
+      {
+        "Name": "Pattern",
+        "Label": "Desen",
+        "Type": "enum",
+        "EnumType": "Pattern",
+        "EnumValues": [
+          {
+            "Value": "Unknown",
+            "Label": "Bilinmiyor"
+          },
+          {
+            "Value": "Patterned",
+            "Label": "Paternli"
+          },
+          {
+            "Value": "NonPatterned",
+            "Label": "Paternsiz"
+          },
+          {
+            "Value": "Adaptive",
+            "Label": "Adaptasyonlu"
+          },
+          {
+            "Value": "unModulated",
+            "Label": "Modülasyonsuz"
+          }
+        ],
+        "IsMandatory": false
+      },
+      {
+        "Name": "SuperPeriods",
+        "Label": "Alt Periyod Değerleri Listesi",
+        "Type": "list",
+        "ListType": "EmitterModePriSuperPeriodValue"
+      },
+      {
+        "Name": "MostProbableValues",
+        "Label": "En Yüksel Olasılıklı Pri Değerleri",
+        "Type": "list",
+        "ListType": "EmitterModePriMostProbableValue"
+      },
+      {
+        "Name": "DiscreteValues",
+        "Label": "Ayrık Pri Değerleri",
+        "Type": "list",
+        "ListType": "EmitterModePriDiscreteValue"
+      },
+      {
+        "Name": "Sequences",
+        "Label": "Parametre Dizi Listesi",
+        "Type": "list",
+        "ListType": "EmitterModePriSequence"
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterModePriSequence",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterModePriId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "SequenceName",
+        "Label": "Dizi Adı",
+        "Type": "string",
+        "IsMandatory": false
+      },
+      {
+        "Name": "NumberOfPulsesInSequence",
+        "Label": "Dizi İçerisindeki Pals Sayısı",
+        "Type": "int",
+        "IsMandatory": false
+      },
+      {
+        "Name": "TotalTimeForSequenceMin",
+        "Label": "Toplam Dizi Süresi Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "TotalTimeForSequenceMax",
+        "Label": "Toplam Dizi Süresi Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "FiringOrders",
+        "Label": "Dizi Elemanı Listesi",
+        "Type": "list",
+        "ListType": "EmitterModePriFiringOrder"
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterModePriFiringOrder",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterModePriSequenceId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "EmitterModePriDiscreteValueId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "OrderIndexMin",
+        "Label": "Gönderim Sıra No Min",
+        "Type": "int",
+        "IsMandatory": true,
+        "MinMax": {
+          "Min": 0,
+          "Max": 100000
+        }
+      },
+      {
+        "Name": "OrderIndexMax",
+        "Label": "Gönderim Sıra No Max",
+        "Type": "int",
+        "IsMandatory": true,
+        "MinMax": {
+          "Min": 0,
+          "Max": 100000
+        }
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterModePriDiscreteValue",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterModePriId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "DiscreteValueMin",
+        "Label": "Ayrık Değer Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": true
+      },
+      {
+        "Name": "DiscreteValueMax",
+        "Label": "Ayrık Değer Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": true
+      },
+      {
+        "Name": "DwellDurationMin",
+        "Label": "Dwell Süresi Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "DwellDuration Max",
+        "Label": "Dwell Süresi Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "TransitionRangeMin",
+        "Label": "Geçiş Süresi Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "TransitionRangeMax",
+        "Label": "Geçiş Süresi Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "FiringOrders",
+        "Label": "Dizi Elemanı Listesi",
+        "Type": "list",
+        "ListType": "EmitterModePriFiringOrder"
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterModePriMostProbableValue",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterModePriId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "MostProbableValueMin",
+        "Label": "En Yüksel Olasılıklı Değer Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": true
+      },
+      {
+        "Name": "MostProbableValueMax",
+        "Label": "En Yüksel Olasılıklı Değer Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": true
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterModePriSuperPeriodValue",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterModePriId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "SuperPeriodValueMin",
+        "Label": "Alt Periyod Değeri Min",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": true
+      },
+      {
+        "Name": "SuperPeriodValueMax",
+        "Label": "Alt Periyod Değeri Max",
+        "Type": "double",
+        "Unit": "microsecond",
+        "MinMax": {
+          "Min": 0,
+          "Max": 1000000
+        },
+        "IsMandatory": true
       }
     ]
   },
@@ -101,7 +622,8 @@
       {
         "Name": "Id",
         "Label": "",
-        "Type": "Guid"
+        "Type": "Guid",
+        "IsMandatory": true
       },
       {
         "Name": "EmitterModeId",
@@ -115,8 +637,8 @@
         "IsMandatory": true
       },
       {
-        "Name": "AntennaGain",
-        "Label": "Anten Kazancı",
+        "Name": "AntennaGainMin",
+        "Label": "Anten Kazancı Min",
         "Type": "double",
         "Unit": "dbi",
         "MinMax": {
@@ -126,8 +648,19 @@
         "IsMandatory": false
       },
       {
-        "Name": "BeamPosition",
-        "Label": "Hüzme Pozisyonu",
+        "Name": "AntennaGainMax",
+        "Label": "Anten KazancıMax",
+        "Type": "double",
+        "Unit": "dbi",
+        "MinMax": {
+          "Min": 0,
+          "Max": 100
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "BeamPositionMin",
+        "Label": "Hüzme Pozisyonu Min",
         "Type": "double",
         "Unit": "degree",
         "MinMax": {
@@ -137,8 +670,19 @@
         "IsMandatory": false
       },
       {
-        "Name": "BeamWidthAzimute",
-        "Label": "Hüzme Genişliği Yatay",
+        "Name": "BeamPositionMax",
+        "Label": "Hüzme Pozisyonu Max",
+        "Type": "double",
+        "Unit": "degree",
+        "MinMax": {
+          "Min": -180,
+          "Max": 180
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "BeamWidthAzimuteMin",
+        "Label": "Hüzme Genişliği Yatay Min",
         "Type": "double",
         "Unit": "degree",
         "MinMax": {
@@ -148,8 +692,30 @@
         "IsMandatory": false
       },
       {
-        "Name": "BeamWidthElevation",
-        "Label": "Hüzme Genişliği Dikey",
+        "Name": "BeamWidthAzimuteMax",
+        "Label": "Hüzme Genişliği Yatay Max",
+        "Type": "double",
+        "Unit": "degree",
+        "MinMax": {
+          "Min": 0,
+          "Max": 360
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "BeamWidthElevationMin",
+        "Label": "Hüzme Genişliği Dikey Min",
+        "Type": "double",
+        "Unit": "degree",
+        "MinMax": {
+          "Min": 0,
+          "Max": 360
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "BeamWidthElevationMax",
+        "Label": "Hüzme Genişliği Dikey Max",
         "Type": "double",
         "Unit": "degree",
         "MinMax": {
@@ -178,7 +744,8 @@
       {
         "Name": "Id",
         "Label": "",
-        "Type": "Guid"
+        "Type": "Guid",
+        "IsMandatory": true
       },
       {
         "Name": "EmitterModeBeamId",
@@ -186,8 +753,19 @@
         "Type": "Guid"
       },
       {
-        "Name": "BeamWPositionDuration",
-        "Label": "Hüzme Pozisyonu Kalış Süresi",
+        "Name": "BeamWPositionDurationMin",
+        "Label": "Hüzme Pozisyonu Kalış Süresi Min",
+        "Type": "double",
+        "Unit": "ms",
+        "MinMax": {
+          "Min": 0,
+          "Max": 10000
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "BeamWPositionDurationMax",
+        "Label": "Hüzme Pozisyonu Kalış Süresi Max",
         "Type": "double",
         "Unit": "ms",
         "MinMax": {
@@ -201,6 +779,12 @@
         "Label": "Sıra No",
         "Type": "int",
         "IsMandatory": true
+      },
+      {
+        "Name": "FiringOrders",
+        "Label": "Dizi Elemanı Listesi",
+        "Type": "list",
+        "ListType": "EmitterModeBeamPositionFiringOrder"
       }
     ]
   },
@@ -210,7 +794,8 @@
       {
         "Name": "Id",
         "Label": "",
-        "Type": "Guid"
+        "Type": "Guid",
+        "IsMandatory": true
       },
       {
         "Name": "EmitterModeBeamId",
@@ -237,7 +822,8 @@
       {
         "Name": "Id",
         "Label": "",
-        "Type": "Guid"
+        "Type": "Guid",
+        "IsMandatory": true
       },
       {
         "Name": "EmitterModeBeamPositionSequenceId",
@@ -245,8 +831,13 @@
         "Type": "Guid"
       },
       {
-        "Name": "BeamPositionOrderIndex",
-        "Label": "Gönderim Sıra No",
+        "Name": "EmitterModeBeamPositionDwellDurationValueId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "BeamPositionOrderIndexMin",
+        "Label": "Gönderim Sıra No Min",
         "Type": "int",
         "IsMandatory": true,
         "MinMax": {
@@ -255,8 +846,8 @@
         }
       },
       {
-        "Name": "BeamPositionIndex",
-        "Label": "Hüzme Ayrık Pozisyonu Sıra No",
+        "Name": "BeamPositionOrderIndexMax",
+        "Label": "Gönderim Sıra No Max",
         "Type": "int",
         "IsMandatory": true,
         "MinMax": {
@@ -265,8 +856,8 @@
         }
       },
       {
-        "Name": "BeamPositionDuration",
-        "Label": "Hüzme Pozisyonu Kalış Süresi",
+        "Name": "BeamPositionIndexMin",
+        "Label": "Hüzme Ayrık Pozisyonu Sıra No Min",
         "Type": "int",
         "IsMandatory": true,
         "MinMax": {
@@ -275,8 +866,38 @@
         }
       },
       {
-        "Name": "Elevation",
-        "Label": "Dikey Açı",
+        "Name": "BeamPositionIndexMax",
+        "Label": "Hüzme Ayrık Pozisyonu Sıra No Max",
+        "Type": "int",
+        "IsMandatory": true,
+        "MinMax": {
+          "Min": 0,
+          "Max": 10000
+        }
+      },
+      {
+        "Name": "BeamPositionDurationMin",
+        "Label": "Hüzme Pozisyonu Kalış Süresi Min",
+        "Type": "int",
+        "IsMandatory": true,
+        "MinMax": {
+          "Min": 0,
+          "Max": 10000
+        }
+      },
+      {
+        "Name": "BeamPositionDurationMax",
+        "Label": "Hüzme Pozisyonu Kalış Süresi Max",
+        "Type": "int",
+        "IsMandatory": true,
+        "MinMax": {
+          "Min": 0,
+          "Max": 10000
+        }
+      },
+      {
+        "Name": "ElevationMin",
+        "Label": "Dikey Açı Min",
         "Type": "double",
         "IsMandatory": false,
         "MinMax": {
@@ -285,8 +906,28 @@
         }
       },
       {
-        "Name": "Azimuth",
-        "Label": "Yatay Açı",
+        "Name": "ElevationMax",
+        "Label": "Dikey Açı Max",
+        "Type": "double",
+        "IsMandatory": false,
+        "MinMax": {
+          "Min": -90,
+          "Max": 90
+        }
+      },
+      {
+        "Name": "AzimuthMin",
+        "Label": "Yatay Açı Min",
+        "Type": "double",
+        "IsMandatory": false,
+        "MinMax": {
+          "Min": -180,
+          "Max": 180
+        }
+      },
+      {
+        "Name": "AzimuthMax",
+        "Label": "Yatay Açı Max",
         "Type": "double",
         "IsMandatory": false,
         "MinMax": {

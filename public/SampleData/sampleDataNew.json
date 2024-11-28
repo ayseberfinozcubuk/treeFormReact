@@ -57,6 +57,174 @@
         "Label": "Emiter Mod Listesi",
         "Type": "list",
         "ListType": "EmitterMode"
+      },
+      {
+        "Name": "AssociatedPlatforms",
+        "Label": "İlişkili Platformlar",
+        "Type": "list",
+        "ListType": "EmitterAssociatedPlatform"
+      }
+    ]
+  },
+  {
+    "EntityName": "EmitterAssociatedPlatform",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "EmitterId",
+        "Label": "",
+        "Type": "Guid"
+      },
+      {
+        "Name": "PlatformId",
+        "Label": "Platform",
+        "SelectFrom": "Platform",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "AssociataionType",
+        "Label": "İlişki Tipi",
+        "Type": "enum",
+        "EnumValues": [
+          {
+            "Value": "Own",
+            "Label": "Kendi"
+          },
+          {
+            "Value": "General",
+            "Label": "Genel"
+          }
+        ],
+        "IsMandatory": false
+      }
+    ]
+  },
+  {
+    "EntityName": "Platform",
+    "Properties": [
+      {
+        "Name": "Id",
+        "Label": "",
+        "Type": "Guid",
+        "IsMandatory": true
+      },
+      {
+        "Name": "PlatformName",
+        "Label": "Platform Adı",
+        "Type": "string",
+        "IsMandatory": true
+      },
+      {
+        "Name": "Latitude",
+        "Label": "Enlem",
+        "Type": "double",
+        "Unit": "degree",
+        "MinMax": {
+          "Min": -90,
+          "Max": 90
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "Longitude",
+        "Label": "Boylam",
+        "Type": "double",
+        "Unit": "degree",
+        "MinMax": {
+          "Min": -180,
+          "Max": 180
+        },
+        "IsMandatory": false
+      },
+      {
+        "Name": "PlatformType",
+        "Label": "Platform Tipi",
+        "Type": "enum",
+        "EnumType": "PlatformType",
+        "EnumValues": [
+          {
+            "Value": "Unknown",
+            "Label": "Bilinmiyor"
+          },
+          {
+            "Value": "Air",
+            "Label": "Hava"
+          },
+          {
+            "Value": "Land",
+            "Label": "Kara"
+          },
+          {
+            "Value": "Sea",
+            "Label": "Deniz"
+          },
+          {
+            "Value": "Space",
+            "Label": "Uzay"
+          }
+        ],
+        "IsMandatory": true
+      },
+      {
+        "Name": "PennantOrTailOrPlateNumber",
+        "Label": "Bayrak/ Kuyruk/ Plaka Numarası",
+        "Type": "string",
+        "IsMandatory": false
+      },
+      {
+        "Name": "PlatformCategory",
+        "Label": "Platform Kategorisi",
+        "Type": "enum",
+        "EnumType": "PlatformCategory",
+        "EnumValues": [
+          {
+            "Value": "Unknown",
+            "Label": "Bilinmiyor"
+          },
+          {
+            "Value": "Fighter",
+            "Label": "Savaş Uçağı"
+          },
+          {
+            "Value": "Bomber",
+            "Label": "Bombardıman Uçağı"
+          },
+          {
+            "Value": "Transport",
+            "Label": "Nakliye Uçağı"
+          },
+          {
+            "Value": "Helicopter",
+            "Label": "Helikopter"
+          },
+          {
+            "Value": "Tank",
+            "Label": "Tank"
+          },
+          {
+            "Value": "ArmoredVehicle",
+            "Label": "Zırhlı Araç"
+          },
+          {
+            "Value": "Ship",
+            "Label": "Gemi"
+          },
+          {
+            "Value": "Submarine",
+            "Label": "Denizaltı"
+          },
+          {
+            "Value": "Satellite",
+            "Label": "Uydu"
+          }
+        ],
+        "IsMandatory": true
       }
     ]
   },

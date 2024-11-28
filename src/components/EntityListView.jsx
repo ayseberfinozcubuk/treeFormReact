@@ -8,7 +8,7 @@ import { Card } from "primereact/card";
 import { useEntityStore } from "../store/useEntityStore";
 import { useFormStore } from "../store/useFormStore";
 import DeleteButton from "./DeleteButton";
-import { showToast, onToastClose } from "../utils/utils";
+import { showToast, onToastClose, checkUserExists } from "../utils/utils";
 import { Toast } from "primereact/toast";
 
 const EntityListView = ({ rootEntity }) => {
@@ -58,6 +58,8 @@ const EntityListView = ({ rootEntity }) => {
 
     fetchEntities();
   }, [refreshEntites]);
+
+  useEffect(() => {}, []);
 
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])
