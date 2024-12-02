@@ -20,13 +20,16 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const response = await axiosInstance.get("/api/users/get-role", {
-          withCredentials: true, // Send cookies with the request
-        });
-        setRole(response.data.role); // Assume backend responds with { role: "admin" }
+        const user = JSON.parse(localStorage.getItem("user")); // Fetch user from local storage
+        if (!user || !user.Id) {
+          console.error("User ID is missing. Redirecting to login.");
+          navigate("/login");
+          return;
+        }
+        setRole(user.role); // Assume backend responds with { role: "admin" }
       } catch (error) {
         console.error("Failed to fetch user role:", error);
-        navigate("/login"); // Redirect if fetching role fails
+        navigate("/login"); // Redirect to login if role fetch fails
       }
     };
 

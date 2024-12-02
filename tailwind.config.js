@@ -7,6 +7,6 @@ module.exports = {
   theme: {
     extend: {},
   },
-  darkMode: false, // or 'media' or 'class'
+  darkMode: "media", // or 'media' or 'class'
   plugins: [],
 };

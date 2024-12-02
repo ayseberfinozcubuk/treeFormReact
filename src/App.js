@@ -13,6 +13,7 @@ import { useFormStore } from "./store/useFormStore";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import axiosInstance from "./api/axiosInstance";
 
 const App = () => {
   const { setFormData } = useFormStore();

@@ -28,9 +28,13 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        // Fetch user role from the server
-        const response = await axiosInstance.get("/api/users/get-role");
-        setRole(response.data.role);
+        const user = JSON.parse(localStorage.getItem("user")); // Fetch user from local storage
+        if (!user || !user.Id) {
+          console.error("User ID is missing. Redirecting to login.");
+          navigate("/login");
+          return;
+        }
+        setRole(user.role); // Assume backend responds with { role: "admin" }
       } catch (error) {
         console.error("Failed to fetch user role:", error);
 
