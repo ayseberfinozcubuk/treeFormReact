@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
@@ -26,6 +26,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
     initialFormValues,
     notInRangeField,
   } = useFormStore();
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [role, setRole] = useState("read");
   const [isLoading, setIsLoading] = useState(true);
@@ -36,41 +37,47 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   const { id } = useParams(); // Get id from the URL
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const resetUpdatedBy = async () => {
-      console.log("RESET");
-      try {
-        if (formValues?.Id && formValues?.UpdatedBy) {
-          await axiosInstance.patch(
-            `/api/${rootEntity}/${rootEntity}-updatedby`,
-            {
-              id: formValues.Id,
-              updatedBy: null,
-            }
-          );
-        }
-      } catch (error) {
-        console.error("Error resetting UpdatedBy property:", error);
+  const resetUpdatedBy = useCallback(async () => {
+    try {
+      if (formValues?.Id && formValues?.UpdatedBy) {
+        await axiosInstance.patch(
+          `/api/${rootEntity}/${rootEntity}-updatedby`,
+          {
+            id: formValues.Id,
+            updatedBy: null,
+          }
+        );
+        console.log("UpdatedBy reset successfully.");
       }
-    };
+    } catch (error) {
+      console.error("Error resetting UpdatedBy property:", error);
+    }
+  }, [formValues, rootEntity]);
 
-    // Function to handle browser navigation or refresh
+  useEffect(() => {
+    // Handle beforeunload for page refresh or close
     const handleBeforeUnload = (event) => {
-      resetUpdatedBy(); // Reset UpdatedBy to null
-      // Show a confirmation dialog (optional for unsaved changes)
+      resetUpdatedBy();
       event.preventDefault();
-      event.returnValue = ""; // Required for some browsers
+      event.returnValue = "";
     };
 
-    // Add event listener for browser unload
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Cleanup function when the component unmounts or on navigation
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+    // Handle popstate for back/forward navigation
+    const handlePopState = () => {
       resetUpdatedBy();
     };
-  }, []);
+
+    // Add event listeners
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+      resetUpdatedBy();
+    };
+  }, [resetUpdatedBy]);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));

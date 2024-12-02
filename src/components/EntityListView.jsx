@@ -42,6 +42,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
     };
 
     fetchUserRole();
+    setRefreshEntities((prev) => !prev);
   }, [navigate]);
 
   useEffect(() => {
@@ -49,6 +50,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
       try {
         // Fetch entities
         const response = await axiosInstance.get(`/api/${rootEntity}`);
+        console.log("response.data: ", response.data);
         setEntities(rootEntity, response.data);
       } catch (error) {
         console.error(`Error fetching ${rootEntity} list:`, error);
