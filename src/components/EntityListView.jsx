@@ -149,12 +149,24 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
     return [];
   };
 
-  const renderValue = (value) => {
-    if (typeof value === "object" && value !== null) {
-      return JSON.stringify(value);
-    } else {
-      return value;
+  const renderValue = (value, field) => {
+    const enumValues = formData[rootEntity]?.Properties.find(
+      (prop) => prop.Name === field
+    )?.EnumValues;
+
+    if (enumValues && Array.isArray(enumValues)) {
+      // If it's an enum field, find the corresponding label
+      const enumLabel = enumValues.find(
+        (enumVal) => enumVal.Value === value
+      )?.Label;
+      return enumLabel || value; // Return label if found, otherwise the raw value
     }
+
+    if (typeof value === "object" && value !== null) {
+      return JSON.stringify(value); // Render objects as JSON strings
+    }
+
+    return value; // Render other values directly
   };
 
   return (
@@ -191,7 +203,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
                   key={col.field}
                   field={col.field}
                   header={col.header}
-                  body={(rowData) => renderValue(rowData[col.field])}
+                  body={(rowData) => renderValue(rowData[col.field], col.field)}
                   sortable
                   className="px-3 py-2"
                 />
