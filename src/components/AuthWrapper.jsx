@@ -51,6 +51,7 @@ const AuthWrapper = ({ children }) => {
 
     const handleLogout = () => {
       localStorage.removeItem("user");
+      localStorage.removeItem("isAuthenticated");
       document.cookie = "token=; path=/; max-age=0"; // Clear token cookie
       navigate("/login");
     };

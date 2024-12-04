@@ -26,7 +26,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
           navigate("/login");
           return;
         }
-        setRole(user.role); // Assume backend responds with { role: "admin" }
+        setRole(user.Role); // Assume backend responds with { role: "admin" }
       } catch (error) {
         console.error(
           "Failed to fetch user role from localstorage user:",
@@ -45,6 +45,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         {},
         { withCredentials: true }
       );
+      navigate("/login");
       onLogout();
       navigate("/login");
     } catch (error) {

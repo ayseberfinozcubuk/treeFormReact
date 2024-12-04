@@ -28,6 +28,9 @@ const App = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuthenticated");
+    document.cookie = "token=; path=/; max-age=0"; // Clear token cookie
   };
 
   useEffect(() => {
@@ -76,6 +79,7 @@ const App = () => {
     const handleLogout = () => {
       setIsAuthenticated(false);
       localStorage.removeItem("user");
+      localStorage.removeItem("isAuthenticated");
       document.cookie = "token=; path=/; max-age=0"; // Clear token cookie
       //navigate("/login");
     };
