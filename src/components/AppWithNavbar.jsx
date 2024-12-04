@@ -21,18 +21,20 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
     const fetchUserRole = async () => {
       try {
         const user = JSON.parse(localStorage.getItem("user")); // Fetch user from local storage
-        if (!user || !user.Id) {
+        if (!user || !user.Id || user === null) {
           console.error("User ID is missing. Redirecting to login.");
           navigate("/login");
           return;
         }
         setRole(user.role); // Assume backend responds with { role: "admin" }
       } catch (error) {
-        console.error("Failed to fetch user role:", error);
+        console.error(
+          "Failed to fetch user role from localstorage user:",
+          error
+        );
         navigate("/login"); // Redirect to login if role fetch fails
       }
     };
-
     fetchUserRole();
   }, [navigate]);
 
@@ -98,7 +100,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   );
 
   if (role === null) {
-    return <div>Loading...</div>; // Show a loading indicator while role is being fetched
+    return <div>Custom Loading...</div>; // Show a loading indicator while role is being fetched
   }
 
   return (
