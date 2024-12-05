@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import AppWithNavbar from "./components/AppWithNavbar";
-//import AuthWrapper from "./components/AuthWrapper";
+// import AuthWrapper from "./components/AuthProvider";
 import LoginPage from "./components/LoginPage";
 import UserProfile from "./components/UserProfile"; // Import UserProfile
 import { useFormStore } from "./store/useFormStore";
@@ -30,7 +30,7 @@ const App = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("user");
     localStorage.removeItem("isAuthenticated");
-    document.cookie = "token=; path=/; max-age=0"; // Clear token cookie
+    document.cookie = "authToken=; path=/; max-age=0"; // Clear token cookie
   };
 
   useEffect(() => {
@@ -38,12 +38,11 @@ const App = () => {
       const user = JSON.parse(localStorage.getItem("user"));
       const token = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("token="))
+        .find((row) => row.startsWith("authToken="))
         ?.split("=")[1];
 
       // If user or token is missing, redirect to login without showing an error
       if (!token) {
-        //navigate("/login");
         setIsAuthenticated(false);
         return;
       }
@@ -80,8 +79,7 @@ const App = () => {
       setIsAuthenticated(false);
       localStorage.removeItem("user");
       localStorage.removeItem("isAuthenticated");
-      document.cookie = "token=; path=/; max-age=0"; // Clear token cookie
-      //navigate("/login");
+      document.cookie = "authToken=; path=/; max-age=0"; // Clear token cookie
     };
 
     checkAuth();
@@ -106,7 +104,12 @@ const App = () => {
   }
 
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true, // Opt-in to React.startTransition support
+        v7_relativeSplatPath: true, // Opt-in to updated relative splat path resolution
+      }}
+    >
       <Routes>
         {isAuthenticated ? (
           <>
@@ -119,8 +122,7 @@ const App = () => {
                 />
               }
             />
-            <Route path="/profile" element={<UserProfile />} />{" "}
-            {/* Profile route */}
+            <Route path="/profile" element={<UserProfile />} />
           </>
         ) : (
           <>

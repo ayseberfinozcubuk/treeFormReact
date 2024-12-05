@@ -1,40 +1,49 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import axiosInstance from "../api/axiosInstance";
-import { showToast, checkUserExists } from "../utils/utils";
+import { checkUserExists } from "../utils/utils";
+
+// Create an AuthContext
+const AuthContext = createContext();
+
+// Hook to consume the AuthContext
+export const useAuth = () => useContext(AuthContext);
 
 const AuthWrapper = ({ children }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
   const navigate = useNavigate();
   const toastRef = React.useRef(null);
 
+  // Central authentication logic
   useEffect(() => {
     const authenticate = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       const token = document.cookie
         .split("; ")
-        .find((row) => row.startsWith("token="))
+        .find((row) => row.startsWith("authToken="))
         ?.split("=")[1];
+      console.log("user: ", user, " with id: ", user.Id, " token: ", token);
+      console.log("document.cookie: ", document.cookie);
 
-      // If user or token is missing, redirect to login without showing an error
       if (!user || !user.Id || !token) {
-        navigate("/login");
+        console.log("A");
+        //handleLogout();
         return;
       }
 
-      // Optional: Token validation
-      // If you trust server-side token checks via `credentials`, skip this part.
-      const isTokenValid = token && (await validateToken(token));
-      if (!isTokenValid) {
-        handleLogout(); // Handle token invalidation
-        return;
-      }
+      try {
+        const isTokenValid = await validateToken(token);
+        const userExists = await checkUserExists(user.Id);
 
-      // Check if the user still exists in the backend
-      const userExists = await checkUserExists(user.Id);
-      if (!userExists) {
-        handleLogout(); // Handle missing user
-        return;
+        if (isTokenValid && userExists) {
+          setIsAuthenticated(true);
+        } else {
+          //handleLogout();
+        }
+      } catch (error) {
+        console.error("Authentication error:", error);
+        //handleLogout();
       }
     };
 
@@ -52,18 +61,24 @@ const AuthWrapper = ({ children }) => {
     const handleLogout = () => {
       localStorage.removeItem("user");
       localStorage.removeItem("isAuthenticated");
-      document.cookie = "token=; path=/; max-age=0"; // Clear token cookie
+      document.cookie = "authToken=; path=/; max-age=0"; // Clear token cookie
+      setIsAuthenticated(false);
       navigate("/login");
     };
 
     authenticate();
   }, [navigate]);
 
+  // If authentication is in progress, show a loader or blank screen
+  if (isAuthenticated === null) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <>
+    <AuthContext.Provider value={{ isAuthenticated }}>
       <Toast ref={toastRef} />
       {children}
-    </>
+    </AuthContext.Provider>
   );
 };
 

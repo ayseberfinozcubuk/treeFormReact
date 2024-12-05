@@ -122,21 +122,47 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
           />
           <Route
             path="/add-entity"
-            element={<AddNewEntity rootEntity={rootEntity} />}
+            element={
+              //<AuthWrapper>
+              <AddNewEntity rootEntity={rootEntity} />
+              //</AuthWrapper>
+            }
           />
           {selectFromData.map((item) => (
             <Route
               key={item}
               path={`/entity-page`}
-              element={<EntityListView rootEntity={item} />}
+              element={
+                //<AuthWrapper>
+                <EntityListView rootEntity={item} />
+                //</AuthWrapper>
+              }
             />
           ))}
           <Route
             path="/details/:id"
-            element={<EntityDetails rootEntity={rootEntity} />}
+            element={
+              //<AuthWrapper>
+              <EntityDetails rootEntity={rootEntity} />
+              //</AuthWrapper>
+            }
           />
-          <Route path="/user-settings" element={<UserListView />} />
-          <Route path="/profile" element={<UserProfile />} />
+          <Route
+            path="/user-settings"
+            element={
+              //<AuthWrapper>
+              <UserListView />
+              //</AuthWrapper>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              //<AuthWrapper>
+              <UserProfile />
+              //</AuthWrapper>
+            }
+          />
         </Routes>
       </div>
     </>
