@@ -6,6 +6,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import DynamicForm from "./DynamicForm";
 import SubmitButton from "./SubmitButton";
 import CancelButton from "./CancelButton";
+import debounce from "lodash/debounce";
 import { Toast } from "primereact/toast";
 import {
   convertToNestedJson,
@@ -25,6 +26,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
     resetFormValues,
     initialFormValues,
     notInRangeField,
+    updateFormValues,
   } = useFormStore();
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -47,6 +49,8 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
             updatedBy: null,
           }
         );
+        //formValues.UpdatedBy = null;
+        updateFormValues("UpdatedBy", null);
         console.log("UpdatedBy reset successfully.");
       }
     } catch (error) {
@@ -57,9 +61,12 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   useEffect(() => {
     // Handle beforeunload for page refresh or close
     const handleBeforeUnload = (event) => {
-      resetUpdatedBy();
-      event.preventDefault();
-      event.returnValue = "";
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user && user.Id && user.Id === formValues.UpdatedBy) {
+        resetUpdatedBy();
+        event.preventDefault();
+        event.returnValue = "";
+      }
     };
 
     // Handle popstate for back/forward navigation
@@ -105,6 +112,15 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   }, [rootEntity, id, setFormValues, navigate]);
 
   const handleModeSwitch = async (checked) => {
+    const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
+    console.log("After Mode Switch pulled formValues: ", response.data);
+    setFormValues(response.data); // Set form values in the store
+
+    // Wait for the state to finish updating
+    await new Promise((resolve) => {
+      setTimeout(() => resolve(), 0);
+    });
+
     const user = JSON.parse(localStorage.getItem("user"));
     if (!user || !user.Id) {
       showToast(
@@ -116,9 +132,14 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       return;
     }
 
-    console.log("formValues: ", formValues);
-    if (formValues?.UpdatedBy && formValues.UpdatedBy !== user.Id) {
-      console.log("UpdatedBy: ", formValues.UpdatedBy, " user id: ", user.Id);
+    console.log("formValues: ", response.data);
+    if (response.data?.UpdatedBy && response.data.UpdatedBy !== user.Id) {
+      console.log(
+        "Cant update UpdatedBy from formValues: ",
+        response.data.UpdatedBy,
+        " user id: ",
+        user.Id
+      );
       showToast(
         toast.current,
         "warn",
@@ -128,19 +149,27 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       return;
     }
 
-    if (formValues?.UpdatedBy === null || formValues?.UpdatedBy === undefined) {
+    if (
+      response.data?.UpdatedBy === null ||
+      response.data?.UpdatedBy === undefined
+    ) {
       try {
+        console.log("UpdatedBy is null. Update it with the id of: ", user.Id);
+
         await axiosInstance.patch(
           `/api/${rootEntity}/${rootEntity}-updatedby`,
           {
-            id: formValues.Id,
+            id: response.data.Id,
             updatedBy: user.Id,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
         );
-
-        // Fetch updated data
-        const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
-        setFormValues(response.data); // Update the store with the new data
+        updateFormValues("UpdatedBy", user.Id);
+        //formValues.UpdatedBy = user.Id;
       } catch (error) {
         console.error("Error updating UpdatedBy property:", error);
         showToast(
@@ -212,6 +241,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       );
 
       // Reset the UpdatedBy property to null
+      console.log("SAVE SAVE SAVE");
       await axiosInstance.patch(`/api/${rootEntity}/${rootEntity}-updatedby`, {
         id: formValues.Id,
         updatedBy: null,
@@ -226,6 +256,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       );
 
       const timeoutFunction = () => {
+        console.log("BUMBUMBUM RESET");
         resetFormValues();
         navigate("/");
       };
@@ -247,6 +278,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   const handleCancelChanges = async () => {
     try {
       // Reset the UpdatedBy property to null
+      console.log("CANCEL CANCEL CANCEL");
       await axiosInstance.patch(`/api/${rootEntity}/${rootEntity}-updatedby`, {
         id: formValues.Id,
         updatedBy: null,
