@@ -31,54 +31,58 @@ const LoginPage = ({ onLogin }) => {
         navigate("/");
       } catch (error) {
         // console.error("Error during sign-in:", error);
-        setError("Invalid login credentials");
+        setError("Geçersiz giriş bilgileri");
       }
     } else {
-      setError("Please fill in all fields.");
+      setError("Lütfen tüm alanları doldurun.");
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center">Employee Portal</h2>
+        <h2 className="text-2xl font-bold text-center">EHBB</h2>
         {error && (
           <div className="p-2 mb-4 text-red-600 bg-red-100 rounded">
             {error}
           </div>
         )}
         <div className="p-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">E-posta</label>
           <InputText
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
+            placeholder="E-posta adresinizi girin"
             className="w-full"
           />
         </div>
         <div className="p-field relative">
-          <label htmlFor="password">Password</label>
-          <InputText
-            id="password"
-            type={passwordVisible ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            className="w-full"
-          />
-          <i
-            className={`absolute right-3 top-9 pi ${
-              passwordVisible ? "pi-eye-slash" : "pi-eye"
-            } cursor-pointer`}
-            onClick={() => setPasswordVisible(!passwordVisible)}
-          />
+          <label htmlFor="password">Şifre</label>
+          <div className="relative">
+            <InputText
+              id="password"
+              type={passwordVisible ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Şifrenizi girin"
+              className="w-full pr-10" // Add padding-right to avoid overlapping with the icon
+            />
+            <i
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 pi ${
+                passwordVisible ? "pi-eye-slash" : "pi-eye"
+              } cursor-pointer`}
+              onClick={() => setPasswordVisible(!passwordVisible)}
+            />
+          </div>
         </div>
+
         <Button
-          label="Sign In"
+          label="Giriş Yap"
           onClick={handleSignIn}
-          className="w-full p-button mt-4"
+          className="w-full p-button bg-blue-500 hover:bg-blue-400 text-white mt-4"
+          style={{ fontSize: "1rem", padding: "0.75rem" }}
         />
       </div>
     </div>
