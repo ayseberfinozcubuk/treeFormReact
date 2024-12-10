@@ -100,7 +100,7 @@ const App = () => {
   }, [setFormData]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Yükleniyor...</div>;
   }
 
   return (
