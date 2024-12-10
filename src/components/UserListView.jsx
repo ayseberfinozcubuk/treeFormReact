@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -33,13 +34,11 @@ const UserListView = () => {
   // console.log("(editable row): ", editableRow);
   const [tempRole, setTempRole] = useState(null);
 
+  const navigate = useNavigate();
+
   const toast = useRef(null); // Toast reference
   const confirmCancelMessage =
     "İşlemi iptal etmek istediğinizden emin misiniz?";
-
-  useEffect(() => {
-    console.log("editable row: ", editableRow);
-  }, [editableRow]);
 
   useEffect(() => {
     // Fetch users, roles, and user data
@@ -54,53 +53,13 @@ const UserListView = () => {
     }
   }, [fetchUsers, fetchRoles, fetchUserData]);
 
-  const resetUpdatedBy = useCallback(async () => {
-    try {
-      console.log("RESET UpdatedBy for UserListView");
-      if (editableRow !== null) {
-        const rowData = users[editableRow];
-        if (rowData?.Id && rowData?.UpdatedBy) {
-          await axiosInstance.patch(`/api/users/user-updatedby`, {
-            id: rowData.Id,
-            updatedBy: null,
-          });
-          console.log("Reset UpdatedBy for row:", rowData.Id);
-        }
-      }
-    } catch (error) {
-      console.error("Error resetting UpdatedBy property:", error);
-    }
-  }, [editableRow, users]);
-
-  // Stable handleBeforeUnload defined with useCallback
-  const handleBeforeUnload = useCallback(
-    (event) => {
-      console.log("D - beforeunload triggered");
-      resetUpdatedBy();
-      event.preventDefault();
-      event.returnValue = ""; // Required for some browsers to show a confirmation dialog
-    },
-    [resetUpdatedBy]
-  );
-
-  // useEffect to manage the event listener lifecycle
-  useEffect(() => {
-    console.log("Adding beforeunload listener");
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      console.log("Removing beforeunload listener");
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      resetUpdatedBy();
-    };
-  }, [handleBeforeUnload, resetUpdatedBy]);
-
   const handleOpenDialog = () => {
     setIsDialogVisible(true);
   };
 
   const handleSaveNewUser = async (newUser) => {
     try {
+      newUser.CreatedBy = currentUser.Id;
       const response = await axiosInstance.post("/api/users/add", newUser);
       addUser(response.data);
       setIsDialogVisible(false);
@@ -193,27 +152,6 @@ const UserListView = () => {
       console.log("handle edit role (editable row)");
       setEditableRow(rowIndex);
       setTempRole(initialRole);
-
-      // Check the UpdatedBy property
-      if (selectedUser.UpdatedBy && selectedUser.UpdatedBy !== currentUser.Id) {
-        showToast(
-          toast.current,
-          "warn",
-          "Erişim Engellendi",
-          "Bu kullanıcı başka bir admin tarafından düzenleniyor."
-        );
-        return;
-      }
-
-      // If UpdatedBy is null or undefined, update it with the current user's ID
-      if (!selectedUser.UpdatedBy) {
-        await axiosInstance.patch(`/api/users/user-updatedby`, {
-          id: userId,
-          updatedBy: currentUser.Id,
-        });
-
-        fetchUsers(); // Refresh the user list
-      }
     } catch (error) {
       // console.error("Error while editing role:", error);
       showToast(
@@ -242,11 +180,6 @@ const UserListView = () => {
         "Değişiklik Yok",
         "Girilen bilgiler mevcut verilerle aynı. Güncelleme yapılmadı."
       );
-      await axiosInstance.patch(`/api/users/user-updatedby`, {
-        id: rowData.Id,
-        updatedBy: null,
-      });
-      console.log("handle save role (editable row)");
 
       setEditableRow(null);
       setTempRole(null);
@@ -254,6 +187,34 @@ const UserListView = () => {
     }
 
     try {
+      // Fetch the latest UpdatedDate from the backend
+      const response = await axiosInstance.get(
+        `/api/users/${rowData.Id}?updatedDateOnly=true`
+      );
+      const latestUpdatedDate = response.data?.UpdatedDate;
+      console.log("latestUpdatedDate: ", latestUpdatedDate);
+      console.log("rowData.UpdatedDate: ", rowData.UpdatedDate);
+
+      if (
+        latestUpdatedDate &&
+        rowData.UpdatedDate &&
+        latestUpdatedDate !== rowData.UpdatedDate &&
+        latestUpdatedDate !== null
+      ) {
+        // If UpdatedDate doesn't match, show a conflict message and navigate back
+        showToast(
+          toast.current,
+          "error",
+          "Çakışma",
+          "Bu kayıt başka bir kullanıcı tarafından güncellenmiş. Listeye yönlendiriliyorsunuz."
+        );
+
+        setTimeout(() => navigate("/user-settings"), 3000);
+        fetchUsers(); // Refresh the user list
+        setEditableRow(null);
+        return;
+      }
+
       const userExists = await checkUserExists(rowData.Id);
       if (!userExists) {
         showToast(
@@ -269,12 +230,6 @@ const UserListView = () => {
       // Update the user's role
       await axiosInstance.put(`/api/users/${rowData.Id}/role`, {
         Role: tempRole,
-      });
-
-      // Reset the UpdatedBy property
-      await axiosInstance.patch(`/api/users/user-updatedby`, {
-        id: rowData.Id,
-        updatedBy: null,
       });
 
       fetchUsers(); // Refresh the list
@@ -403,6 +358,7 @@ const UserListView = () => {
         </h2>
 
         {error && <p className="text-red-600 mb-2">{error}</p>}
+        {/*console.log("users: ", users)*/}
 
         <Button
           label="Kullanıcı Ekle"
@@ -418,7 +374,14 @@ const UserListView = () => {
         >
           {users.length > 0 &&
             Object.keys(users[0])
-              .filter((key) => key !== "Id" && key !== "UpdatedBy") // Exclude UpdatedBy
+              .filter(
+                (key) =>
+                  key !== "Id" &&
+                  key !== "UpdatedBy" &&
+                  key !== "CreatedBy" &&
+                  key !== "UpdatedDate" &&
+                  key !== "CreatedDate"
+              ) // Exclude UpdatedBy
               .map((key) => (
                 <Column
                   key={key}
@@ -434,7 +397,7 @@ const UserListView = () => {
               ))}
 
           <Column
-            header="Actions"
+            header="Aksiyonlar"
             body={(rowData, { rowIndex }) =>
               editableRow === rowIndex ? (
                 <div className="flex gap-2">

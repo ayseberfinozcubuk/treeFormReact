@@ -49,7 +49,7 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
       return;
     }
 
-    // console.log("formValues before nestedJson: ", formValues);
+    console.log("formValues before nestedJson: ", formValues);
 
     const structuredJson = convertToNestedJson(formValues);
     console.log("sending to back: ", structuredJson);
@@ -83,6 +83,8 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
   const handleStartForm = () => {
     setIsClicked(true);
     setFormStarted(true);
+    const user = JSON.parse(localStorage.getItem("user"));
+    formValues.CreatedBy = user.Id;
   };
 
   const handleRemoveForm = () => {

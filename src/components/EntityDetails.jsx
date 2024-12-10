@@ -6,7 +6,6 @@ import { InputSwitch } from "primereact/inputswitch";
 import DynamicForm from "./DynamicForm";
 import SubmitButton from "./SubmitButton";
 import CancelButton from "./CancelButton";
-import debounce from "lodash/debounce";
 import { Toast } from "primereact/toast";
 import {
   convertToNestedJson,
@@ -32,6 +31,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [role, setRole] = useState("read");
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const toast = useRef(null); // Toast reference
   const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
@@ -39,40 +39,8 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   const { id } = useParams(); // Get id from the URL
   const navigate = useNavigate();
 
-  const resetUpdatedBy = useCallback(async () => {
-    try {
-      if (formValues?.Id && formValues?.UpdatedBy) {
-        await axiosInstance.patch(
-          `/api/${rootEntity}/${rootEntity}-updatedby`,
-          {
-            id: formValues.Id,
-            updatedBy: null,
-          }
-        );
-        //formValues.UpdatedBy = null;
-        updateFormValues("UpdatedBy", null);
-        console.log("UpdatedBy reset successfully.");
-      }
-    } catch (error) {
-      console.error("Error resetting UpdatedBy property:", error);
-    }
-  }, [formValues, rootEntity]);
-
+  /*
   useEffect(() => {
-    // Handle beforeunload for page refresh or close
-    const handleBeforeUnload = (event) => {
-      const user = JSON.parse(localStorage.getItem("user"));
-      if (user && user.Id && user.Id === formValues.UpdatedBy) {
-        resetUpdatedBy();
-        event.preventDefault();
-        event.returnValue = "";
-      }
-    };
-
-    // Handle popstate for back/forward navigation
-    const handlePopState = () => {
-      resetUpdatedBy();
-    };
 
     // Add event listeners
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -85,11 +53,13 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       resetUpdatedBy();
     };
   }, [resetUpdatedBy]);
+  */
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.Role) {
       setRole(user.Role);
+      setCurrentUser(user);
     }
   }, []);
 
@@ -131,56 +101,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       );
       return;
     }
-
     console.log("formValues: ", response.data);
-    if (response.data?.UpdatedBy && response.data.UpdatedBy !== user.Id) {
-      console.log(
-        "Cant update UpdatedBy from formValues: ",
-        response.data.UpdatedBy,
-        " user id: ",
-        user.Id
-      );
-      showToast(
-        toast.current,
-        "warn",
-        "Erişim Engellendi",
-        "Bu kayıt başka bir kullanıcı tarafından güncelleniyor."
-      );
-      return;
-    }
-
-    if (
-      response.data?.UpdatedBy === null ||
-      response.data?.UpdatedBy === undefined
-    ) {
-      try {
-        console.log("UpdatedBy is null. Update it with the id of: ", user.Id);
-
-        await axiosInstance.patch(
-          `/api/${rootEntity}/${rootEntity}-updatedby`,
-          {
-            id: response.data.Id,
-            updatedBy: user.Id,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        updateFormValues("UpdatedBy", user.Id);
-        //formValues.UpdatedBy = user.Id;
-      } catch (error) {
-        console.error("Error updating UpdatedBy property:", error);
-        showToast(
-          toast.current,
-          "error",
-          "Güncelleme Hatası",
-          "Düzenleme moduna geçerken bir hata oluştu."
-        );
-        return;
-      }
-    }
 
     setIsEditMode(checked); // Toggle edit mode
   };
@@ -233,19 +154,37 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
     }
 
     try {
+      // Fetch the latest UpdatedDate
+      const latestResponse = await axiosInstance.get(
+        `/api/${rootEntity}/${id}?updatedDateOnly=true`
+      );
+      const latestUpdatedDate = latestResponse.data.UpdatedDate;
+
+      // Compare the UpdatedDate
+      if (
+        latestUpdatedDate &&
+        formValues.UpdatedDate &&
+        latestUpdatedDate !== formValues.UpdatedDate
+      ) {
+        showToast(
+          toast.current,
+          "error",
+          "Çakışma",
+          "Bu kayıt başka bir kullanıcı tarafından güncellenmiş. Listeye yönlendiriliyorsunuz."
+        );
+
+        setTimeout(() => navigate("/"), 3000);
+        return;
+      }
+      formValues.updatedBy = currentUser.Id;
+      // Proceed with the update
       const structuredJson = convertToNestedJson(formValues);
       console.log("updated data sent to back: ", structuredJson);
+
       await axiosInstance.put(
         `http://localhost:5000/api/${rootEntity}/${id}`,
         structuredJson
       );
-
-      // Reset the UpdatedBy property to null
-      console.log("SAVE SAVE SAVE");
-      await axiosInstance.patch(`/api/${rootEntity}/${rootEntity}-updatedby`, {
-        id: formValues.Id,
-        updatedBy: null,
-      });
 
       // Show success toast and set timeout
       showToast(
@@ -255,15 +194,14 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
         `${rootEntity} başarıyla güncellendi!`
       );
 
-      const timeoutFunction = () => {
-        console.log("BUMBUMBUM RESET");
+      setTimeout(() => {
         resetFormValues();
         navigate("/");
-      };
+      }, 3000);
 
-      toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
+      //toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
       // Store the function for immediate execution if the toast is dismissed
-      toastTimeoutRef.current = timeoutFunction;
+      //toastTimeoutRef.current = timeoutFunction;
     } catch (error) {
       console.error("Update error:", error);
       showToast(
@@ -277,13 +215,6 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
 
   const handleCancelChanges = async () => {
     try {
-      // Reset the UpdatedBy property to null
-      console.log("CANCEL CANCEL CANCEL");
-      await axiosInstance.patch(`/api/${rootEntity}/${rootEntity}-updatedby`, {
-        id: formValues.Id,
-        updatedBy: null,
-      });
-
       showToast(
         toast.current,
         "info",
