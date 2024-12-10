@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -196,8 +196,6 @@ const UserListView = () => {
       console.log("rowData.UpdatedDate: ", rowData.UpdatedDate);
 
       if (
-        latestUpdatedDate &&
-        rowData.UpdatedDate &&
         latestUpdatedDate !== rowData.UpdatedDate &&
         latestUpdatedDate !== null
       ) {
@@ -230,6 +228,7 @@ const UserListView = () => {
       // Update the user's role
       await axiosInstance.put(`/api/users/${rowData.Id}/role`, {
         Role: tempRole,
+        UpdatedBy: currentUser.Id,
       });
 
       fetchUsers(); // Refresh the list
@@ -271,11 +270,6 @@ const UserListView = () => {
       // Show confirmation toast before resetting the UpdatedBy property
       showConfirmationToast(toast.current, confirmCancelMessage, async () => {
         try {
-          // Reset the UpdatedBy property
-          await axiosInstance.patch(`/api/users/user-updatedby`, {
-            id: rowData.Id,
-            updatedBy: null,
-          });
           console.log("handle cancel role (editable row)");
 
           setEditableRow(null);

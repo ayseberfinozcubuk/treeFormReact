@@ -82,22 +82,6 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
 
   const handleDelete = async (id) => {
     try {
-      // Check if the entity is being updated by another user
-      const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
-      const selectedEntity = response.data;
-
-      if (selectedEntity?.UpdatedBy && selectedEntity.UpdatedBy !== id) {
-        if (toast.current) {
-          showToast(
-            toast.current,
-            "warn",
-            "Silme Engellendi",
-            `Bu kayıt şu anda başka bir kullanıcı tarafından güncelleniyor.`
-          );
-        }
-        return;
-      }
-
       // Proceed with deletion
       await axiosInstance.delete(`/api/${rootEntity}/${id}`);
       setRefreshEntities((prev) => !prev);

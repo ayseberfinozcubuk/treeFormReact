@@ -39,22 +39,6 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   const { id } = useParams(); // Get id from the URL
   const navigate = useNavigate();
 
-  /*
-  useEffect(() => {
-
-    // Add event listeners
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("popstate", handlePopState);
-
-    // Cleanup event listeners on component unmount
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("popstate", handlePopState);
-      resetUpdatedBy();
-    };
-  }, [resetUpdatedBy]);
-  */
-
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user && user.Role) {
@@ -82,28 +66,49 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   }, [rootEntity, id, setFormValues, navigate]);
 
   const handleModeSwitch = async (checked) => {
-    const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
-    console.log("After Mode Switch pulled formValues: ", response.data);
-    setFormValues(response.data); // Set form values in the store
+    try {
+      const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
+      console.log("After Mode Switch pulled formValues: ", response.data);
+      setFormValues(response.data); // Set form values in the store
 
-    // Wait for the state to finish updating
-    await new Promise((resolve) => {
-      setTimeout(() => resolve(), 0);
-    });
+      // Wait for the state to finish updating
+      await new Promise((resolve) => {
+        setTimeout(() => resolve(), 0);
+      });
 
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (!user || !user.Id) {
-      showToast(
-        toast.current,
-        "error",
-        "Kullanıcı Hatası",
-        "Geçersiz kullanıcı."
-      );
-      return;
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.Id) {
+        showToast(
+          toast.current,
+          "error",
+          "Kullanıcı Hatası",
+          "Geçersiz kullanıcı."
+        );
+        return;
+      }
+      console.log("formValues: ", response.data);
+
+      setIsEditMode(checked); // Toggle edit mode
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        showToast(
+          toast.current,
+          "error",
+          "Silinmiş Kayıt",
+          "Bu kayıt başka bir kullanıcı tarafından silinmiş. Ana sayfaya yönlendiriliyorsunuz."
+        );
+
+        setTimeout(() => navigate("/"), 3000); // Redirect to the main page
+      } else {
+        console.error("Error during mode switch:", error);
+        showToast(
+          toast.current,
+          "error",
+          "Bir Hata Oluştu",
+          "Mode switch işlemi sırasında bir hata meydana geldi. Lütfen tekrar deneyin."
+        );
+      }
     }
-    console.log("formValues: ", response.data);
-
-    setIsEditMode(checked); // Toggle edit mode
   };
 
   const handleSubmit = async () => {
@@ -134,6 +139,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
     }
 
     if (notInRangeField.length > 0) {
+      console.log("notInRangeField: ", notInRangeField);
       showToast(
         toast.current,
         "error",
@@ -203,13 +209,24 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       // Store the function for immediate execution if the toast is dismissed
       //toastTimeoutRef.current = timeoutFunction;
     } catch (error) {
-      console.error("Update error:", error);
-      showToast(
-        toast.current,
-        "error",
-        "Güncelleme Hatası",
-        "Bir hata oluştu. Lütfen tekrar deneyin."
-      );
+      if (error.response && error.response.status === 404) {
+        showToast(
+          toast.current,
+          "error",
+          "Silinmiş Kayıt",
+          "Bu kayıt başka bir kullanıcı tarafından silinmiş. Listeye yönlendiriliyorsunuz."
+        );
+
+        setTimeout(() => navigate("/"), 3000);
+      } else {
+        console.error("Update error:", error);
+        showToast(
+          toast.current,
+          "error",
+          "Güncelleme Hatası",
+          "Bir hata oluştu. Lütfen tekrar deneyin."
+        );
+      }
     }
   };
 
