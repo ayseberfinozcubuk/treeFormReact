@@ -51,7 +51,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
       const passwordError =
         (fieldName === "Password" ? value : newUser.Password) !==
         (fieldName === "ConfirmPassword" ? value : confirmPassword)
-          ? "Passwords do not match."
+          ? "Şifreler eşleşmiyor."
           : "";
       setError((prevError) => ({
         ...prevError,
@@ -62,7 +62,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
 
   const handleSave = () => {
     const passwordError =
-      newUser.Password !== confirmPassword ? "Passwords do not match." : "";
+      newUser.Password !== confirmPassword ? "Şifreler eşleşmiyor." : "";
     const validationErrors = {};
 
     userData?.Properties.forEach((field) => {
@@ -141,7 +141,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
 
   return (
     <Dialog
-      header="Add New User"
+      header="Yeni Kullanıcı Ekle"
       visible={visible}
       style={{ width: "400px" }}
       onHide={() => {
@@ -151,7 +151,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
       footer={
         <div className="flex justify-end gap-2">
           <Button
-            label="Cancel"
+            label="İptal Et"
             icon="pi pi-times"
             onClick={() => {
               resetFields(); // Reset fields on cancel
@@ -160,7 +160,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
             className="p-button-text"
           />
           <Button
-            label="Save"
+            label="Kaydet"
             icon="pi pi-check"
             onClick={handleSave}
             className="p-button-primary"

@@ -6,7 +6,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import AppWithNavbar from "./components/AppWithNavbar";
-// import AuthWrapper from "./components/AuthProvider";
 import LoginPage from "./components/LoginPage";
 import UserProfile from "./components/UserProfile"; // Import UserProfile
 import { useFormStore } from "./store/useFormStore";

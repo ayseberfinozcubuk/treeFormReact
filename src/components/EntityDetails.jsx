@@ -68,7 +68,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   const handleModeSwitch = async (checked) => {
     try {
       const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
-      console.log("After Mode Switch pulled formValues: ", response.data);
+      // console.log("After Mode Switch pulled formValues: ", response.data);
       setFormValues(response.data); // Set form values in the store
 
       // Wait for the state to finish updating
@@ -86,7 +86,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
         );
         return;
       }
-      console.log("formValues: ", response.data);
+      // console.log("formValues: ", response.data);
 
       setIsEditMode(checked); // Toggle edit mode
     } catch (error) {
@@ -105,7 +105,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
           toast.current,
           "error",
           "Bir Hata Oluştu",
-          "Mode switch işlemi sırasında bir hata meydana geldi. Lütfen tekrar deneyin."
+          "Mode değişimi sırasında bir hata meydana geldi. Lütfen tekrar deneyin."
         );
       }
     }
@@ -139,7 +139,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
     }
 
     if (notInRangeField.length > 0) {
-      console.log("notInRangeField: ", notInRangeField);
+      // console.log("notInRangeField: ", notInRangeField);
       showToast(
         toast.current,
         "error",
@@ -185,7 +185,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
       formValues.updatedBy = currentUser.Id;
       // Proceed with the update
       const structuredJson = convertToNestedJson(formValues);
-      console.log("updated data sent to back: ", structuredJson);
+      // console.log("updated data sent to back: ", structuredJson);
 
       await axiosInstance.put(
         `http://localhost:5000/api/${rootEntity}/${id}`,
@@ -260,7 +260,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p>Loading...</p>
+        <p>Yükleniyor...</p>
       </div>
     );
   }

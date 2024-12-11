@@ -33,8 +33,8 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
       // Show success toast
       toastRef.current.show({
         severity: "success",
-        summary: "Success",
-        detail: "Your password has been updated successfully!",
+        summary: "Başarılı",
+        detail: "Şifreniz başarıyla güncellendi!",
         life: 3000,
         closable: true,
       });
@@ -48,7 +48,7 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
       if (response && response.data) {
         setError({ server: response.data });
       } else {
-        setError({ server: "An unknown error occurred." });
+        setError({ server: "Bilinmeyen bir hata oluştu." });
       }
     }
   };
@@ -91,7 +91,7 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
         type={passwordVisible[fieldName] ? "text" : "password"}
         value={value}
         onChange={onChange}
-        placeholder={`Enter ${label.toLowerCase()}`}
+        placeholder={`${label.toLowerCase()} değerini giriniz`}
         className="w-full"
       />
       <i
@@ -118,21 +118,21 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
       )}
       {renderPasswordField(
         "currentPassword",
-        "Current Password",
+        "Mevcut Şifre",
         currentPassword,
         (e) => setCurrentPassword(e.target.value),
         "currentPassword"
       )}
       {renderPasswordField(
         "newPassword",
-        "New Password",
+        "Yeni Şifre",
         newPassword,
         (e) => setNewPassword(e.target.value),
         "newPassword"
       )}
       {renderPasswordField(
         "confirmPassword",
-        "Confirm New Password",
+        "Yeni Şifre Doğrulaması",
         confirmPassword,
         (e) => setConfirmPassword(e.target.value),
         "confirmPassword"
@@ -142,14 +142,14 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
       )}
       <div className="flex justify-between mt-4">
         <Button
-          label="Cancel"
+          label="İptal Et"
           icon="pi pi-times"
           className="p-button-secondary"
           onClick={resetFields}
           style={{ width: "150px" }}
         />
         <Button
-          label="Save"
+          label="Kaydet"
           icon="pi pi-check"
           className="p-button-primary"
           onClick={handleValidateAndSave}

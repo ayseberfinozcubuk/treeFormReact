@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import axiosInstance from "../api/axiosInstance";
 
-const useUserStore = create((set) => ({
+export const useUserStore = create((set) => ({
   users: [],
   roles: [],
   userData: null,

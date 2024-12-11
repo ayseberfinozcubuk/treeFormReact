@@ -23,11 +23,11 @@ const AuthWrapper = ({ children }) => {
         .split("; ")
         .find((row) => row.startsWith("authToken="))
         ?.split("=")[1];
-      console.log("user: ", user, " with id: ", user.Id, " token: ", token);
-      console.log("document.cookie: ", document.cookie);
+      // console.log("user: ", user, " with id: ", user.Id, " token: ", token);
+      // console.log("document.cookie: ", document.cookie);
 
       if (!user || !user.Id || !token) {
-        console.log("A");
+        // console.log("A");
         //handleLogout();
         return;
       }
@@ -71,7 +71,7 @@ const AuthWrapper = ({ children }) => {
 
   // If authentication is in progress, show a loader or blank screen
   if (isAuthenticated === null) {
-    return <div>Loading...</div>;
+    return <div>Yükleniyor...</div>;
   }
 
   return (

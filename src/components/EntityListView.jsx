@@ -54,7 +54,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
       try {
         // Fetch entities
         const response = await axiosInstance.get(`/api/${rootEntity}`);
-        console.log("response.data: ", response.data);
+        // console.log("response.data: ", response.data);
         setEntities(rootEntity, response.data);
       } catch (error) {
         console.error(`Error fetching ${rootEntity} list:`, error);
@@ -200,7 +200,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
               />
             </DataTable>
           ) : (
-            <p className="text-center text-gray-500">No data available</p>
+            <p className="text-center text-gray-500">Veri bulunamadı</p>
           )}
         </Card>
       </div>

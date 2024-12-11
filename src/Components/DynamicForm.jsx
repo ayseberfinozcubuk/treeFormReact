@@ -64,7 +64,7 @@ const DynamicForm = ({
     if (entity) {
       setData(entity);
     } else {
-      setError("Entity not found.");
+      setError("Varlık bulunamadı.");
     }
     setLoading(false);
   }, [entityName, formData]);
@@ -78,6 +78,7 @@ const DynamicForm = ({
       formValues[path === "" ? `${path}` : `${path}.Id`] !== null &&
       formValues[path === "" ? `${path}` : `${path}.Id`] !== undefined
     ) {
+      /*
       console.log(
         "parentName: ",
         parentName,
@@ -86,6 +87,7 @@ const DynamicForm = ({
         " path: ",
         path
       );
+      */
       const parentProperty = data.Properties.find(
         (property) => property.Name === `${parentName}Id`
       );

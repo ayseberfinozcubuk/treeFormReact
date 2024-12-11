@@ -26,20 +26,20 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
 
   const handleSubmit = () => {
     if (!formStarted) {
-      alert("Please start the form before submitting.");
+      alert("Lütfen göndermeden önce formu başlatın.");
       return;
     }
-    console.log("emptyMandatoryFields before submit: ", emptyMandatoryFields);
+    // console.log("emptyMandatoryFields before submit: ", emptyMandatoryFields);
 
     const missingRequiredFields = emptyMandatoryFields.filter((field) => {
       const value = getNestedValue(formValues, field);
-      console.log(`Checking field ${field}:`, value);
+      // console.log(`Checking field ${field}:`, value);
       return value === "" || value === null;
     });
     // console.log("missingRequiredFields: ", missingRequiredFields);
 
     if (missingRequiredFields.length > 0) {
-      console.log("missingRequiredFields: ", missingRequiredFields);
+      // console.log("missingRequiredFields: ", missingRequiredFields);
       alert("Lütfen göndermeden önce tüm gerekli alanları doldurun.");
       return;
     }
@@ -49,24 +49,24 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
       return;
     }
 
-    console.log("formValues before nestedJson: ", formValues);
+    // console.log("formValues before nestedJson: ", formValues);
 
     const structuredJson = convertToNestedJson(formValues);
-    console.log("sending to back: ", structuredJson);
+    // console.log("sending to back: ", structuredJson);
 
     axiosInstance
       .post(`/api/${rootEntity}`, structuredJson) // Base URL is already set
       .then((response) => {
-        console.log("Entity created successfully:", response.data);
+        // console.log("Entity created successfully:", response.data);
         resetForm();
       })
       .catch((error) => {
         if (error.response && error.response.status === 401) {
-          alert("Unauthorized. Please log in again.");
+          alert("Yetkisiz. Lütfen yeniden giriş yapın.");
           navigate("/login");
         } else {
           console.error("Error submitting entity:", error);
-          alert("An error occurred. Please try again.");
+          alert("Bir hata oluştu. Lütfen tekrar deneyin.");
         }
       });
 
