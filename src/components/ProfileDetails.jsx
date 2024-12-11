@@ -23,7 +23,7 @@ const ProfileDetails = ({
     try {
       const userId = updatedUser?.Id; // Assuming 'Id' is part of the user data
       if (!userId) {
-        alert("User ID is missing. Unable to update profile.");
+        alert("Kullanıcı ID'si eksik. Profil güncellenemiyor");
         return;
       }
 
@@ -55,7 +55,7 @@ const ProfileDetails = ({
         toast.current,
         "success",
         "Başarıyla Güncellendi",
-        `${updatePayload.UserName} Başarıyla güncellendi!`
+        `${updatePayload.UserName} başarıyla güncellendi!`
       );
       setIsEditing(false);
     } catch (error) {

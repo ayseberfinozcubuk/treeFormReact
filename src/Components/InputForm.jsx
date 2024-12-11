@@ -8,7 +8,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
   const {
     updateFormValues,
     formValues,
-    formData, // Added this line to access formData
+    formData,
     addEmptyMandatoryField,
     addNotInRangeField,
     removeNotInRangeField,
@@ -29,14 +29,13 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     SelectFrom,
   } = property;
 
-  const [error, setError] = useState(""); // Track validation errors
+  const [error, setError] = useState("");
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
 
   const formValueKey = path !== "" ? `${path}.${Name}` : Name;
   var formValue = formValues[formValueKey];
 
-  // Fetch the options for SelectFrom
   useEffect(() => {
     if (Type === "Guid" && SelectFrom) {
       const fetchOptions = async () => {
@@ -63,7 +62,6 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     }
   }, [formValue, formValueKey, updateFormValues]);
 
-  // Automatically update IsCalculated fields based on DependsOn with calculation
   useEffect(() => {
     if (IsCalculated && DependsOn) {
       const dependencyKey = path !== "" ? `${path}.${DependsOn}` : DependsOn;
@@ -120,7 +118,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
           updateFormValues(formValueKey, dependentValue);
         }
       } else {
-        console.log("AAAAAAA BIG TROUBLE! NO ENTITY DATA!");
+        // console.log("AAAAAAA BIG TROUBLE! NO ENTITY DATA!");
       }
     }
   }, [
@@ -132,7 +130,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     path,
     formValue,
     updateFormValues,
-    formData, // Added formData to dependencies
+    formData,
   ]);
 
   useEffect(() => {
@@ -146,7 +144,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
   }, [IsMandatory, formValueKey, formValue, addEmptyMandatoryField]);
 
   const validateAndSetError = (value) => {
-    console.log("validate value: ", value);
+    // console.log("validate value: ", value);
     if (value === null) {
       setError("");
       removeNotInRangeField(formValueKey);
@@ -161,11 +159,11 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     if (MinMax) {
       const numValue = parseFloat(value);
       if (MinMax.Min !== undefined && numValue < MinMax.Min) {
-        setError(`Value must be greater than or equal to ${MinMax.Min}`);
+        setError(`Değer, ${MinMax.Min} veya daha büyük olmalıdır.`);
         addNotInRangeField(formValueKey);
         return;
       } else if (MinMax.Max !== undefined && numValue > MinMax.Max) {
-        setError(`Value must be less than or equal to ${MinMax.Max}`);
+        setError(`Değer, ${MinMax.Min} veya daha küçük olmalıdır.`);
         addNotInRangeField(formValueKey);
         return;
       } else {
@@ -241,7 +239,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
                   error ? "border-red-500" : "border-gray-300"
                 } rounded-md p-1 w-48 text-sm ml-2`}
               >
-                <option value="">Select {Label}</option>
+                <option value="">{Label} Seçiniz</option>
                 {options.map((option) => (
                   <option key={option.Id} value={option.Id}>
                     {option.PlatformName || option.Name || option.Id}
@@ -269,7 +267,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
                   error ? "border-red-500" : "border-gray-300"
                 } rounded-md p-1 w-48 text-sm ml-2`}
               >
-                <option value="">Select {Label}</option>
+                <option value="">{Label} Seçiniz</option>
                 {EnumValues.map((enumOption) => (
                   <option key={enumOption.Value} value={enumOption.Value}>
                     {enumOption.Label}

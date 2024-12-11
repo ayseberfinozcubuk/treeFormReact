@@ -19,7 +19,7 @@ const SubmitButton = ({
       disabled={disabled}
       className={`p-button ${className}`}
       style={{
-        backgroundColor: disabled ? "#D3D3D3" : "#4CAF50", // Vibrant yet refined green
+        backgroundColor: disabled ? "#D3D3D3" : "#4CAF50",
         color: "white",
         borderRadius: "6px",
         padding: "0.7rem 1.2rem",
@@ -29,7 +29,7 @@ const SubmitButton = ({
         ...style,
       }}
       onMouseEnter={(e) => {
-        if (!disabled) e.currentTarget.style.backgroundColor = "#388E3C"; // Darker shade on hover
+        if (!disabled) e.currentTarget.style.backgroundColor = "#388E3C";
       }}
       onMouseLeave={(e) => {
         if (!disabled) e.currentTarget.style.backgroundColor = "#4CAF50";

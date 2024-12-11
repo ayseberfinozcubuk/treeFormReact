@@ -149,7 +149,7 @@ const UserListView = () => {
       }
 
       // Set up for role editing
-      console.log("handle edit role (editable row)");
+      // console.log("handle edit role (editable row)");
       setEditableRow(rowIndex);
       setTempRole(initialRole);
     } catch (error) {
@@ -192,8 +192,8 @@ const UserListView = () => {
         `/api/users/${rowData.Id}?updatedDateOnly=true`
       );
       const latestUpdatedDate = response.data?.UpdatedDate;
-      console.log("latestUpdatedDate: ", latestUpdatedDate);
-      console.log("rowData.UpdatedDate: ", rowData.UpdatedDate);
+      // console.log("latestUpdatedDate: ", latestUpdatedDate);
+      // console.log("rowData.UpdatedDate: ", rowData.UpdatedDate);
 
       if (
         latestUpdatedDate !== rowData.UpdatedDate &&
@@ -238,7 +238,7 @@ const UserListView = () => {
         "Başarıyla Güncellendi",
         `${rowData.Name} başarıyla güncellendi!`
       );
-      console.log("handle edit role 2 (editable row)");
+      // console.log("handle edit role 2 (editable row)");
 
       setEditableRow(null);
       setTempRole(null);
@@ -270,7 +270,7 @@ const UserListView = () => {
       // Show confirmation toast before resetting the UpdatedBy property
       showConfirmationToast(toast.current, confirmCancelMessage, async () => {
         try {
-          console.log("handle cancel role (editable row)");
+          // console.log("handle cancel role (editable row)");
 
           setEditableRow(null);
           setTempRole(null);

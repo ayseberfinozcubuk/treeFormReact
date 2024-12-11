@@ -17,7 +17,7 @@ const UserProfile = () => {
       try {
         const storedUser = JSON.parse(localStorage.getItem("user"));
         if (!storedUser?.Id) {
-          throw new Error("User ID not found in localStorage.");
+          throw new Error("Yerel depolamada kullanıcı Id'si bulunamadı.");
         }
 
         // Fetch user data by ID
