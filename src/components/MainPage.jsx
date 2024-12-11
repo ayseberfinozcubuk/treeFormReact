@@ -145,11 +145,13 @@ const MainPage = ({ role, rootEntity }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-      {isDataCountsReceived &&
-        dashboardItems.map((item, index) => (
-          <DashboardCard key={index} item={item} dataCounts={dataCounts} />
-        ))}
+    <div className="p-4 flex justify-center">
+      <div className="flex flex-wrap gap-4 justify-center max-w-full">
+        {isDataCountsReceived &&
+          dashboardItems.map((item, index) => (
+            <DashboardCard key={index} item={item} dataCounts={dataCounts} />
+          ))}
+      </div>
     </div>
   );
 };
