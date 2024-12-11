@@ -29,11 +29,13 @@ const MainPage = ({ role, rootEntity }) => {
   const navigate = useNavigate();
   const [dataCounts, setDataCounts] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDataCountsReceived, setIsDataCountsReceived] = useState(false);
+  const [dashboardItems, setDashboardItems] = useState([]);
 
   useEffect(() => {
-    fetchUserData();
     const fetchDataCounts = async () => {
       try {
+        fetchUserData();
         const rootEntityResponse = await axiosInstance.get(
           `/api/${rootEntity}/counts`
         );
@@ -62,77 +64,92 @@ const MainPage = ({ role, rootEntity }) => {
           users,
           userRoles,
         });
+        setIsDataCountsReceived(true); // Mark data as received
       } catch (error) {
         console.error("Error fetching counts:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchDataCounts();
-  }, []);
+  }, [rootEntity, selectFromData, fetchUserData]);
+
+  useEffect(() => {
+    if (isDataCountsReceived) {
+      // Assign dashboard items when data counts are received
+      const items = [
+        {
+          label: `${rootEntity} Ekranı`,
+          icon: "pi pi-list",
+          onClick: () => navigate("/list", { state: { rootEntity } }),
+          chartData: createChartData(
+            dataCounts.rootEntities.total,
+            dataCounts.rootEntities.recent,
+            rootEntity
+          ),
+        },
+        ...selectFromData.map((item) => ({
+          label: `${item} Ekranı`,
+          icon: "pi pi-list",
+          onClick: () =>
+            navigate("/entity-page", { state: { rootEntity: item } }),
+          chartData: createChartData(
+            dataCounts.selectFromDatas[item]?.total || 0,
+            dataCounts.selectFromDatas[item]?.recent || 0,
+            item
+          ),
+        })),
+        ...(role === "admin"
+          ? [
+              {
+                label: "Kullanıcı Ekranı",
+                icon: "pi pi-users",
+                onClick: () => navigate("/user-settings"),
+                chartData: createChartData(
+                  dataCounts.users.total,
+                  dataCounts.users.recent,
+                  "kullanıcı"
+                ),
+                rolesChartData: {
+                  labels: Object.keys(dataCounts.userRoles || {}),
+                  datasets: [
+                    {
+                      data: Object.values(dataCounts.userRoles || {}),
+                      backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+                      hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
+                    },
+                  ],
+                },
+              },
+            ]
+          : []),
+      ];
+      setDashboardItems(items);
+    }
+  }, [
+    isDataCountsReceived,
+    dataCounts,
+    role,
+    rootEntity,
+    selectFromData,
+    navigate,
+  ]);
+
+  useEffect(() => {
+    if (userData) {
+      setLoading(false);
+    }
+  }, [userData]);
 
   if (loading) {
-    return <div className="p-6 text-center">Yükleniyor...</div>;
+    return <div className="p-6 text-center">Yükleniyor main...</div>;
   }
-
-  const dashboardItems = [
-    {
-      label: `${rootEntity} Ekranı`,
-      icon: "pi pi-list",
-      onClick: () => navigate("/list", { state: { rootEntity } }),
-      chartData: createChartData(
-        dataCounts.rootEntities.total,
-        dataCounts.rootEntities.recent,
-        rootEntity
-      ),
-    },
-    ...selectFromData.map((item) => ({
-      label: `${item} Ekranı`,
-      icon: "pi pi-list",
-      onClick: () => navigate("/entity-page", { state: { rootEntity: item } }),
-      chartData: createChartData(
-        dataCounts.selectFromDatas[item]?.total || 0,
-        dataCounts.selectFromDatas[item]?.recent || 0,
-        item
-      ),
-    })),
-    ...(role === "admin"
-      ? [
-          {
-            label: "Kullanıcı Ekranı",
-            icon: "pi pi-users",
-            onClick: () => navigate("/user-settings"),
-            chartData: createChartData(
-              dataCounts.users.total,
-              dataCounts.users.recent,
-              "kullanıcı"
-            ),
-            rolesChartData: {
-              labels: Object.keys(dataCounts.userRoles || {}),
-              datasets: [
-                {
-                  data: Object.values(dataCounts.userRoles || {}),
-                  backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-                  hoverBackgroundColor: ["#FF6384", "#36A2EB", "#FFCE56"],
-                },
-              ],
-            },
-          },
-        ]
-      : []),
-  ];
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-      {dashboardItems.map((item, index) => (
-        <DashboardCard
-          key={index}
-          item={item}
-          dataCounts={dataCounts}
-          userData={userData}
-        />
-      ))}
+      {isDataCountsReceived &&
+        dashboardItems.map((item, index) => (
+          <DashboardCard key={index} item={item} dataCounts={dataCounts} />
+        ))}
     </div>
   );
 };

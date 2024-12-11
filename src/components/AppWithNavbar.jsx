@@ -90,6 +90,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   return (
     <>
       <Menubar
+        model={[]}
         start={start}
         end={end}
         className="bg-gray-800 text-white fixed top-0 w-full z-10"

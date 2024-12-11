@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DynamicForm from "./DynamicForm";
 import FormButton from "./FormButton";
 import SubmitButton from "./SubmitButton";
 import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
 import BackButton from "./BackButton";
+import { Toast } from "primereact/toast";
 import { useNavigate, useLocation } from "react-router-dom";
-import { getNestedValue, convertToNestedJson } from "../utils/utils";
+import {
+  getNestedValue,
+  convertToNestedJson,
+  showToast,
+  onToastClose,
+} from "../utils/utils";
 
 const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
   const location = useLocation();
@@ -18,7 +24,10 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
   const [formKey, setFormKey] = useState(0);
   const [formStarted, setFormStarted] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+
   const navigate = useNavigate();
+  const toast = useRef(null); // Toast reference
+  const toastTimeoutRef = useRef(null); // Reference to store the timeout ID
 
   useEffect(() => {
     resetFormValues();
@@ -40,12 +49,12 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
 
     if (missingRequiredFields.length > 0) {
       // console.log("missingRequiredFields: ", missingRequiredFields);
-      alert("Lütfen göndermeden önce tüm gerekli alanları doldurun.");
+      alert("Lütfen formu göndermeden önce tüm gerekli alanları doldurun.");
       return;
     }
 
     if (notInRangeField.length > 0) {
-      alert("Please ensure all fields are within the allowed range.");
+      alert("Lütfen bütün alanların beklenen aralıkta olduğundan emin olun.");
       return;
     }
 
@@ -58,7 +67,17 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
       .post(`/api/${rootEntity}`, structuredJson) // Base URL is already set
       .then((response) => {
         // console.log("Entity created successfully:", response.data);
-        resetForm();
+        showToast(
+          toast.current,
+          "success",
+          "Başarıyla Eklendi",
+          `${rootEntity} başarıyla eklendi!`
+        );
+
+        setTimeout(() => {
+          resetForm();
+          navigate(`/list`, { state: { rootEntity } });
+        }, 3000);
       })
       .catch((error) => {
         if (error.response && error.response.status === 401) {
@@ -93,17 +112,8 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
     setIsClicked(false);
   };
 
-  const handleBack = () => {
-    navigate("/"); // Navigate to the viewing list page
-  };
-
   return (
     <div className="main-container min-h-screen bg-gray-100 flex flex-col items-center justify-start py-8 overflow-x-auto">
-      {/* Container for BackButton */}
-      <div className="w-full max-w-3xl mb-2">
-        <BackButton onClick={handleBack} className="ml-0" />
-      </div>
-
       {/* Container for title */}
       <div className="w-full max-w-3xl flex justify-center mb-8">
         <h1 className="text-xl font-semibold text-gray-800">
@@ -144,6 +154,9 @@ const AddNewEntity = ({ rootEntity: defaultRootEntity }) => {
           />
         </div>
       </div>
+
+      {/* Toast container */}
+      <Toast ref={toast} onHide={() => onToastClose(toastTimeoutRef.current)} />
     </div>
   );
 };

@@ -1,7 +1,11 @@
 import React from "react";
 import { Chart } from "primereact/chart";
+import { useUserStore } from "../store/useUserStore";
 
-const DashboardCard = ({ item, dataCounts, userData }) => {
+const DashboardCard = ({ item, dataCounts }) => {
+  const { userData } = useUserStore();
+  console.log("userData: ", userData);
+
   const rolesChartData = item.rolesChartData && {
     labels: Object.keys(dataCounts.userRoles || {}).map((role) => {
       const matchingEnum = userData.Properties.find(

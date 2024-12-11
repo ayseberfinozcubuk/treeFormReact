@@ -200,14 +200,16 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
         `${rootEntity} başarıyla güncellendi!`
       );
 
-      setTimeout(() => {
+      toastTimeoutRef.current = setTimeout(() => {
         resetFormValues();
-        navigate("/");
+        navigate(`/list`, { state: { rootEntity } });
       }, 3000);
 
-      //toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
       // Store the function for immediate execution if the toast is dismissed
-      //toastTimeoutRef.current = timeoutFunction;
+      toastTimeoutRef.current = () => {
+        resetFormValues();
+        navigate(`/list`, { state: { rootEntity } });
+      };
     } catch (error) {
       if (error.response && error.response.status === 404) {
         showToast(
@@ -241,7 +243,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
 
       const timeoutFunction = () => {
         resetFormValues();
-        navigate("/");
+        navigate(`/list`, { state: { rootEntity } });
       };
 
       toastTimeoutRef.current = setTimeout(timeoutFunction, 3000);
