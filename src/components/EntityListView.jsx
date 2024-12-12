@@ -95,15 +95,24 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
         );
       }
     } catch (error) {
-      console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
+      // console.error(`Error deleting ${rootEntity} with ID ${id}:`, error);
+
+      let errorMessage =
+        "Silme işlemi esnasında bir hata oluştu. Lütfen tekrar deneyin.";
+
+      // Check if the error message matches the specific association error
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data ===
+          "Cannot delete platform as it is associated with one or more emitters."
+      ) {
+        errorMessage =
+          "Silmeye çalıştığınız platform bir veya daha fazla Emitter ile ilişkili olduğundan silme işlemi yapılamıyor.";
+      }
 
       if (toast.current) {
-        showToast(
-          toast.current,
-          "error",
-          "Silme Hatası",
-          "Silme işlemi esnasında bir hata oluştu. Lütfen tekrar deneyin."
-        );
+        showToast(toast.current, "error", "Silme Hatası", errorMessage);
       }
     }
   };
