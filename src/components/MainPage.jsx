@@ -10,7 +10,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const createChartData = (total, recent, entityName) => ({
   labels: [
-    `Şimdiye kadar oluşturulmuş ${entityName} sayısı`,
+    `Bi aydan önce oluşturulmuş ${entityName} sayısı`,
     `Bir ay içerisinde oluşturulmuş ${entityName} sayısı`,
   ],
   datasets: [

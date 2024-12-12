@@ -48,18 +48,22 @@ const LoginPage = ({ onLogin }) => {
           </div>
         )}
         <div className="p-field">
-          <label htmlFor="email">E-posta</label>
+          <label htmlFor="email" className="block py-2 text-lg leading-none">
+            E-posta
+          </label>{" "}
           <InputText
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="E-posta adresinizi girin"
-            className="w-full"
+            className="w-full pr-10 py-2 text-lg" // Added padding-y for height and text size for better visibility
           />
         </div>
         <div className="p-field relative">
-          <label htmlFor="password">Şifre</label>
+          <label htmlFor="password" className="block py-2 text-lg leading-none">
+            Şifre
+          </label>{" "}
           <div className="relative">
             <InputText
               id="password"
@@ -67,7 +71,7 @@ const LoginPage = ({ onLogin }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Şifrenizi girin"
-              className="w-full pr-10" // Add padding-right to avoid overlapping with the icon
+              className="w-full pr-10 py-2 text-lg" // Added padding-y for height and text size for better visibility
             />
             <i
               className={`absolute right-3 top-1/2 transform -translate-y-1/2 pi ${
