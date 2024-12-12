@@ -42,7 +42,7 @@ const UserProfile = () => {
     };
 
     fetchAndUpdateUserData();
-  }, [userData, fetchUserData]);
+  }, [userData, fetchUserData, isPasswordChanging]);
 
   // Reset fields to the latest user data
   const resetFields = () => {
