@@ -29,6 +29,32 @@ const DashboardCard = ({ item, dataCounts }) => {
     ],
   };
 
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          boxWidth: 20,
+          font: {
+            size: 10,
+          },
+          // Custom formatter to wrap text
+          formatter: (value) => {
+            const maxLength = 20; // Maximum characters per line
+            if (value.length > maxLength) {
+              return value
+                .match(new RegExp(`.{1,${maxLength}}`, "g"))
+                .join("\n");
+            }
+            return value;
+          },
+        },
+      },
+    },
+  };
+
   return (
     <div
       className="p-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md cursor-pointer text-center"
@@ -45,15 +71,7 @@ const DashboardCard = ({ item, dataCounts }) => {
         <Chart
           type="doughnut"
           data={item.chartData}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: "bottom",
-              },
-            },
-          }}
+          options={chartOptions}
           style={{ maxHeight: "150px" }}
         />
       </div>
@@ -62,15 +80,7 @@ const DashboardCard = ({ item, dataCounts }) => {
           <Chart
             type="doughnut"
             data={rolesChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  position: "bottom",
-                },
-              },
-            }}
+            options={chartOptions}
             style={{ maxHeight: "150px" }}
           />
         </div>

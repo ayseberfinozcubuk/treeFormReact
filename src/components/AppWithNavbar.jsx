@@ -93,10 +93,16 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         model={[]}
         start={start}
         end={end}
-        className="bg-gray-800 text-white fixed top-0 w-full z-10"
+        className="bg-gray-800 text-white fixed top-0 w-full z-10 navbar"
         style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}
       />
-      <div className="p-6 pt-16">
+      <div
+        className="main-content"
+        style={{
+          paddingTop: "4rem", // Push content below navbar
+          minHeight: "100vh", // Ensure content covers viewport
+        }}
+      >
         <Routes>
           <Route
             path="/"
@@ -109,10 +115,10 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
           <Route path="/entity-page" element={<EntityListView />} />
           <Route path="/add-entity" element={<AddNewEntity />} />
           <Route path="/details/:id" element={<EntityDetails />} />
+          <Route path="/profile" element={<UserProfile />} />
           {role === "admin" && (
             <Route path="/user-settings" element={<UserListView />} />
           )}
-          <Route path="/profile" element={<UserProfile />} />
         </Routes>
       </div>
     </>

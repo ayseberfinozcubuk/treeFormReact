@@ -64,7 +64,7 @@ const MainPage = ({ role, rootEntity }) => {
           users,
           userRoles,
         });
-        setIsDataCountsReceived(true); // Mark data as received
+        setIsDataCountsReceived(true);
       } catch (error) {
         console.error("Error fetching counts:", error);
       }
@@ -75,7 +75,6 @@ const MainPage = ({ role, rootEntity }) => {
 
   useEffect(() => {
     if (isDataCountsReceived) {
-      // Assign dashboard items when data counts are received
       const items = [
         {
           label: `${rootEntity} Ekranı`,
@@ -145,12 +144,31 @@ const MainPage = ({ role, rootEntity }) => {
   }
 
   return (
-    <div className="p-4 flex justify-center">
-      <div className="flex flex-wrap gap-4 justify-center max-w-full">
-        {isDataCountsReceived &&
-          dashboardItems.map((item, index) => (
-            <DashboardCard key={index} item={item} dataCounts={dataCounts} />
-          ))}
+    <div className="p-6 flex justify-center items-center min-h-screen bg-gray-100">
+      <div
+        className="bg-white shadow-lg rounded-xl p-6 flex flex-col items-center"
+        style={{
+          width: "fit-content",
+          maxWidth: "95%",
+        }}
+      >
+        <div
+          className="flex flex-wrap justify-center gap-6"
+          style={{
+            maxWidth: "100%",
+          }}
+        >
+          {isDataCountsReceived &&
+            dashboardItems.map((item, index) => (
+              <div
+                key={index}
+                className="flex-none"
+                style={{ margin: "0 10px" }}
+              >
+                <DashboardCard item={item} dataCounts={dataCounts} />
+              </div>
+            ))}
+        </div>
       </div>
     </div>
   );

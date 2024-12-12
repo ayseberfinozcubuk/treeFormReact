@@ -53,14 +53,17 @@ const UserProfile = () => {
   };
 
   if (!updatedUser) {
-    return <div>Loading...</div>;
+    return <div>Yükleniyor...</div>;
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-md bg-white rounded-lg shadow-md">
+    <div
+      className="container mx-auto p-6 max-w-md bg-white rounded-lg shadow-md"
+      style={{ marginTop: "1rem" }} // Add slight margin for better spacing
+    >
       <div className="flex justify-between border-b-2 border-gray-200 pb-2 mb-4">
         <Button
-          label="Düzenle Profil"
+          label="Profili Düzenle"
           className={`p-button-text ${
             !isPasswordChanging ? "font-bold border-b-2 border-primary" : ""
           }`}

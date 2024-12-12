@@ -117,7 +117,7 @@ const ProfileDetails = ({
       <div className="flex flex-col gap-2 mt-4">
         {!isEditing ? (
           <Button
-            label="Edit"
+            label="Düzenle"
             icon="pi pi-pencil"
             className="p-button-primary"
             onClick={() => setIsEditing(true)}
@@ -126,14 +126,14 @@ const ProfileDetails = ({
         ) : (
           <div className="flex justify-between mt-4">
             <Button
-              label="Cancel"
+              label="İptal Et"
               icon="pi pi-times"
               className="p-button-secondary"
               onClick={resetFields}
               style={{ width: "150px" }}
             />
             <Button
-              label="Save"
+              label="Kaydet"
               icon="pi pi-check"
               className="p-button-primary"
               onClick={handleSave}
