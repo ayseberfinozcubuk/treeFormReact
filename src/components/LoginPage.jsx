@@ -12,17 +12,17 @@ const LoginPage = ({ onLogin }) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleSignIn = async () => {
-    console.log("sign-in");
-    console.log("email: ", email, " password: ", password);
+    // console.log("sign-in");
+    // console.log("email: ", email, " password: ", password);
     if (email && password) {
       try {
-        console.log("inside try-catch");
+        // console.log("inside try-catch");
         const response = await axiosInstance.post("/api/users/signin", {
           email,
           password,
         });
         const { User } = response.data;
-        console.log("user: ", User);
+        // console.log("user: ", User);
 
         // Authentication successful
         onLogin(); // Set isAuthenticated to true in App.jsx

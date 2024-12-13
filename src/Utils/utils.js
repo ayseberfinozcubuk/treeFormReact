@@ -85,6 +85,7 @@ export const areObjectsEqual = (obj1, obj2) => {
 
   for (const key of keys1) {
     if (!obj2.hasOwnProperty(key) || obj1[key] !== obj2[key]) {
+      /*
       console.log(
         "obj1[key]: ",
         obj1[key],
@@ -93,6 +94,7 @@ export const areObjectsEqual = (obj1, obj2) => {
         " key: ",
         key
       );
+      */
       return false; // Key mismatch or values not equal
     }
   }

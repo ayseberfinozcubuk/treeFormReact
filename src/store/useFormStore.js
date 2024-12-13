@@ -76,7 +76,7 @@ export const useFormStore = create((set) => ({
   addEmptyMandatoryField: (key) => {
     set((state) => {
       if (!state.emptyMandatoryFields.includes(key)) {
-        console.log("addEmptyMandatoryField: ", key);
+        // console.log("addEmptyMandatoryField: ", key);
         return {
           emptyMandatoryFields: [...state.emptyMandatoryFields, key],
         };
@@ -95,7 +95,7 @@ export const useFormStore = create((set) => ({
 
   removeFormSection: (path) =>
     set((state) => {
-      console.log("removed path: ", path);
+      // console.log("removed path: ", path);
       const updatedFormValues = { ...state.formValues };
       const updatedMandatoryFields = state.emptyMandatoryFields.filter(
         (key) => !key.startsWith(path)
@@ -110,7 +110,7 @@ export const useFormStore = create((set) => ({
         }
       });
 
-      console.log("after remove form values: ", updatedFormValues);
+      // console.log("after remove form values: ", updatedFormValues);
 
       return {
         formValues: updatedFormValues,

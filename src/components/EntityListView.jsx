@@ -181,7 +181,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
               />
             )}
           </div>
-          {console.log("entitiesList: ", entitiesList)}
+          {/*console.log("entitiesList: ", entitiesList)*/}
           {entitiesList.length > 0 ? (
             <DataTable
               value={entitiesList}

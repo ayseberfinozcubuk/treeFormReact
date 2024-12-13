@@ -45,17 +45,17 @@ const MainPage = ({ role, rootEntity }) => {
             return { item, data: response.data };
           })
         );
-        //console.log("selectFromDataResponses: ", selectFromDataResponses);
+        // console.log("selectFromDataResponses: ", selectFromDataResponses);
         const usersResponse = await axiosInstance.get("/api/users/counts");
         const userRolesResponse = await axiosInstance.get(
           "/api/users/role-counts"
         );
 
         const rootEntities = rootEntityResponse.data;
-        console.log("rootEntities: ", rootEntities);
+        // console.log("rootEntities: ", rootEntities);
         const selectFromDatas = selectFromDataResponses.reduce((acc, curr) => {
           acc[curr.item] = curr.data;
-          //console.log("cur.data: ", curr.data);
+          // console.log("cur.data: ", curr.data);
           return acc;
         }, {});
         const users = usersResponse.data;
