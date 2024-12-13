@@ -5,7 +5,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import AppWithNavbar from "./components/AppWithNavbar";
+import NavbarLayout from "./components/NavbarLayout";
 import LoginPage from "./components/LoginPage";
 import MainPage from "./components/MainPage";
 import AddNewEntity from "./components/AddNewEntity";
@@ -35,11 +35,10 @@ const App = () => {
     if (isAuthenticated) {
       const user = JSON.parse(localStorage.getItem("user"));
       setRole(user.Role);
-      console.log("Current role:", role);
     } else {
       handleLogout();
     }
-  }, [isAuthenticated, role]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const validateAuth = async () => {
@@ -91,7 +90,7 @@ const App = () => {
           <Route
             path="/"
             element={
-              <AppWithNavbar rootEntity={rootEntity} onLogout={handleLogout} />
+              <NavbarLayout rootEntity={rootEntity} onLogout={handleLogout} />
             }
           >
             <Route

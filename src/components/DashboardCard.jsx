@@ -36,13 +36,13 @@ const DashboardCard = ({ item, dataCounts }) => {
       legend: {
         position: "bottom",
         labels: {
-          boxWidth: 20,
+          boxWidth: 10,
           font: {
             size: 10,
           },
           // Custom formatter to wrap text
           formatter: (value) => {
-            const maxLength = 20; // Maximum characters per line
+            const maxLength = 15; // Maximum characters per line
             if (value.length > maxLength) {
               return value
                 .match(new RegExp(`.{1,${maxLength}}`, "g"))
@@ -52,6 +52,29 @@ const DashboardCard = ({ item, dataCounts }) => {
           },
         },
       },
+      tooltip: {
+        callbacks: {
+          title: (tooltipItems) => {
+            // Optional: Format tooltip title if needed
+            return tooltipItems[0].label;
+          },
+        },
+        bodyFont: {
+          size: 10, // Smaller text size
+        },
+        titleFont: {
+          size: 10, // Slightly smaller title font size
+        },
+        //padding: 10, // Adjust padding for better appearance
+      },
+    },
+    layout: {
+      padding: {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10,
+      },
     },
   };
 
@@ -59,7 +82,7 @@ const DashboardCard = ({ item, dataCounts }) => {
     <div
       className="p-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md cursor-pointer text-center"
       onClick={item.onClick}
-      style={{ maxWidth: "250px", fontSize: "0.9rem" }} // Reduced max width and font size
+      style={{ maxWidth: "280px", fontSize: "0.9rem" }} // Reduced max width and font size
     >
       <i className={`${item.icon} text-xl`}></i>
       <div className="mt-2">{item.label}</div>
