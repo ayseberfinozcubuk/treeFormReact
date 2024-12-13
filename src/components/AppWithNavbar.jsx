@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Route, Routes, useNavigate } from "react-router-dom";
-import MainPage from "./MainPage";
-import AddNewEntity from "./AddNewEntity";
-import EntityDetails from "./EntityDetails";
-import UserListView from "./UserListView";
-import EntityListView from "./EntityListView";
-import UserProfile from "./UserProfile";
+import { Outlet, useNavigate } from "react-router-dom"; // Use Outlet for nested routes
 import { Menubar } from "primereact/menubar";
 import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
@@ -63,7 +57,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   const start = (
     <span
       className="text-xl font-medium text-gray-200 hover:text-white cursor-pointer"
-      onClick={() => navigate("/")} // Navigate to the main page
+      onClick={() => navigate("/")}
     >
       EHBB
     </span>
@@ -89,6 +83,7 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
 
   return (
     <>
+      {/* Fixed Navbar */}
       <Menubar
         model={[]}
         start={start}
@@ -96,30 +91,16 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         className="bg-gray-800 text-white fixed top-0 w-full z-10 navbar"
         style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}
       />
+      {/* Main Content Area */}
       <div
         className="main-content"
         style={{
-          paddingTop: "4rem", // Push content below navbar
-          minHeight: "100vh", // Ensure content covers viewport
+          paddingTop: "4rem",
+          minHeight: "100vh",
         }}
       >
-        <Routes>
-          <Route
-            path="/"
-            element={<MainPage role={role} rootEntity={rootEntity} />}
-          />
-          <Route
-            path="/list"
-            element={<EntityListView rootEntity={rootEntity} />}
-          />
-          <Route path="/entity-page" element={<EntityListView />} />
-          <Route path="/add-entity" element={<AddNewEntity />} />
-          <Route path="/details/:id" element={<EntityDetails />} />
-          <Route path="/profile" element={<UserProfile />} />
-          {role === "admin" && (
-            <Route path="/user-settings" element={<UserListView />} />
-          )}
-        </Routes>
+        {/* Render nested routes using Outlet */}
+        <Outlet />
       </div>
     </>
   );

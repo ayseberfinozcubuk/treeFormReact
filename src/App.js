@@ -7,11 +7,13 @@ import {
 } from "react-router-dom";
 import AppWithNavbar from "./components/AppWithNavbar";
 import LoginPage from "./components/LoginPage";
-import UserProfile from "./components/UserProfile"; // Import UserProfile
+import MainPage from "./components/MainPage";
+import AddNewEntity from "./components/AddNewEntity";
+import EntityDetails from "./components/EntityDetails";
+import UserListView from "./components/UserListView";
+import EntityListView from "./components/EntityListView";
+import UserProfile from "./components/UserProfile";
 import { useFormStore } from "./store/useFormStore";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
-import "primeicons/primeicons.css";
 import axiosInstance from "./api/axiosInstance";
 import { checkUserExists } from "./utils/utils";
 
@@ -19,69 +21,44 @@ const App = () => {
   const { setFormData } = useFormStore();
   const [rootEntity, setRootEntity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Start as not authenticated
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [role, setRole] = useState(null); // Track user role for conditional rendering
 
-  const handleLogin = () => {
-    setIsAuthenticated(true);
-  };
+  const handleLogin = () => setIsAuthenticated(true);
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("user");
-    localStorage.removeItem("isAuthenticated");
-    document.cookie = "authToken=; path=/; max-age=0"; // Clear token cookie
+    document.cookie = "authToken=; path=/; max-age=0";
   };
 
   useEffect(() => {
-    const checkAuth = async () => {
+    if (isAuthenticated) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      setRole(user.Role);
+      console.log("Current role:", role);
+    } else {
+      handleLogout();
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const validateAuth = async () => {
       const user = JSON.parse(localStorage.getItem("user"));
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("authToken="))
         ?.split("=")[1];
 
-      // If user or token is missing, redirect to login without showing an error
-      if (!token) {
-        setIsAuthenticated(false);
-        return;
-      }
-
-      // Token validation
-      const isTokenValid = token && (await validateToken(token));
-      if (!isTokenValid) {
-        handleLogout(); // Handle token invalidation
-        return;
-      }
-
-      // Check if the user still exists in the backend
-      const userExists = await checkUserExists(user.Id);
-      if (!userExists) {
-        handleLogout(); // Handle missing user
+      if (!user || !token || !(await checkUserExists(user.Id))) {
+        handleLogout();
         return;
       }
 
       setIsAuthenticated(true);
+      setRole(user.Role); // Save the user's role
     };
-
-    const validateToken = async (token) => {
-      try {
-        const response = await axiosInstance.post("/api/validate-token", {
-          token,
-        });
-        return response.data.isValid;
-      } catch {
-        return false; // Treat failure as invalid token
-      }
-    };
-
-    const handleLogout = () => {
-      setIsAuthenticated(false);
-      localStorage.removeItem("user");
-      localStorage.removeItem("isAuthenticated");
-      document.cookie = "authToken=; path=/; max-age=0"; // Clear token cookie
-    };
-
-    checkAuth();
+    validateAuth();
   }, []);
 
   useEffect(() => {
@@ -93,7 +70,7 @@ const App = () => {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error("Error loading sample data:", error);
+        console.error("Error loading data:", error);
         setIsLoading(false);
       });
   }, [setFormData]);
@@ -103,26 +80,32 @@ const App = () => {
   }
 
   return (
-    <Router
-      future={{
-        v7_startTransition: true, // Opt-in to React.startTransition support
-        v7_relativeSplatPath: true, // Opt-in to updated relative splat path resolution
-      }}
-    >
+    <Router>
       <Routes>
         {isAuthenticated ? (
-          <>
+          <Route
+            path="/"
+            element={
+              <AppWithNavbar rootEntity={rootEntity} onLogout={handleLogout} />
+            }
+          >
+            {/* Nested Routes */}
             <Route
-              path="/*"
-              element={
-                <AppWithNavbar
-                  rootEntity={rootEntity}
-                  onLogout={handleLogout}
-                />
-              }
+              path="/"
+              element={<MainPage rootEntity={rootEntity} role={role} />}
             />
+            <Route
+              path="/list"
+              element={<EntityListView rootEntity={rootEntity} />}
+            />
+            <Route path="/entity-page" element={<EntityListView />} />
+            <Route path="/add-entity" element={<AddNewEntity />} />
+            <Route path="/details/:id" element={<EntityDetails />} />
             <Route path="/profile" element={<UserProfile />} />
-          </>
+            {role === "admin" && (
+              <Route path="/user-settings" element={<UserListView />} />
+            )}
+          </Route>
         ) : (
           <>
             <Route

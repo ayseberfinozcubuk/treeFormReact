@@ -92,8 +92,8 @@ const MainPage = ({ role, rootEntity }) => {
           onClick: () =>
             navigate("/entity-page", { state: { rootEntity: item } }),
           chartData: createChartData(
-            dataCounts.selectFromDatas[item]?.total || 0,
-            dataCounts.selectFromDatas[item]?.recent || 0,
+            dataCounts.selectFromDatas[item]?.total,
+            dataCounts.selectFromDatas[item]?.recent,
             item
           ),
         })),
@@ -140,7 +140,7 @@ const MainPage = ({ role, rootEntity }) => {
   }, [userData]);
 
   if (loading) {
-    return <div className="p-6 text-center">Yükleniyor main...</div>;
+    return <div className="p-6 text-center">Yükleniyor...</div>;
   }
 
   return (

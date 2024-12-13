@@ -57,50 +57,49 @@ const UserProfile = () => {
   }
 
   return (
-    <div
-      className="container mx-auto p-6 max-w-md bg-white rounded-lg shadow-md"
-      style={{ marginTop: "1rem" }} // Add slight margin for better spacing
-    >
-      <div className="flex justify-between border-b-2 border-gray-200 pb-2 mb-4">
-        <Button
-          label="Profili Düzenle"
-          className={`p-button-text ${
-            !isPasswordChanging ? "font-bold border-b-2 border-primary" : ""
-          }`}
-          onClick={() => {
-            setIsPasswordChanging(false);
-          }}
-          style={{ width: "50%" }}
-        />
-        <Button
-          label="Şifreyi Değiştir"
-          className={`p-button-text ${
-            isPasswordChanging ? "font-bold border-b-2 border-primary" : ""
-          }`}
-          onClick={() => {
-            setIsPasswordChanging(true);
-            setIsEditing(false);
-          }}
-          style={{ width: "50%" }}
-        />
-      </div>
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 pt-16">
+      <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6">
+        <div className="flex justify-between border-b-2 border-gray-200 pb-2 mb-4">
+          <Button
+            label="Profili Düzenle"
+            className={`p-button-text ${
+              !isPasswordChanging ? "font-bold border-b-2 border-primary" : ""
+            }`}
+            onClick={() => {
+              setIsPasswordChanging(false);
+            }}
+            style={{ width: "50%" }}
+          />
+          <Button
+            label="Şifreyi Değiştir"
+            className={`p-button-text ${
+              isPasswordChanging ? "font-bold border-b-2 border-primary" : ""
+            }`}
+            onClick={() => {
+              setIsPasswordChanging(true);
+              setIsEditing(false);
+            }}
+            style={{ width: "50%" }}
+          />
+        </div>
 
-      {!isPasswordChanging ? (
-        <ProfileDetails
-          userData={userData}
-          updatedUser={updatedUser}
-          setUpdatedUser={setUpdatedUser}
-          isEditing={isEditing}
-          setIsEditing={setIsEditing}
-          resetFields={resetFields}
-        />
-      ) : (
-        <ChangePassword
-          userData={userData}
-          updatedUser={updatedUser}
-          resetFields={resetFields}
-        />
-      )}
+        {!isPasswordChanging ? (
+          <ProfileDetails
+            userData={userData}
+            updatedUser={updatedUser}
+            setUpdatedUser={setUpdatedUser}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+            resetFields={resetFields}
+          />
+        ) : (
+          <ChangePassword
+            userData={userData}
+            updatedUser={updatedUser}
+            resetFields={resetFields}
+          />
+        )}
+      </div>
     </div>
   );
 };
