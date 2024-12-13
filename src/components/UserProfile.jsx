@@ -58,7 +58,7 @@ const UserProfile = () => {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 pt-16">
-      <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6">
+      <div className="w-full max-w-xl bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between border-b-2 border-gray-200 pb-2 mb-4">
           <Button
             label="Profili Düzenle"

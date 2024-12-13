@@ -5,7 +5,7 @@ import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
 import axiosInstance from "../api/axiosInstance";
 
-const AppWithNavbar = ({ rootEntity, onLogout }) => {
+const NavbarLayout = ({ onLogout }) => {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
   const menuRef = useRef(null);
@@ -89,13 +89,16 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
         start={start}
         end={end}
         className="bg-gray-800 text-white fixed top-0 w-full z-10 navbar"
-        style={{ boxShadow: "0 2px 5px rgba(0,0,0,0.1)" }}
+        style={{
+          boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+          height: "4rem", // Adjust the height here
+        }}
       />
       {/* Main Content Area */}
       <div
         className="main-content"
         style={{
-          paddingTop: "4rem",
+          paddingTop: "5rem",
           minHeight: "100vh",
         }}
       >
@@ -106,4 +109,4 @@ const AppWithNavbar = ({ rootEntity, onLogout }) => {
   );
 };
 
-export default AppWithNavbar;
+export default NavbarLayout;

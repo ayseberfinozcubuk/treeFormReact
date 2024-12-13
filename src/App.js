@@ -87,12 +87,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
         {isAuthenticated && (
-          <Route
-            path="/"
-            element={
-              <NavbarLayout rootEntity={rootEntity} onLogout={handleLogout} />
-            }
-          >
+          <Route path="/" element={<NavbarLayout onLogout={handleLogout} />}>
             <Route
               index
               element={<MainPage rootEntity={rootEntity} role={role} />}
