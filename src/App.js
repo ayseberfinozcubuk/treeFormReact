@@ -14,7 +14,6 @@ import UserListView from "./components/UserListView";
 import EntityListView from "./components/EntityListView";
 import UserProfile from "./components/UserProfile";
 import { useFormStore } from "./store/useFormStore";
-import axiosInstance from "./api/axiosInstance";
 import { checkUserExists } from "./utils/utils";
 
 const App = () => {
@@ -22,7 +21,7 @@ const App = () => {
   const [rootEntity, setRootEntity] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(null); // Track user role for conditional rendering
+  const [role, setRole] = useState(null);
 
   const handleLogin = () => setIsAuthenticated(true);
 
@@ -40,7 +39,7 @@ const App = () => {
     } else {
       handleLogout();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, role]);
 
   useEffect(() => {
     const validateAuth = async () => {
@@ -56,7 +55,7 @@ const App = () => {
       }
 
       setIsAuthenticated(true);
-      setRole(user.Role); // Save the user's role
+      setRole(user.Role);
     };
     validateAuth();
   }, []);
@@ -80,41 +79,42 @@ const App = () => {
   }
 
   return (
-    <Router>
+    <Router
+      future={{
+        v7_startTransition: true, // Enable React.startTransition
+        v7_relativeSplatPath: true, // Enable relative splat path resolution
+      }}
+    >
       <Routes>
-        {isAuthenticated ? (
+        <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+        {isAuthenticated && (
           <Route
             path="/"
             element={
               <AppWithNavbar rootEntity={rootEntity} onLogout={handleLogout} />
             }
           >
-            {/* Nested Routes */}
             <Route
-              path="/"
+              index
               element={<MainPage rootEntity={rootEntity} role={role} />}
             />
             <Route
-              path="/list"
+              path="list"
               element={<EntityListView rootEntity={rootEntity} />}
             />
-            <Route path="/entity-page" element={<EntityListView />} />
-            <Route path="/add-entity" element={<AddNewEntity />} />
-            <Route path="/details/:id" element={<EntityDetails />} />
-            <Route path="/profile" element={<UserProfile />} />
+            <Route path="entity-page" element={<EntityListView />} />
+            <Route path="add-entity" element={<AddNewEntity />} />
+            <Route path="details/:id" element={<EntityDetails />} />
+            <Route path="profile" element={<UserProfile />} />
             {role === "admin" && (
-              <Route path="/user-settings" element={<UserListView />} />
+              <Route path="user-settings" element={<UserListView />} />
             )}
           </Route>
-        ) : (
-          <>
-            <Route
-              path="/login"
-              element={<LoginPage onLogin={handleLogin} />}
-            />
-            <Route path="*" element={<Navigate to="/login" />} />
-          </>
         )}
+        <Route
+          path="*"
+          element={<Navigate to={isAuthenticated ? "/" : "/login"} />}
+        />
       </Routes>
     </Router>
   );
