@@ -343,28 +343,32 @@ const UserListView = () => {
   };
 
   return (
-    <div className="p-4 flex justify-center">
-      <Toast ref={toast} />
-
-      <div className="w-full max-w-4xl">
-        <h2 className="mb-4 text-2xl font-semibold text-center">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="max-w-6xl w-full p-6 bg-white dark:bg-gray-800 shadow-lg rounded-lg">
+        <Toast ref={toast} />
+        <h2 className="mb-4 text-2xl font-semibold text-center text-gray-800 dark:text-gray-100">
           Kullanıcı Yönetimi
         </h2>
 
-        {error && <p className="text-red-600 mb-2">{error}</p>}
-        {/*console.log("users: ", users)*/}
+        {error && (
+          <p className="text-red-600 mb-4 bg-red-100 p-2 rounded text-center">
+            {error}
+          </p>
+        )}
 
-        <Button
-          label="Kullanıcı Ekle"
-          icon="pi pi-plus"
-          onClick={handleOpenDialog}
-          className="mb-4"
-          disabled={editableRow !== null}
-        />
+        <div className="flex justify-end mb-4">
+          <Button
+            label="Kullanıcı Ekle"
+            icon="pi pi-plus"
+            onClick={handleOpenDialog}
+            className="p-button-success"
+            disabled={editableRow !== null}
+          />
+        </div>
 
         <DataTable
           value={users}
-          className="p-datatable-sm border rounded-lg shadow-md overflow-hidden"
+          className="p-datatable-sm p-datatable-gridlines border rounded-lg shadow-md overflow-hidden"
         >
           {users.length > 0 &&
             Object.keys(users[0])
@@ -375,7 +379,7 @@ const UserListView = () => {
                   key !== "CreatedBy" &&
                   key !== "UpdatedDate" &&
                   key !== "CreatedDate"
-              ) // Exclude UpdatedBy
+              )
               .map((key) => (
                 <Column
                   key={key}
