@@ -75,19 +75,19 @@ const NavbarLayout = ({ onLogout }) => {
     <>
       <Menu model={profileMenuItems} popup ref={menuRef} id="profileMenu" />
       <Button
+        icon={isDarkMode ? "pi pi-sun" : "pi pi-moon"}
+        className="p-button-text text-gray-200 font-medium hover:text-white mx-3"
+        onClick={() => setIsDarkMode((prev) => !prev)}
+        style={{ fontSize: "0.95rem" }}
+        aria-label="Toggle Dark Mode"
+      />
+      <Button
         icon="pi pi-user"
         className="p-button-text text-gray-200 font-medium hover:text-white mx-3"
         onClick={(event) => menuRef.current.toggle(event)}
         aria-controls="profileMenu"
         aria-haspopup
         style={{ fontSize: "0.95rem" }}
-      />
-      <Button
-        icon={isDarkMode ? "pi pi-sun" : "pi pi-moon"}
-        className="p-button-text text-gray-200 font-medium hover:text-white mx-3"
-        onClick={() => setIsDarkMode((prev) => !prev)}
-        style={{ fontSize: "0.95rem" }}
-        aria-label="Toggle Dark Mode"
       />
     </>
   );

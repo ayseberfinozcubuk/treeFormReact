@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
@@ -8,30 +8,89 @@ const LoginPage = ({ onLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(
+    parseInt(localStorage.getItem("failedAttempts")) || 0
+  );
+  const [timeoutRemaining, setTimeoutRemaining] = useState(
+    parseInt(localStorage.getItem("timeoutRemaining")) || 0
+  );
+  const navigate = useNavigate();
+
+  const MAX_ATTEMPTS = 3;
+  const TIMEOUT_DURATION = 10; // 10 seconds
+
+  useEffect(() => {
+    // Handle timeout countdown
+    if (timeoutRemaining > 0) {
+      setError(`Lütfen ${timeoutRemaining} saniye bekleyin ve tekrar deneyin.`);
+      const timer = setInterval(() => {
+        setTimeoutRemaining((prev) => {
+          const updatedTimeout = prev - 1;
+          localStorage.setItem("timeoutRemaining", updatedTimeout);
+          setError(
+            `Lütfen ${
+              updatedTimeout > 0 ? updatedTimeout : 0
+            } saniye bekleyin ve tekrar deneyin.`
+          );
+          return updatedTimeout;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    } else {
+      localStorage.removeItem("timeoutRemaining");
+      setError(""); // Clear the error when timeout ends
+    }
+  }, [timeoutRemaining]);
+
+  useEffect(() => {
+    // Update failedAttempts in localStorage whenever it changes
+    localStorage.setItem("failedAttempts", failedAttempts);
+  }, [failedAttempts]);
 
   const handleSignIn = async () => {
-    // console.log("sign-in");
-    // console.log("email: ", email, " password: ", password);
+    if (timeoutRemaining > 0) {
+      return;
+    }
+
     if (email && password) {
       try {
-        // console.log("inside try-catch");
         const response = await axiosInstance.post("/api/users/signin", {
           email,
           password,
         });
         const { User } = response.data;
-        // console.log("user: ", User);
 
         // Authentication successful
         onLogin(); // Set isAuthenticated to true in App.jsx
         localStorage.setItem("user", JSON.stringify(User)); // Optional: Store user info (non-sensitive)
 
+        // Reset failed attempts and timeout on successful login
+        localStorage.removeItem("failedAttempts");
+        localStorage.removeItem("timeoutRemaining");
+        setFailedAttempts(0);
+        setTimeoutRemaining(0);
+
         navigate("/");
       } catch (error) {
-        // console.error("Error during sign-in:", error);
-        setError("Geçersiz giriş bilgileri");
+        const updatedAttempts = failedAttempts + 1;
+
+        if (updatedAttempts >= MAX_ATTEMPTS) {
+          setTimeoutRemaining(TIMEOUT_DURATION);
+          setFailedAttempts(0);
+          localStorage.setItem("timeoutRemaining", TIMEOUT_DURATION);
+          setError(
+            `Çok fazla başarısız giriş denemesi. Lütfen ${TIMEOUT_DURATION} saniye bekleyin.`
+          );
+        } else {
+          setFailedAttempts(updatedAttempts);
+          setError(
+            `Geçersiz giriş bilgileri. ${
+              MAX_ATTEMPTS - updatedAttempts
+            } deneme hakkınız kaldı.`
+          );
+        }
       }
     } else {
       setError("Lütfen tüm alanları doldurun.");
@@ -57,7 +116,7 @@ const LoginPage = ({ onLogin }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="E-posta adresinizi girin"
-            className="w-full pr-10 py-2 text-lg" // Added padding-y for height and text size for better visibility
+            className="w-full pr-10 py-2 text-lg"
           />
         </div>
         <div className="p-field relative">
@@ -71,7 +130,7 @@ const LoginPage = ({ onLogin }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Şifrenizi girin"
-              className="w-full pr-10 py-2 text-lg" // Added padding-y for height and text size for better visibility
+              className="w-full pr-10 py-2 text-lg"
             />
             <i
               className={`absolute right-3 top-1/2 transform -translate-y-1/2 pi ${
@@ -85,7 +144,12 @@ const LoginPage = ({ onLogin }) => {
         <Button
           label="Giriş Yap"
           onClick={handleSignIn}
-          className="w-full p-button bg-blue-500 hover:bg-blue-400 text-white mt-4"
+          disabled={timeoutRemaining > 0} // Disable button if timeout is active
+          className={`w-full p-button ${
+            timeoutRemaining > 0
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-500 hover:bg-blue-400"
+          } text-white mt-4`}
           style={{ fontSize: "1rem", padding: "0.75rem" }}
         />
       </div>
