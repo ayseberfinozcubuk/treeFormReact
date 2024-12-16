@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
@@ -14,13 +14,59 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
     currentPassword: false,
     newPassword: false,
     confirmPassword: false,
-  }); // Visibility states for passwords
+  });
+  const [failedAttempts, setFailedAttempts] = useState(
+    parseInt(localStorage.getItem("changePasswordFailedAttempts")) || 0
+  );
+  const [timeoutRemaining, setTimeoutRemaining] = useState(
+    parseInt(localStorage.getItem("changePasswordTimeoutRemaining")) || 0
+  );
   const toastRef = useRef(null);
+
+  const MAX_ATTEMPTS = 3;
+  const TIMEOUT_DURATION = 10; // 10 seconds
+
+  useEffect(() => {
+    if (timeoutRemaining > 0) {
+      setError({
+        server: `Çok fazla başarısız deneme. Lütfen ${timeoutRemaining} saniye bekleyin ve tekrar deneyin.`,
+      });
+
+      const timer = setInterval(() => {
+        setTimeoutRemaining((prev) => {
+          const updatedTimeout = prev - 1;
+          localStorage.setItem(
+            "changePasswordTimeoutRemaining",
+            updatedTimeout
+          );
+          setError({
+            server: `Çok fazla başarısız deneme. Lütfen ${updatedTimeout} saniye bekleyin ve tekrar deneyin.`,
+          });
+          return updatedTimeout;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    } else {
+      localStorage.removeItem("changePasswordTimeoutRemaining");
+      setError({}); // Clear error message after timeout ends
+    }
+  }, [timeoutRemaining]);
+
+  useEffect(() => {
+    localStorage.setItem("changePasswordFailedAttempts", failedAttempts);
+  }, [failedAttempts]);
 
   const handleSave = async () => {
     setError({});
+    if (timeoutRemaining > 0) {
+      setError({
+        server: `Çok fazla başarısız deneme. Lütfen ${timeoutRemaining} saniye bekleyin ve tekrar deneyin.`,
+      });
+      return;
+    }
+
     try {
-      // Proceed with updating the password
       const response = await axiosInstance.put(
         `http://localhost:5000/api/users/${updatedUser.Id}/change-password`,
         {
@@ -30,7 +76,6 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
         }
       );
 
-      // Show success toast
       toastRef.current.show({
         severity: "success",
         summary: "Başarılı",
@@ -39,29 +84,45 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
         closable: true,
       });
 
-      // Delay navigation to reset fields
       setTimeout(() => {
         resetFields();
+        setFailedAttempts(0);
+        setTimeoutRemaining(0);
+        localStorage.removeItem("changePasswordFailedAttempts");
+        localStorage.removeItem("changePasswordTimeoutRemaining");
       }, 3000);
     } catch (err) {
-      const { response } = err;
-      if (response && response.data) {
-        setError({ server: response.data });
+      setFailedAttempts((prev) => prev + 1);
+
+      if (failedAttempts + 1 >= MAX_ATTEMPTS) {
+        setTimeoutRemaining(TIMEOUT_DURATION);
+        setFailedAttempts(0);
+        localStorage.setItem(
+          "changePasswordTimeoutRemaining",
+          TIMEOUT_DURATION
+        );
+        setError({
+          server: `Çok fazla başarısız deneme. Lütfen ${TIMEOUT_DURATION} saniye bekleyin.`,
+        });
       } else {
-        setError({ server: "Bilinmeyen bir hata oluştu." });
+        const { response } = err;
+        if (response && response.data) {
+          setError({
+            server: `Mevcut şifre hatalı. ${
+              MAX_ATTEMPTS - (failedAttempts + 1)
+            } deneme hakkınız kaldı.`,
+          });
+        } else {
+          setError({ server: "Bilinmeyen bir hata oluştu." });
+        }
       }
     }
-  };
-
-  const handleToastHide = () => {
-    resetFields();
   };
 
   const validateNewPassword = () => {
     const field = userData.Properties.find((prop) => prop.Name === "Password");
     const validationErrors = [];
 
-    // Validate new password against defined rules
     if (field?.ValidationRules) {
       const result = validateField(newPassword, field.ValidationRules);
       if (!result.isValid) {
@@ -110,7 +171,7 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
 
   return (
     <div className="space-y-4">
-      <Toast ref={toastRef} onHide={handleToastHide} />
+      <Toast ref={toastRef} />
       {error.server && (
         <div className="p-2 mb-4 text-red-600 bg-red-100 rounded">
           {error.server}

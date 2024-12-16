@@ -5,16 +5,8 @@ module.exports = {
     "./node_modules/primereact/**/*.{js,jsx,ts,tsx}", // Include PrimeReact components
   ],
   theme: {
-    extend: {
-      colors: {
-        // Example custom colors (optional)
-        lightBackground: "#ffffff",
-        darkBackground: "#000000",
-        lightText: "#000000",
-        darkText: "#ffffff",
-      },
-    },
+    extend: {},
   },
-  darkMode: "class", // Enable dark mode with class
+  darkMode: "media", // Enable dark mode with class
   plugins: [],
 };
