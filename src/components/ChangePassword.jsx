@@ -149,25 +149,27 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
       <label htmlFor={id} className="block mb-2">
         {label}
       </label>
-      <InputText
-        id={id}
-        type={passwordVisible[fieldName] ? "text" : "password"}
-        value={value}
-        onChange={onChange}
-        placeholder={`${label.toLowerCase()} değerini giriniz`}
-        className="w-full"
-      />
-      <i
-        className={`absolute right-3 top-8 pi ${
-          passwordVisible[fieldName] ? "pi-eye-slash" : "pi-eye"
-        } cursor-pointer`}
-        onClick={() =>
-          setPasswordVisible((prev) => ({
-            ...prev,
-            [fieldName]: !prev[fieldName],
-          }))
-        }
-      />
+      <div className="relative">
+        <InputText
+          id={id}
+          type={passwordVisible[fieldName] ? "text" : "password"}
+          value={value}
+          onChange={onChange}
+          placeholder={`${label.toLowerCase()} değerini giriniz`}
+          className="w-full pr-10" // Add padding-right to prevent overlap
+        />
+        <i
+          className={`absolute right-3 top-1/2 transform -translate-y-1/2 pi ${
+            passwordVisible[fieldName] ? "pi-eye-slash" : "pi-eye"
+          } cursor-pointer text-gray-500`}
+          onClick={() =>
+            setPasswordVisible((prev) => ({
+              ...prev,
+              [fieldName]: !prev[fieldName],
+            }))
+          }
+        />
+      </div>
     </div>
   );
 

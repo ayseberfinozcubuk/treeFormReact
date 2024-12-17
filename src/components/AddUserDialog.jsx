@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
 import { validateField } from "../utils/validationUtils";
 import useUserStore from "../store/useUserStore";
+import SubmitButton from "./SubmitButton";
+import CancelButton from "./CancelButton";
 
 const AddUserDialog = ({ visible, onHide, onSave }) => {
   const { userData } = useUserStore();
@@ -111,12 +112,12 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
             value={value}
             onChange={(e) => handleInputChange(Name, e.target.value)}
             placeholder={Label}
-            className="w-full"
+            className="w-full pr-10" // Add padding-right to avoid overlap
           />
           <i
-            className={`absolute right-3 top-2 pi ${
+            className={`absolute right-3 top-1/2 transform -translate-y-1/2 pi ${
               passwordVisible[Name] ? "pi-eye-slash" : "pi-eye"
-            } cursor-pointer`}
+            } cursor-pointer text-gray-500`}
             onClick={() =>
               setPasswordVisible((prev) => ({ ...prev, [Name]: !prev[Name] }))
             }
@@ -141,7 +142,11 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
 
   return (
     <Dialog
-      header="Yeni Kullanıcı Ekle"
+      header={
+        <div className="text-center w-full font-semibold text-lg">
+          Yeni Kullanıcı Ekle
+        </div>
+      }
       visible={visible}
       style={{ width: "400px" }}
       onHide={() => {
@@ -149,30 +154,26 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
         onHide();
       }}
       footer={
-        <div className="flex justify-end gap-2">
-          <Button
-            label="İptal Et"
-            icon="pi pi-times"
+        <div className="mt-1 flex justify-between items-center">
+          <SubmitButton
+            label="Kaydet"
+            icon="pi pi-check"
+            onClick={handleSave}
+            className="bg-blue-500 text-white"
+          />
+          <CancelButton
             onClick={() => {
               resetFields(); // Reset fields on cancel
               onHide();
             }}
-            className="p-button-text"
-          />
-          <Button
-            label="Kaydet"
-            icon="pi pi-check"
-            onClick={handleSave}
-            className="p-button-primary"
           />
         </div>
       }
     >
       <div className="space-y-4">
-        <h3 className="text-xl font-semibold text-center">
-          Kullanıcı Bilgisi Giriniz
+        <h3 className="text-lg font-medium text-gray-600 mb-5">
+          Yeni Kullanıcı için Bilgi Giriniz
         </h3>
-
         {userData.Properties.filter((field) => field.Type !== "Guid").map(
           (field) => (
             <div key={field.Name} className="p-field">
