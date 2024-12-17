@@ -55,12 +55,19 @@ const NavbarLayout = ({ onLogout }) => {
   ];
 
   const start = (
-    <span
-      className="text-xl font-medium text-gray-200 hover:text-white cursor-pointer"
+    <div
+      className="flex items-center gap-3 cursor-pointer"
       onClick={() => navigate("/")}
     >
-      EHBB
-    </span>
+      <img
+        src="tubitak_logo.png"
+        alt="Bilgem Logo"
+        className="h-10 w-10 object-contain"
+      />
+      <span className="text-xl font-medium text-gray-200 hover:text-white">
+        EHBB
+      </span>
+    </div>
   );
 
   const end = (

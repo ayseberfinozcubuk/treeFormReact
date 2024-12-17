@@ -12,14 +12,13 @@ const CancelButton = ({ onClick, className = "", style = {} }) => {
     <>
       <Toast ref={toast} />
       <Button
-        label="Cancel"
+        label="İptal Et"
         icon="pi pi-times"
         onClick={() =>
           showConfirmationToast(toast.current, confirmMessage, onClick)
         }
         className={`p-button-outlined ${className}`}
         style={{
-          marginTop: "1rem", // Consistent margin with SubmitButton
           marginLeft: "1rem", // Added left margin for spacing
           padding: "0.7rem 1.2rem", // Matches SubmitButton padding
           fontSize: "0.9rem",

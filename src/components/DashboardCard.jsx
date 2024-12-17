@@ -43,33 +43,24 @@ const DashboardCard = ({ item, dataCounts }) => {
         },
       },
       tooltip: {
+        displayColors: true, // Show the color cube
         callbacks: {
-          title: () => "",
+          title: () => "", // Remove the title
           label: (tooltipItem) => {
             const label = tooltipItem.label || "";
-            const words = label.split(" ");
-            const lines = [];
-            let currentLine = "";
+            const value = tooltipItem.raw; // Get the numerical value
+            const color =
+              tooltipItem.dataset.backgroundColor[tooltipItem.dataIndex];
 
-            words.forEach((word) => {
-              if ((currentLine + word).length > 25) {
-                lines.push(currentLine);
-                currentLine = word;
-              } else {
-                currentLine += currentLine.length > 0 ? ` ${word}` : word;
-              }
-            });
-
-            if (currentLine) {
-              lines.push(currentLine);
-            }
-
-            return lines.join("\n");
+            // Format the label with space after the color cube
+            return `  ${label}: ${value}`;
           },
         },
         bodySpacing: 5,
         bodyFont: { size: 10 },
-        displayColors: false,
+        boxWidth: 10, // Cube width
+        boxHeight: 10, // Cube height
+        padding: 10, // Add padding around tooltip content
       },
     },
   };
@@ -80,11 +71,11 @@ const DashboardCard = ({ item, dataCounts }) => {
       onClick={item.onClick}
       style={{ maxWidth: "280px", fontSize: "0.9rem" }}
     >
-      <i className={`${item.icon} text-xl`}></i>
+      <i className={`${item.icon} text-xl font-bold`}></i>
 
       {/* Title with reduced margin */}
       <div
-        className="mt-0.5"
+        className="mt-0.5 font-bold"
         style={{
           whiteSpace: "normal",
           wordWrap: "break-word",

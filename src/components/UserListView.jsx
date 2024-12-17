@@ -355,8 +355,10 @@ const UserListView = () => {
             {error}
           </p>
         )}
-
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+            Kullanıcı Listesi
+          </h1>
           <Button
             label="Kullanıcı Ekle"
             icon="pi pi-plus"

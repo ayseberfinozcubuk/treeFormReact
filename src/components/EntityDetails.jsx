@@ -296,7 +296,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
           <>
             <DynamicForm entityName={rootEntity} isEditMode={isEditMode} />
             {isEditMode && (
-              <>
+              <div className="mt-3 flex justify-between items-center">
                 <SubmitButton
                   label="Güncelle"
                   icon="pi pi-check"
@@ -304,7 +304,7 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
                   className="bg-blue-500 text-white"
                 />
                 <CancelButton onClick={handleCancelChanges} />
-              </>
+              </div>
             )}
           </>
         )}
