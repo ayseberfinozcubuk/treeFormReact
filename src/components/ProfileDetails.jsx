@@ -14,7 +14,7 @@ const ProfileDetails = ({
   setIsEditing,
   resetFields,
 }) => {
-  const toast = useRef(null); // Toast reference
+  const toast = useRef(null);
 
   const handleInputChange = (fieldName, value) => {
     setUpdatedUser((prevUser) => ({ ...prevUser, [fieldName]: value }));
@@ -22,13 +22,12 @@ const ProfileDetails = ({
 
   const handleSave = async () => {
     try {
-      const userId = updatedUser?.Id; // Assuming 'Id' is part of the user data
+      const userId = updatedUser?.Id;
       if (!userId) {
-        alert("Kullanıcı ID'si eksik. Profil güncellenemiyor");
+        alert("Kullanıcı ID'si eksik. Profil güncellenemiyor.");
         return;
       }
 
-      // Retrieve stored user data from localStorage
       const storedUser = JSON.parse(localStorage.getItem("user"));
       if (
         storedUser &&
@@ -49,7 +48,6 @@ const ProfileDetails = ({
         Email: updatedUser.Email,
       };
 
-      // Send updated profile to the server
       await axiosInstance.put(`/api/users/${userId}`, updatePayload);
 
       showToast(
@@ -73,19 +71,20 @@ const ProfileDetails = ({
     const { Name, Label, Type, EnumValues } = field;
     const value = updatedUser[Name] || "-";
 
+    const commonStyle =
+      "w-full h-10 p-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800";
+
     if (Type === "enum") {
+      const displayValue =
+        EnumValues?.find((option) => option.Value === value)?.Label || "-";
       return (
-        <div className="text-gray-800 p-2 bg-gray-100 rounded-md">
-          {EnumValues?.find((option) => option.Value === value)?.Label || "-"}
-        </div>
+        <div className={`${commonStyle} flex items-center`}>{displayValue}</div>
       );
     }
 
     if (!isEditing) {
       return (
-        <div className="text-gray-800 p-2 bg-gray-100 rounded-md">
-          {value || "-"}
-        </div>
+        <div className={`${commonStyle} flex items-center`}>{value || "-"}</div>
       );
     }
 
@@ -96,7 +95,7 @@ const ProfileDetails = ({
         value={value}
         onChange={(e) => handleInputChange(Name, e.target.value)}
         placeholder={Label}
-        className="w-full"
+        className="w-full h-10 p-2 rounded-md border border-gray-300"
       />
     );
   };
@@ -104,18 +103,31 @@ const ProfileDetails = ({
   return (
     <>
       <Toast ref={toast} />
-      {userData?.Properties?.filter(
-        (field) => field.Type !== "Guid" && field.Type !== "password"
-      ).map((field) => (
-        <div key={field.Name} className="p-field mb-4">
-          <label htmlFor={field.Name} className="block mb-2 text-gray-700">
-            {field.Label}
-          </label>
-          {renderField(field)}
-        </div>
-      ))}
+      <div className="block mb-1 text-gray-700 font-medium">
+        {userData?.Properties?.filter(
+          (field) => field.Type !== "Guid" && field.Type !== "password"
+        ).map((field) => (
+          <div key={field.Name} className="mb-4">
+            {/* Label */}
+            <label
+              htmlFor={field.Name}
+              className="block text-sm text-gray-700 font-medium mb-1"
+              style={{
+                minWidth: "150px",
+                maxWidth: "250px",
+                lineHeight: "1.25rem",
+              }}
+            >
+              {field.Label}
+            </label>
 
-      <div className="flex flex-col gap-2 mt-3">
+            {/* Field Value */}
+            <div className="relative">{renderField(field)}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between mt-3">
         {!isEditing ? (
           <SubmitButton
             label="Düzenle"
@@ -125,14 +137,25 @@ const ProfileDetails = ({
             style={{ width: "150px" }}
           />
         ) : (
-          <div className="mt-3 flex justify-between items-center">
+          <div className="flex items-center justify-between w-full">
+            {/* Güncelle Button */}
             <SubmitButton
               label="Güncelle"
               icon="pi pi-check"
               onClick={handleSave}
-              className="bg-blue-500 text-white"
+              className="bg-blue-500 text-white hover:bg-blue-600"
+              style={{ width: "150px" }}
             />
-            <CancelButton onClick={resetFields} />
+
+            {/* İptal Et Button */}
+            <CancelButton
+              onClick={() => {
+                resetFields();
+                setIsEditing(false);
+              }}
+              className="bg-red-500 text-white hover:bg-red-600"
+              style={{ width: "150px" }}
+            />
           </div>
         )}
       </div>

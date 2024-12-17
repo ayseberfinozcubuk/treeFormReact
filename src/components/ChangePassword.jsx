@@ -145,18 +145,29 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
   };
 
   const renderPasswordField = (id, label, value, onChange, fieldName) => (
-    <div className="p-field relative">
-      <label htmlFor={id} className="block mb-2">
+    <div className="mb-">
+      {/* Label */}
+      <label
+        htmlFor={id}
+        className="block text-sm text-gray-700 font-medium mb-1"
+        style={{
+          minWidth: "150px",
+          maxWidth: "250px",
+          lineHeight: "1.25rem",
+        }}
+      >
         {label}
       </label>
+
+      {/* Input Wrapper */}
       <div className="relative">
         <InputText
           id={id}
           type={passwordVisible[fieldName] ? "text" : "password"}
           value={value}
           onChange={onChange}
-          placeholder={`${label.toLowerCase()} değerini giriniz`}
-          className="w-full pr-10" // Add padding-right to prevent overlap
+          placeholder={`${label} giriniz`}
+          className="w-full h-10 p-2 rounded-md border border-gray-300 text-gray-800 bg-gray-100"
         />
         <i
           className={`absolute right-3 top-1/2 transform -translate-y-1/2 pi ${
@@ -210,7 +221,8 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
           label="Kaydet"
           icon="pi pi-check"
           onClick={handleValidateAndSave}
-          className="bg-blue-500 text-white"
+          className="bg-blue-500 text-white hover:bg-blue-600"
+          style={{ width: "150px" }}
         />
         <CancelButton onClick={resetFields} className="bg-red-500 text-white" />
       </div>
