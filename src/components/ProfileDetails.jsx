@@ -69,17 +69,39 @@ const ProfileDetails = ({
 
   const renderField = (field) => {
     const { Name, Label, Type, EnumValues } = field;
-    const value = updatedUser[Name] || "-";
+    const value = updatedUser[Name] || "";
 
     const commonStyle =
       "w-full h-10 p-2 rounded-md border border-gray-300 bg-gray-100 text-gray-800";
 
     if (Type === "enum") {
-      const displayValue =
-        EnumValues?.find((option) => option.Value === value)?.Label || "-";
-      return (
-        <div className={`${commonStyle} flex items-center`}>{displayValue}</div>
-      );
+      if (!isEditing) {
+        const displayValue =
+          EnumValues?.find((option) => option.Value === value)?.Label || "-";
+        return (
+          <div className={`${commonStyle} flex items-center`}>
+            {displayValue}
+          </div>
+        );
+      } else {
+        return (
+          <select
+            id={Name}
+            value={value}
+            onChange={(e) => handleInputChange(Name, e.target.value)}
+            className="w-full h-10 p-2 rounded-md border border-gray-300 text-gray-800 bg-white"
+          >
+            <option value="" disabled>
+              {Label} Seçiniz
+            </option>
+            {EnumValues?.map((option) => (
+              <option key={option.Value} value={option.Value}>
+                {option.Label}
+              </option>
+            ))}
+          </select>
+        );
+      }
     }
 
     if (!isEditing) {
