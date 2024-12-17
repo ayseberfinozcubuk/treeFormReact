@@ -316,14 +316,26 @@ const UserListView = () => {
   const renderRoleField = (rowData, rowIndex) => {
     const roleOptions = getRoleOptions();
 
+    const dropdownStyle = {
+      //height: "2.5rem", // Fixed height for dropdown
+      //padding: "0 0.5rem", // Match padding
+      //fontSize: "0.85rem", // Small text size
+      //lineHeight: "2.5rem", // Vertically align text
+      width: "150px", // Fixed width to match the column size
+    };
+
     if (editableRow === rowIndex) {
       return (
         <Dropdown
           value={tempRole}
           options={roleOptions}
           onChange={(e) => handleRoleChange(e.value)}
-          placeholder="Select Role"
-          className="text-sm w-full"
+          placeholder="Rol Seçiniz"
+          className="border rounded-md text-gray-800 bg-white"
+          style={dropdownStyle}
+          panelStyle={{
+            fontSize: "0.85rem", // Ensures dropdown items' font size
+          }}
         />
       );
     }
@@ -332,7 +344,14 @@ const UserListView = () => {
       roleOptions.find((role) => role.value === rowData.Role)?.label ||
       rowData.Role;
 
-    return <span>{roleLabel}</span>;
+    return (
+      <span
+        className="block text-gray-800 text-sm truncate"
+        style={{ lineHeight: "2.5rem", width: "150px" }}
+      >
+        {roleLabel}
+      </span>
+    );
   };
 
   const getColumnHeader = (fieldKey) => {
@@ -391,6 +410,11 @@ const UserListView = () => {
                     key === "Role"
                       ? renderRoleField(rowData, rowIndex)
                       : rowData[key]
+                  }
+                  style={() =>
+                    key === "Role"
+                      ? { minWidth: "200px", maxWidth: "200px" }
+                      : null
                   }
                   className="text-sm px-3 py-2 truncate"
                 />
