@@ -317,10 +317,6 @@ const UserListView = () => {
     const roleOptions = getRoleOptions();
 
     const dropdownStyle = {
-      //height: "2.5rem", // Fixed height for dropdown
-      //padding: "0 0.5rem", // Match padding
-      //fontSize: "0.85rem", // Small text size
-      //lineHeight: "2.5rem", // Vertically align text
       width: "150px", // Fixed width to match the column size
     };
 
@@ -330,7 +326,7 @@ const UserListView = () => {
           value={tempRole}
           options={roleOptions}
           onChange={(e) => handleRoleChange(e.value)}
-          placeholder="Rol Seçiniz"
+          placeholder="YetkiS Seçiniz"
           className="border rounded-md text-gray-800 bg-white"
           style={dropdownStyle}
           panelStyle={{
