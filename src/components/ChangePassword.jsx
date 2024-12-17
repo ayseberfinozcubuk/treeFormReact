@@ -4,6 +4,8 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { validateField } from "../utils/validationUtils";
 import axiosInstance from "../api/axiosInstance";
+import SubmitButton from "./SubmitButton";
+import CancelButton from "./CancelButton";
 
 const ChangePassword = ({ userData, updatedUser, resetFields }) => {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -201,21 +203,14 @@ const ChangePassword = ({ userData, updatedUser, resetFields }) => {
       {error.validation && (
         <small className="p-error text-red-500">{error.validation}</small>
       )}
-      <div className="flex justify-between mt-4">
-        <Button
-          label="İptal Et"
-          icon="pi pi-times"
-          className="p-button-secondary"
-          onClick={resetFields}
-          style={{ width: "150px" }}
-        />
-        <Button
+      <div className="mt-3 flex justify-between items-center">
+        <SubmitButton
           label="Kaydet"
           icon="pi pi-check"
-          className="p-button-primary"
           onClick={handleValidateAndSave}
-          style={{ width: "150px" }}
+          className="bg-blue-500 text-white"
         />
+        <CancelButton onClick={resetFields} className="bg-red-500 text-white" />
       </div>
     </div>
   );

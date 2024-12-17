@@ -1,9 +1,10 @@
 import React, { useRef } from "react";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import axiosInstance from "../api/axiosInstance";
 import { showToast } from "../utils/utils";
 import { Toast } from "primereact/toast";
+import SubmitButton from "./SubmitButton";
+import CancelButton from "./CancelButton";
 
 const ProfileDetails = ({
   userData,
@@ -114,31 +115,24 @@ const ProfileDetails = ({
         </div>
       ))}
 
-      <div className="flex flex-col gap-2 mt-4">
+      <div className="flex flex-col gap-2 mt-3">
         {!isEditing ? (
-          <Button
+          <SubmitButton
             label="Düzenle"
             icon="pi pi-pencil"
-            className="p-button-primary"
             onClick={() => setIsEditing(true)}
+            className="bg-yellow-500 text-white hover:bg-yellow-600"
             style={{ width: "150px" }}
           />
         ) : (
-          <div className="flex justify-between mt-4">
-            <Button
-              label="İptal Et"
-              icon="pi pi-times"
-              className="p-button-secondary"
-              onClick={resetFields}
-              style={{ width: "150px" }}
-            />
-            <Button
-              label="Kaydet"
+          <div className="mt-3 flex justify-between items-center">
+            <SubmitButton
+              label="Güncelle"
               icon="pi pi-check"
-              className="p-button-primary"
               onClick={handleSave}
-              style={{ width: "150px" }}
+              className="bg-blue-500 text-white"
             />
+            <CancelButton onClick={resetFields} />
           </div>
         )}
       </div>
