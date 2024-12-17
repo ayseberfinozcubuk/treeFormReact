@@ -44,65 +44,86 @@ const DashboardCard = ({ item, dataCounts }) => {
       },
       tooltip: {
         callbacks: {
-          title: (tooltipItems) => {
-            return tooltipItems[0].label;
+          title: () => "",
+          label: (tooltipItem) => {
+            const label = tooltipItem.label || "";
+            const words = label.split(" ");
+            const lines = [];
+            let currentLine = "";
+
+            words.forEach((word) => {
+              if ((currentLine + word).length > 25) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine += currentLine.length > 0 ? ` ${word}` : word;
+              }
+            });
+
+            if (currentLine) {
+              lines.push(currentLine);
+            }
+
+            return lines.join("\n");
           },
         },
-        bodyFont: {
-          size: 10,
-        },
-        titleFont: {
-          size: 10,
-        },
-      },
-    },
-    layout: {
-      padding: {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10,
+        bodySpacing: 5,
+        bodyFont: { size: 10 },
+        displayColors: false,
       },
     },
   };
 
   return (
     <div
-      className="p-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md cursor-pointer text-center"
+      className="p-3 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg shadow-md cursor-pointer text-center"
       onClick={item.onClick}
       style={{ maxWidth: "280px", fontSize: "0.9rem" }}
     >
       <i className={`${item.icon} text-xl`}></i>
-      {/* Title with flexible wrapping */}
+
+      {/* Title with reduced margin */}
       <div
-        className="mt-2"
+        className="mt-0.5"
         style={{
-          whiteSpace: "normal", // Allow text to wrap
-          wordWrap: "break-word", // Break long words
-          overflowWrap: "break-word", // Ensure wrapping on overflow
+          whiteSpace: "normal",
+          wordWrap: "break-word",
+          overflowWrap: "break-word",
         }}
       >
         {item.label}
       </div>
-      {/* Display total count above the chart */}
-      <div className="mt-2 text-sm font-semibold text-gray-500">
+
+      {/* Total count with reduced spacing */}
+      <div className="mt-0.5 text-sm font-semibold text-gray-500">
         Toplam {item.label.replace(" Ekranı", "")} Sayısı: {total}
       </div>
-      <div className="mt-2">
+
+      {/* Smaller chart radius */}
+      <div className="mt-1">
         <Chart
           type="doughnut"
           data={item.chartData}
-          options={chartOptions}
+          options={{
+            ...chartOptions,
+            cutout: "45%", // Reduced inner radius
+            radius: "55%", // Smaller outer radius
+          }}
           style={{ maxHeight: "150px" }}
         />
       </div>
+
       {rolesChartData && (
-        <div className="mt-2">
+        <div className="mt-0.5">
           <Chart
             type="doughnut"
             data={rolesChartData}
-            options={chartOptions}
-            style={{ maxHeight: "150px" }}
+            options={{
+              ...chartOptions,
+              cutout: "45%", // Reduced inner radius
+              radius: "55%", // Smaller outer radius
+            }}
+            style={{ maxHeight: "170px" }}
           />
         </div>
       )}
