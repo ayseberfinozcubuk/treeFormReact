@@ -66,9 +66,9 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
 
   const handleModeSwitch = async (checked) => {
     try {
-      const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
+      // const response = await axiosInstance.get(`/api/${rootEntity}/${id}`);
       // console.log("After Mode Switch pulled formValues: ", response.data);
-      setFormValues(response.data); // Set form values in the store
+      // setFormValues(response.data); // Set form values in the store
 
       // Wait for the state to finish updating
       await new Promise((resolve) => {
