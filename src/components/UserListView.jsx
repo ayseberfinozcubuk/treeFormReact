@@ -326,7 +326,7 @@ const UserListView = () => {
           value={tempRole}
           options={roleOptions}
           onChange={(e) => handleRoleChange(e.value)}
-          placeholder="YetkiS Seçiniz"
+          placeholder="Yetki Seçiniz"
           className="border rounded-md text-gray-800 bg-white"
           style={dropdownStyle}
           panelStyle={{

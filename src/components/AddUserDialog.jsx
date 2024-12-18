@@ -19,7 +19,7 @@ const AddUserDialog = ({ visible, onHide, onSave }) => {
     if (userData && newUser.Role === "read") {
       setNewUser((prevUser) => ({ ...prevUser, Role: "read" }));
     }
-  }, [userData]);
+  }, [userData, newUser.Role]);
 
   const resetFields = () => {
     setNewUser(initialUserState);

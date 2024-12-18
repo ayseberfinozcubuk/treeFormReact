@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useFormStore } from "../store/useFormStore";
@@ -25,7 +25,6 @@ const EntityDetails = ({ rootEntity: defaultRootEntity }) => {
     resetFormValues,
     initialFormValues,
     notInRangeField,
-    updateFormValues,
   } = useFormStore();
 
   const [isEditMode, setIsEditMode] = useState(false);

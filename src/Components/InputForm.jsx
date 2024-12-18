@@ -127,6 +127,7 @@ const InputForm = ({ entityName, property, path, isEditMode }) => {
     Note,
     formValues,
     formValueKey,
+    entityName,
     path,
     formValue,
     updateFormValues,

@@ -16,8 +16,6 @@ const DynamicForm = ({
   parentName,
 }) => {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
   const [entityId, setEntityId] = useState(null);
   const entityIdSet = useRef(false); // Ref to track if entityId has been set
@@ -56,17 +54,13 @@ const DynamicForm = ({
 
       addIdToFormValues(path, newId); // Add ID to formValues after setting it in local state
     }
-  }, []);
+  }, [addIdToFormValues, formValues, path]);
 
   useEffect(() => {
-    setLoading(true);
     const entity = formData[entityName];
     if (entity) {
       setData(entity);
-    } else {
-      setError("Varlık bulunamadı.");
     }
-    setLoading(false);
   }, [entityName, formData]);
 
   // New useEffect to handle updating parent ID if needed

@@ -67,7 +67,7 @@ const EntityListView = ({ rootEntity: defaultRootEntity }) => {
     };
 
     fetchEntities();
-  }, [refreshEntites]);
+  }, [refreshEntites, navigate, rootEntity, setEntities]);
 
   const entitiesList = entities[rootEntity]
     ? Object.values(entities[rootEntity])

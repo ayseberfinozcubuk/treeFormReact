@@ -49,9 +49,6 @@ const DashboardCard = ({ item, dataCounts }) => {
           label: (tooltipItem) => {
             const label = tooltipItem.label || "";
             const value = tooltipItem.raw; // Get the numerical value
-            const color =
-              tooltipItem.dataset.backgroundColor[tooltipItem.dataIndex];
-
             // Format the label with space after the color cube
             return `  ${label}: ${value}`;
           },
